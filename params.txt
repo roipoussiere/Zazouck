@@ -1,0 +1,27 @@
+Cotton swab :
+	width = 6
+	main_hole_width = 2.8
+	main_hole_shape = circle
+	member_hole_shape = circle
+	member_hole_width = 2.6
+
+Iron rod 6mm :
+	width = 10
+	main_hole_width = 6.5
+	main_hole_shape = circle
+	member_hole_shape = circle
+	member_hole_width = 6.3
+
+Wooden rod 4mm :
+	width = 7.5
+	main_hole_width = 4.5
+	main_hole_shape = circle
+	member_hole_shape = circle
+	member_hole_width = 4.3
+
+rectangular wooden rod 3mm :
+	width = 6
+	main_hole_width = 3.5
+	main_hole_shape = square
+	member_hole_shape = square
+	member_hole_width = 3.3
