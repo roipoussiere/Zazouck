@@ -1,10 +1,10 @@
-data = "00000,270,090,270,180,000,090,045,090";
-// max id : 16383 : 14 bits de data et 2 bits de parité
+data = "00000,000,000";
+// max id = 16383 : 14 bits de data et 2 bits de parité
 
-width = 10;
-edge_length = 15;
-hole_width = 6;
-hole_deep = 8;
+width = 6.5;
+edge_length = 8;
+hole_width = 3.5;
+hole_deep = 5;
 
 csv = search(",", data, 20)[0];
 id = longStrToNumber(str(data[0], data[1], data[2], data[3], data[4]));
@@ -51,16 +51,16 @@ module part(v)
 			sphere(width/2);
 			difference() {
 				for(i = [0:len(v)-1])
-					if (v[i][1] != undef && v[i][0] != undef)
+					if (v[i][1] != -1 && v[i][0] != -1)
 						rotate([v[i][1], 0, v[i][0]])
 							block(width, edge_length, circular=true);
 		
 			for(i = [0:len(v)-1])
-					if (v[i][1] != undef && v[i][0] != undef)
+					if (v[i][1] != -1 && v[i][0] != -1)
 						rotate([v[i][1], 0, v[i][0]]) code(id);
 		
 				for(i = [0:len(v)-1])
-					if (v[i][1] != undef && v[i][0] != undef)
+					if (v[i][1] != -1 && v[i][0] != -1)
 						rotate([v[i][1], 0, v[i][0]]) translate([0, 0, edge_length - hole_deep + 1])
 							block(hole_width, hole_deep);
 			}
@@ -84,7 +84,7 @@ function sumv(v,i,s=0) = (i==s ? v[i] : v[i] + sumv(v,i-1,s));
 
 function int2bin(nb, i) = floor( nb/pow(2, i) ) % 2;
 
-function p2i(index) = strToNumber(str(
+function p2i(index) = (index >= len(csv)) ? -1 : strToNumber(str(
 		data[csv[index]+1],
 		data[csv[index]+2],
 		data[csv[index]+3]));
