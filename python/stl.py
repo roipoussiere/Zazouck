@@ -9,11 +9,11 @@
 
 import re
 
-def clean_file(stl_path, cleaned_stl_path) :
+def clean_file(stl_path, cleaned_stl_path):
 	words = ['vertex', 'endloop']
-	with open(stl_path, 'r') as f_stl, open(cleaned_stl_path, 'w') as f_cleaned_stl :
-		for line in f_stl :
-			if any(word in line for word in words) :
+	with open(stl_path, 'r') as f_stl, open(cleaned_stl_path, 'w') as f_cleaned_stl:
+		for line in f_stl:
+			if any(word in line for word in words):
 				line = re.sub('^endloop.*', '|', line.lstrip())
 				line = line.replace("vertex", "")
 				line = line.lstrip().replace(" ", ",")
@@ -21,16 +21,16 @@ def clean_file(stl_path, cleaned_stl_path) :
 				line = line.replace("|;", "\n")
 				f_cleaned_stl.write(line)
 
-def file_to_model(cleaned_stl_path) :
+def file_to_model(cleaned_stl_path):
 	model = []
-	with open(cleaned_stl_path) as f_cleaned_stl :
-		for line in f_cleaned_stl :
+	with open(cleaned_stl_path) as f_cleaned_stl:
+		for line in f_cleaned_stl:
 			line = re.sub('[;\n]$', '\n', line)
 			p = []
-			for point in line.split(';') :
+			for point in line.split(';'):
 				pos_str = point.split(',')
 				pos_int = []
-				for nb in pos_str :
+				for nb in pos_str:
 					pos_int.append(float(nb))
 				p.append(pos_int)
 		
