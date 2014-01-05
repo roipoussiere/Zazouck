@@ -10,28 +10,28 @@ This project is licenced under GNU GPLv3 : see COPYING.txt for details.
 
 ### On Linux platforms :
 - Install dependencies :
-    $ sudo apt-get install git openscad
+$ sudo apt-get install git openscad    
 
 - Get the sources :
 
-    $ cd your_favorite_path
-    $ git clone https://github.com/roipoussiere/ouack.git
+$ cd your_favorite_path    
+$ git clone https://github.com/roipoussiere/ouack.git    
 
 - Make it easy to use :
-    $ cd ouack
-    $ chmod +xX *.py
-    $ export PATH=$PATH:your_favorite_path/ouack_python/ >> ~/.bashrc
+$ cd ouack    
+$ chmod +xX *.py    
+$ export PATH=$PATH:your_favorite_path/ouack_python/ >> ~/.bashrc    
 
 ##Usage
 -> see ./examples to get 3D model examples
 
 - To create a table describing each file, without generate them :
-    $ ouack cube.stl -b ./table.csv
-    $ ouack cube.stl -b # will create cube.csv
+$ ouack cube.stl -b ./table.csv    
+$ ouack cube.stl -b # will create cube.csv    
 
 - To generate a directory containing all the .stl files :
-    $ ouack cube.stl # from a 3D model
-    $ ouack cube.csv -c # from a table
+$ ouack cube.stl # from a 3D model    
+$ ouack cube.csv -c # from a table    
 
 Use ouack -h to see all available options.
 
