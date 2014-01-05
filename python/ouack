@@ -46,7 +46,7 @@ def parser():
 	# ok
 	parser.add_argument('-b', '--build-only', action = 'store', nargs = '?',
 		dest = 'table_path', type = argparse.FileType('w'), default = None, const = tmp_dir + "_",
-		help = 'Build only table (.csv) as TABLE_PATH, without compile stl files.')
+		help = 'Build only table (.csv) as TABLE_PATH (projet_name.csv by default), without compile stl files.')
 	
 	# ok
 	parser.add_argument('-e', '--export-dir', action = 'store',
@@ -76,7 +76,7 @@ def parser():
 	# ok
 	parser.add_argument('-d', '--documentation', action = 'store', nargs = '?',
 		dest = 'doc_dir', default = None, const = tmp_dir + "_",
-		help = 'Build a nice document in DOC_DIR (default ./doc), to help you to build your construction easily.')
+		help = 'Build a nice document in DOC_DIR (./doc by default), to help you to build your construction easily.')
 	
 	# ok
 	parser.add_argument('-V', '--verbose-cmd', action = 'store', nargs = '?',
@@ -86,8 +86,12 @@ def parser():
 	# ok
 	parser.add_argument('-D', '--details', action = 'store', nargs = '?',
 		dest = 'details_path', type = argparse.FileType('w'), default = None, const = cwd_dir + "details.txt",
-		help = 'Export details about the model (corners position, polygons, corners_network, edges, etc.) in DETAILS_PATH.')
+		help = 'Export details about the model (corners position, polygons, corners_network, edges, etc.) in DETAILS_PATH (./details.txt by default).')
 	
+	parser.add_argument('-m', '--make_full_model', action = 'store', nargs = '?',
+		dest = 'full_model_path', type = argparse.FileType('w'), default = None, const = tmp_dir + "_",
+		help = 'Create the 3d model of the construction in FULL_MODEL_PATH (./full_model.stl by default).')
+
 	return parser.parse_args()
 
 def make_csv(stl_path, table_path, shuffle, details_path, start_from, finish_at):
@@ -128,12 +132,14 @@ def main():
 
 	is_csv = True if opt.input_path[-4:] == ".csv" else False # True if *.csv ; False if *.stl
 	input_path = cwd_dir + opt.input_path
-	projet_name = os.path.splitext(os.path.basename(input_path))[0] 
-	export_dir = (cwd_dir + projet_name + "/") if opt.export_dir == None else opt.export_dir if opt.export_dir[-1] == "/" else opt.export_dir + "/"
+	projet_name = os.path.splitext(os.path.basename(input_path))[0]
 	make_stl = True if opt.table_path == None else False
-	doc_dir = (((cwd_dir + projet_name + "/doc/") if make_stl else cwd_dir + "doc/") if opt.doc_dir == tmp_dir + "_" else opt.doc_dir) if opt.doc_dir != None else None
+	export_dir = (cwd_dir + projet_name + "/") if opt.export_dir == None else opt.export_dir if opt.export_dir[-1] == "/" else opt.export_dir + "/"
+	export_dir = cwd_dir if not make_stl else export_dir
+	doc_dir = (export_dir + "doc/" if opt.doc_dir == tmp_dir + "_" else opt.doc_dir) if opt.doc_dir != None else None
 	parameter_path = None if opt.parameter_path == None else opt.parameter_path.name
 	details_path = None if opt.details_path == None else opt.details_path.name
+	full_model_path = (export_dir + "full_model.stl" if opt.full_model_path.name == tmp_dir + "_" else opt.full_model_path.name) if opt.full_model_path.name != None else None
 
 	if make_stl: # si on compile les stl
 		if is_csv: # à partir d'un .csv
@@ -161,14 +167,20 @@ def main():
 	# print "  shuffle:", opt.shuffle
 	# print "  start_from:", opt.start_from
 	# print "  finish_at:", opt.finish_at
+	# print "  full_model_path:", full_model_path
+
+	corner_scad_path = ouack_scad_dir + "/corner.scad"
 
 	if not is_csv:
 		make_csv(input_path, table_path, opt.shuffle, details_path, opt.start_from, opt.finish_at)
+
+	if doc_dir != None:
+		export.make_pictures(table_path, doc_dir+"img", openscad_path, corner_scad_path, opt.verbose)
 
 	if make_stl:
 		if os.path.exists(export_dir):
 			shutil.rmtree(export_dir)
 		os.makedirs(export_dir)
-		export.make_parts(table_path, export_dir, opt.verbose, openscad_path, ouack_scad_dir + "/corner.scad", doc_dir)
+		export.make_stls(table_path, export_dir, openscad_path, corner_scad_path, opt.verbose)
 
 main()

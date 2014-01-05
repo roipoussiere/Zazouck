@@ -28,8 +28,7 @@ def print_line(i, nb_corners, t_init, picture=False):
 		remaining = time.strftime("%Hh%Mm%Ss", time.gmtime((time.time()-t_init)/i*(nb_corners-i)))
 		print "- started for " + spent + ", please wait", remaining + "."
 
-def compile_pictures(doc_dir, table_path, openscad_path, scad_file, verbose_lvl):
-	create_dir(doc_dir)
+def make_pictures(table_path, doc_dir, openscad_path, scad_file, verbose_lvl):
 	nb_corners = get_nb_lines(table_path)-2
 	t_init = time.time()
 
@@ -50,13 +49,10 @@ def compile_pictures(doc_dir, table_path, openscad_path, scad_file, verbose_lvl)
 			openscad(scad_file, options, output_file, openscad_path, verbose_lvl)
 			i += 1
 
-def make_parts(table_path, export_dir, verbose_lvl, openscad_path, scad_file, doc_dir):
+def make_stls(table_path, export_dir, openscad_path, scad_file, verbose_lvl):
 	nb_corners = get_nb_lines(table_path)-2
 	t_init = time.time()
 	
-	if doc_dir != None:
-		compile_pictures(doc_dir, table_path, openscad_path, scad_file, verbose_lvl)
-
 	print "\n*** Compilation started.", nb_corners, "files will be created in", export_dir, "***"
 
 	with open(table_path, 'r') as f_table:
