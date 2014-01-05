@@ -19,77 +19,76 @@ ouack_python_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 ouack_scad_dir = ouack_python_dir + "/../scad/"
 cwd_dir = os.getcwd() + "/"
 
-corner_scad_path = ouack_scad_dir + "/corner.scad"
-
 def parser():
 	parser = argparse.ArgumentParser(
 			formatter_class=argparse.RawDescriptionHelpFormatter,
 			description = 'Ouack - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).',
 			epilog = 'Ouack is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html')
 	
-	#ok
+	# ok
 	parser.add_argument('input_path', action = 'store',
-		type = argparse.FileType('r'),
+		type = argparse.FileType('r'), #choices=["*.stl", "*.csv"],
 		help = '.stl (3d model) or .csv (table) path of your model.')
 	
-	#ok
+	# ok
 	parser.add_argument('-v', '--version', action = 'store_true',
 		dest = 'version', default = False,
 		help = 'Displays program version.')
 
-	# cela crée un fichier nommé '_'
-	parser.add_argument('-b', '--build-only', action = 'store', nargs='?',
+	# ok
+	parser.add_argument('-b', '--build-only', action = 'store', nargs = '?',
 		dest = 'table_path', type = argparse.FileType('w'), default = None, const = tmp_dir + "_",
 		help = 'Build only table (.csv) as TABLE_PATH, without compile stl files.')
 	
-	#ok
+	# ok
+	# TODO : automatiser en fonction de l'extension
 	parser.add_argument('-c', '--compile-only', action = 'store_true',
 		dest = 'compile_from_csv', default = False,
 		help = 'Compile stl files from INPUT_PATH table.')
 	
-	#ok
+	# ok
 	parser.add_argument('-e', '--export-dir', action = 'store',
 		dest = 'export_dir', default = None,
 		help = 'Directory where .stl files will be exported (./stl/ by default)')
 	
-	#TODO
+	# TODO
 	parser.add_argument('-p', '--param-path', action = 'store',
 		dest = 'parameter_path', type = argparse.FileType('r'), default = None,
 		help = 'Parameters file path, containing parts parameters.')
 	
-	#ok
+	# ok
 	parser.add_argument('-S', '--sort', action = 'store_false',
 		dest = 'shuffle', default = True,
 		help = 'Doesn\'t shuffle the list of corners and polygons in random order.')
 	
-	#TODO
+	# ok
 	parser.add_argument('-s', action = 'store',
-		dest = 'start_from', type = int, default = None,
+		dest = 'start_from', type = int, default = 0,
 		help = 'Start compilation from line xx in the .csv file.')
 
-	#TODO
+	# ok
 	parser.add_argument('-f', action = 'store',
-		dest = 'finish_at', type = int, default = None,
+		dest = 'finish_at', type = int, default = 0,
 		help = 'Finish compilation at line xx in the .csv file.')
 	
-	# assigner defaut dans ./projet_name/doc
-	parser.add_argument('-d', '--documentation', action = 'store', nargs='?',
-		dest = 'doc_dir', default = None, const = cwd_dir + "doc/",
+	# ok
+	parser.add_argument('-d', '--documentation', action = 'store', nargs = '?',
+		dest = 'doc_dir', default = None, const = tmp_dir + "_",
 		help = 'Build a nice document in DOC_DIR (default ./doc), to help you to build your construction easily.')
 	
-	#ok
-	parser.add_argument('-V', '--verbose-cmd', action = 'store', nargs='?',
+	# ok
+	parser.add_argument('-V', '--verbose-cmd', action = 'store', nargs = '?',
 		dest = 'verbose', type=int, choices=xrange(0, 4), default = 0, const = 1,
 		help = 'Verbose level: 0 = nothing, 1 = OpenScad calls (default), 2 = OpenScad warning messages, 3 = all OpenScad messages.')
 
-	# à tester
-	parser.add_argument('-D', '--details', action = 'store',
-		dest = 'details_path', type = argparse.FileType('w'), default = None,
+	# ok
+	parser.add_argument('-D', '--details', action = 'store', nargs = '?',
+		dest = 'details_path', type = argparse.FileType('w'), default = None, const = cwd_dir + "details.txt",
 		help = 'Export details about the model (corners position, polygons, corners_network, edges, etc.) in DETAILS_PATH.')
 	
 	return parser.parse_args()
 
-def make_csv(stl_path, table_path, shuffle, debug_path):
+def make_csv(stl_path, table_path, shuffle, details_path, start_from, finish_at):
 	cleaned_path = tmp_dir + "ouack_cleaned"
 
 	stl.clean_file(stl_path, cleaned_path)
@@ -105,13 +104,14 @@ def make_csv(stl_path, table_path, shuffle, debug_path):
 	s.set_angles()
 	s.set_datas()
 	s.fill_edges()
-	#s.merge_coplanar_polygons()
-	if shuffle:
-		s.shuffle()
-	s.build_csv(table_path)
+	# TODO : s.merge_coplanar_polygons()
+
+	s.build_csv(table_path, start_from, finish_at, shuffle)
 	
-	if debug_path != None:
-		s.display(debug_path)
+	if details_path != None:
+		s.display(details_path)
+
+	print "Successfully created table file on " + table_path + "."
 
 def main():
 
@@ -126,11 +126,9 @@ def main():
 
 	input_path = cwd_dir + opt.input_path.name
 	projet_name = os.path.splitext(os.path.basename(input_path))[0] 
-	export_dir = cwd_dir + projet_name + "/" if opt.export_dir == None else opt.export_dir if opt.export_dir[-1] == "/" else opt.export_dir + "/"
-
-	print "  opt.table_path:", opt.table_path.name
+	export_dir = (cwd_dir + projet_name + "/") if opt.export_dir == None else opt.export_dir if opt.export_dir[-1] == "/" else opt.export_dir + "/"
 	make_stl = True if opt.table_path == None else False
-
+	doc_dir = (((cwd_dir + projet_name + "/doc/") if make_stl else cwd_dir + "doc/") if opt.doc_dir == tmp_dir + "_" else opt.doc_dir) if opt.doc_dir != None else None
 	parameter_path = None if opt.parameter_path == None else opt.parameter_path.name
 	details_path = None if opt.details_path == None else opt.details_path.name
 
@@ -139,7 +137,7 @@ def main():
 			table_path = input_path
 		else: # à partir d'un .stl
 			table_path = tmp_dir + "table.csv"
-	else: # si on construit une table à partir du stl (-b [nom_table])
+	else: # si on construit une table à partir d'un stl (-b [nom_table])
 		if opt.table_path.name == tmp_dir + "_":
 			table_path = cwd_dir + projet_name + ".csv"
 			os.remove(tmp_dir + "_")
@@ -150,20 +148,23 @@ def main():
 	print "  input_path:", input_path
 	print "  projet_name:", projet_name
 	print "  export_dir:", export_dir
+	print "  doc_dir:", doc_dir
 	print "  make_stl:", make_stl
 	print "  table_path:", table_path
 	print "  parameter_path:", parameter_path
 	print "  details_path:", details_path
 	print "  verbose_lvl:", opt.verbose
 	print "  shuffle:", opt.shuffle
+	print "  start_from:", opt.start_from
+	print "  finish_at:", opt.finish_at
 
 	if not opt.compile_from_csv:
-		make_csv(input_path, table_path, opt.shuffle, details_path)
+		make_csv(input_path, table_path, opt.shuffle, details_path, opt.start_from, opt.finish_at)
 
 	if make_stl:
 		if os.path.exists(export_dir):
 			shutil.rmtree(export_dir)
 		os.makedirs(export_dir)
-		export.make_parts(table_path, export_dir, opt.verbose, openscad_path, corner_scad_path, opt.doc_dir)
+		export.make_parts(table_path, export_dir, opt.verbose, openscad_path, ouack_scad_dir + "/corner.scad", doc_dir)
 
 main()

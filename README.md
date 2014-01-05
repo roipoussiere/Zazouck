@@ -21,8 +21,20 @@ $ cd ouack
 $ chmod +xX *.py
 $ export PATH=$PATH:your_favorite_path/ouack_python/ >> ~/.bashrc
 
-Usage (see ./examples to get 3D model examples) :
-$ ouack cube.stl
+#Usage
+-> see ./examples to get 3D model examples
+
+- To create a table describing each file, without generate them :
+$ ouack cube.stl -b ./table.csv
+$ ouack cube.stl -b # will create cube.csv
+
+- To generate a directory containing all the .stl files :
+$ ouack cube.stl # from a 3D model
+$ ouack cube.csv -c # from a table
+
+-To generate a
+
+Use ouack -h to see all available options.
 
 #Contact :
 

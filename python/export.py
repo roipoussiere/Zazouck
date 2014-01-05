@@ -43,7 +43,7 @@ def compile_pictures(doc_dir, table_path, openscad_path, scad_file, verbose_lvl)
 			print_line(i, nb_corners, t_init, True)
 			name = line[0:5]
 			data_options = "-D 'data=\"" + line.rstrip('\n') + "\"'"
-			pict_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,0,0,0,90"
+			pict_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,0,45,45,45"
 			options = data_options + " " + pict_options
 			output_file = doc_dir + name + ".png"
 			
@@ -62,10 +62,7 @@ def make_parts(table_path, export_dir, verbose_lvl, openscad_path, scad_file, do
 	with open(table_path, 'r') as f_table:
 		print f_table.readline()
 		f_table.readline()
-		
-		#for i in range(options.start_from):
-		#	f_table.readline() # À compléter		
-		
+				
 		i = 0
 		for line in f_table:
 			print_line(i, nb_corners, t_init)

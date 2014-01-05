@@ -17,8 +17,8 @@ class Corner:
 		self.angles = []
 		self.data = ""
 	
-	def get_position(self): return self.position
 	def get_id(self): return self.id
+	def get_position(self): return self.position
 	def get_connected_corners(self): return self.connected_corners
 	def get_angles(self): return self.angles
 	def get_data(self): return self.data

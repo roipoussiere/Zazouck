@@ -106,7 +106,7 @@ class Solid: #singleton
 			for polygon in self.polygons:
 				f_debug.write(str(polygon.get_id()) + ": " + str(polygon.get_corners()) + "\n")
 
-			f_debug.write("\n*** Edges length and connexions ***\n\n")
+			f_debug.write("\n*** Edges connexions and length ***\n\n")
 			for edge in self.edges:
 				f_debug.write(str(edge.get_id()) + ": " + str(edge.get_extremities()) + " - " + str(edge.get_length()) + "\n")
 
@@ -114,9 +114,20 @@ class Solid: #singleton
 			for corner in self.corners:
 				f_debug.write(str(corner.get_id()) + ": " + str(corner.get_data()))
 
-	def build_csv(self, f_table_path):
+	def build_csv(self, f_table_path, start_from, finish_at, shuffle):
 		infos = "Model details: " + str(self.get_nb_corners()) + " corners, " + str(self.get_nb_polygons()) + " polygons.\n"
 		labels = "Name,rod 1-H,rod 1-V,rod 2-H,rod 2-V,rod 3-H,rod 3-V,rod 4-H,rod 4-V,rod 5-H,rod 5-V,rod 6-H,rod 6-V,rod 7-H,rod 7-V,rod 8-H,rod 8-V\n"
+		finish_at = self.get_nb_corners() if finish_at == 0 else finish_at+1
+
+		right_limit = self.get_nb_corners()-finish_at
+		for i in range(start_from):
+			self.corners.pop(0)
+		for i in range(right_limit):
+			self.corners.pop()
+
+		if shuffle:
+			self.shuffle()
+
 		with open(f_table_path, 'w') as f_table:
 			f_table.write(infos)
 			f_table.write(labels)
