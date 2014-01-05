@@ -139,7 +139,7 @@ def main():
 	doc_dir = (export_dir + "doc/" if opt.doc_dir == tmp_dir + "_" else opt.doc_dir) if opt.doc_dir != None else None
 	parameter_path = None if opt.parameter_path == None else opt.parameter_path.name
 	details_path = None if opt.details_path == None else opt.details_path.name
-	full_model_path = (export_dir + "full_model.stl" if opt.full_model_path.name == tmp_dir + "_" else opt.full_model_path.name) if opt.full_model_path.name != None else None
+	full_model_path = (export_dir + "full_model.stl" if opt.full_model_path.name == tmp_dir + "_" else opt.full_model_path.name) if opt.full_model_path != None else None
 
 	if make_stl: # si on compile les stl
 		if is_csv: # à partir d'un .csv
@@ -174,8 +174,12 @@ def main():
 	if not is_csv:
 		make_csv(input_path, table_path, opt.shuffle, details_path, opt.start_from, opt.finish_at)
 
+	# ajouter 3 colonne au .csv pour la position en x,y,z.
+	if full_model_path != None:
+		export.make_model(full_model_path, table_path)
+
 	if doc_dir != None:
-		export.make_pictures(table_path, doc_dir+"img", openscad_path, corner_scad_path, opt.verbose)
+		export.make_pictures(table_path, doc_dir + "img", openscad_path, corner_scad_path, opt.verbose)
 
 	if make_stl:
 		if os.path.exists(export_dir):

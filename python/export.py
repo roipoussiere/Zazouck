@@ -58,7 +58,7 @@ def make_stls(table_path, export_dir, openscad_path, scad_file, verbose_lvl):
 	with open(table_path, 'r') as f_table:
 		print f_table.readline()
 		f_table.readline()
-				
+		
 		i = 0
 		for line in f_table:
 			print_line(i, nb_corners, t_init)
@@ -71,7 +71,10 @@ def make_stls(table_path, export_dir, openscad_path, scad_file, verbose_lvl):
 
 	total_time = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time()-t_init))
 	print "\n*** Finished! ***"
-	print i, "stl files successfully created in " + total_time + "."
+	print i, "stl files successfully created in " + total_time + "."	
+
+def make_model(full_model_path, table_path):
+	print "Creating full model ", full_model_path
 
 def openscad(scad_file, options, output_file, openscad_path, verbose_lvl):
 	redirection = "" if verbose_lvl == 3 else "> /dev/null" if verbose_lvl == 2 else "> /dev/null 2> /dev/null"

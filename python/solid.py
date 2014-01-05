@@ -115,8 +115,8 @@ class Solid: #singleton
 				f_debug.write(str(corner.get_id()) + ": " + str(corner.get_data()))
 
 	def build_csv(self, f_table_path, start_from, finish_at, shuffle):
-		infos = "Model details: " + str(self.get_nb_corners()) + " corners, " + str(self.get_nb_polygons()) + " polygons.\n"
-		labels = "Name,rod 1-H,rod 1-V,rod 2-H,rod 2-V,rod 3-H,rod 3-V,rod 4-H,rod 4-V,rod 5-H,rod 5-V,rod 6-H,rod 6-V,rod 7-H,rod 7-V,rod 8-H,rod 8-V\n"
+		infos = "Model details:, " + str(self.get_nb_corners()) + " corners, " + str(self.get_nb_polygons()) + " polygons.\n"
+		labels = "id,x,y,z,rod 1-H,rod 1-V,rod 2-H,rod 2-V,rod 3-H,rod 3-V,rod 4-H,rod 4-V,rod 5-H,rod 5-V,rod 6-H,rod 6-V,rod 7-H,rod 7-V,rod 8-H,rod 8-V\n"
 		finish_at = self.get_nb_corners() if finish_at == 0 else finish_at+1
 
 		right_limit = self.get_nb_corners()-finish_at

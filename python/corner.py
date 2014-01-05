@@ -58,6 +58,11 @@ class Corner:
 	
 	def set_data(self):
 		self.data += self.number_to_txt(self.id, 5)
+
+		self.data += "," + str(self.position[0])
+		self.data += "," + str(self.position[1])
+		self.data += "," + str(self.position[2])
+
 		for angle in self.angles:
 			self.data += "," + self.number_to_txt(angle, 3)
 		self.data += "\n"
