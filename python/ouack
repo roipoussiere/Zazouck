@@ -19,6 +19,14 @@ ouack_python_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 ouack_scad_dir = ouack_python_dir + "/../scad/"
 cwd_dir = os.getcwd() + "/"
 
+def correct_input(string):
+	if not os.path.exists(string):
+		raise argparse.ArgumentTypeError("Filename %r doesn\'t exists in this directory." % string)
+
+	if string[-4:] != ".stl" and string[-4:] != ".csv":
+		raise argparse.ArgumentTypeError("%r is not a .stl or a .csv file." % string)
+	return string
+
 def parser():
 	parser = argparse.ArgumentParser(
 			formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -27,8 +35,8 @@ def parser():
 	
 	# ok
 	parser.add_argument('input_path', action = 'store',
-		type = argparse.FileType('r'), #choices=["*.stl", "*.csv"],
-		help = '.stl (3d model) or .csv (table) path of your model.')
+		type = correct_input,
+		help = '3d model (.stl) or table (.csv) path of your model. The program will automatically generates the .stl files according to the file type.')
 	
 	# ok
 	parser.add_argument('-v', '--version', action = 'store_true',
@@ -39,12 +47,6 @@ def parser():
 	parser.add_argument('-b', '--build-only', action = 'store', nargs = '?',
 		dest = 'table_path', type = argparse.FileType('w'), default = None, const = tmp_dir + "_",
 		help = 'Build only table (.csv) as TABLE_PATH, without compile stl files.')
-	
-	# ok
-	# TODO : automatiser en fonction de l'extension
-	parser.add_argument('-c', '--compile-only', action = 'store_true',
-		dest = 'compile_from_csv', default = False,
-		help = 'Compile stl files from INPUT_PATH table.')
 	
 	# ok
 	parser.add_argument('-e', '--export-dir', action = 'store',
@@ -111,7 +113,7 @@ def make_csv(stl_path, table_path, shuffle, details_path, start_from, finish_at)
 	if details_path != None:
 		s.display(details_path)
 
-	print "Successfully created table file on " + table_path + "."
+	print "Successfully created table file " + table_path + "."
 
 def main():
 
@@ -124,7 +126,8 @@ def main():
 	date = datetime.datetime.now()
 	version = str(date.year-2013) + "." + str(date.month) + "." + str(date.day)
 
-	input_path = cwd_dir + opt.input_path.name
+	is_csv = True if opt.input_path[-4:] == ".csv" else False # True if *.csv ; False if *.stl
+	input_path = cwd_dir + opt.input_path
 	projet_name = os.path.splitext(os.path.basename(input_path))[0] 
 	export_dir = (cwd_dir + projet_name + "/") if opt.export_dir == None else opt.export_dir if opt.export_dir[-1] == "/" else opt.export_dir + "/"
 	make_stl = True if opt.table_path == None else False
@@ -133,7 +136,7 @@ def main():
 	details_path = None if opt.details_path == None else opt.details_path.name
 
 	if make_stl: # si on compile les stl
-		if opt.compile_from_csv: # à partir d'un .csv (-c)
+		if is_csv: # à partir d'un .csv
 			table_path = input_path
 		else: # à partir d'un .stl
 			table_path = tmp_dir + "table.csv"
@@ -144,21 +147,22 @@ def main():
 		else:
 			table_path = opt.table_path.name
 
-	print "  version:", version
-	print "  input_path:", input_path
-	print "  projet_name:", projet_name
-	print "  export_dir:", export_dir
-	print "  doc_dir:", doc_dir
-	print "  make_stl:", make_stl
-	print "  table_path:", table_path
-	print "  parameter_path:", parameter_path
-	print "  details_path:", details_path
-	print "  verbose_lvl:", opt.verbose
-	print "  shuffle:", opt.shuffle
-	print "  start_from:", opt.start_from
-	print "  finish_at:", opt.finish_at
+	# print "  version:", version
+	# print "  input_path:", input_path
+	# print "  is_csv:", is_csv
+	# print "  projet_name:", projet_name
+	# print "  export_dir:", export_dir
+	# print "  doc_dir:", doc_dir
+	# print "  make_stl:", make_stl
+	# print "  table_path:", table_path
+	# print "  parameter_path:", parameter_path
+	# print "  details_path:", details_path
+	# print "  verbose_lvl:", opt.verbose
+	# print "  shuffle:", opt.shuffle
+	# print "  start_from:", opt.start_from
+	# print "  finish_at:", opt.finish_at
 
-	if not opt.compile_from_csv:
+	if not is_csv:
 		make_csv(input_path, table_path, opt.shuffle, details_path, opt.start_from, opt.finish_at)
 
 	if make_stl:
