@@ -2,21 +2,21 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2013 Nathanaël Jourdane
-# This file is part of Ouack.
-# Ouack is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-# Ouack is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License along with Ouack. If not, see <http://www.gnu.org/licenses/>.
+# This file is part of Zazoucko.
+# Zazoucko is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+# Zazoucko is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with Zazoucko. If not, see <http://www.gnu.org/licenses/>.
 
 # TODO : alléger avec from .. import ..
 import argparse, os, sys, datetime, shutil, tempfile
-import solid, stl, export
+import export
 
 #TODO : utiliser tempfile.tempdir
 tmp_dir = tempfile.gettempdir() + "/"
 openscad_path = "openscad"
 
-ouack_python_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-ouack_scad_dir = ouack_python_dir + "/../scad/"
+zazoucko_python_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+zazoucko_scad_dir = zazoucko_python_dir + "/../scad/"
 cwd_dir = os.getcwd() + "/"
 
 def correct_input(string):
@@ -30,8 +30,8 @@ def correct_input(string):
 def parser():
 	parser = argparse.ArgumentParser(
 			formatter_class=argparse.RawDescriptionHelpFormatter,
-			description = 'Ouack - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).',
-			epilog = 'Ouack is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html')
+			description = 'Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).',
+			epilog = 'Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html')
 	
 	# ok
 	parser.add_argument('input_path', action = 'store',
@@ -51,13 +51,18 @@ def parser():
 	# ok
 	parser.add_argument('-e', '--export-dir', action = 'store',
 		dest = 'export_dir', default = None,
-		help = 'Directory where .stl files will be exported (./stl/ by default)')
+		help = 'Directory where .stl files will be exported (./projet_name/ by default)')
 	
 	# TODO
 	parser.add_argument('-p', '--param-path', action = 'store',
 		dest = 'parameter_path', type = argparse.FileType('r'), default = None,
 		help = 'Parameters file path, containing parts parameters.')
 	
+	# ok
+	parser.add_argument('-l', '--low_qlt', action = 'store_true',
+		dest = 'low_qlt', default = False,
+		help = 'The files are quickly compiled in low-quality. Usefull for testing, not able to be print.')
+
 	# ok
 	parser.add_argument('-S', '--sort', action = 'store_false',
 		dest = 'shuffle', default = True,
@@ -94,45 +99,19 @@ def parser():
 
 	return parser.parse_args()
 
-def make_csv(stl_path, table_path, shuffle, details_path, start_from, finish_at):
-	cleaned_path = tmp_dir + "ouack_cleaned"
-
-	stl.clean_file(stl_path, cleaned_path)
-	_model = stl.file_to_model(cleaned_path)
-	os.remove(cleaned_path)
-	
-	s = solid.Solid()
-	s.fill_corners(_model)
-	s.fill_polygons(_model)
-	del _model
-	
-	s.set_connected_corners()
-	s.set_angles()
-	s.set_datas()
-	s.fill_edges()
-	# TODO : s.merge_coplanar_polygons()
-
-	s.build_csv(table_path, start_from, finish_at, shuffle)
-	
-	if details_path != None:
-		s.display(details_path)
-
-	print "Successfully created table file " + table_path + "."
-
 def main():
 
 	opt = parser()
 
 	if opt.version:
-		print "Ouack version " + version
+		date = datetime.datetime.now()
+		version = str(date.year-2013) + "." + str(date.month) + "." + str(date.day)
+		print "Zazoucko version " + version
 		exit()
 
-	date = datetime.datetime.now()
-	version = str(date.year-2013) + "." + str(date.month) + "." + str(date.day)
-
 	is_csv = True if opt.input_path[-4:] == ".csv" else False # True if *.csv ; False if *.stl
-	input_path = cwd_dir + opt.input_path
-	projet_name = os.path.splitext(os.path.basename(input_path))[0]
+	input_stl_path = cwd_dir + opt.input_path
+	projet_name = os.path.splitext(os.path.basename(input_stl_path))[0]
 	make_stl = True if opt.table_path == None else False
 	export_dir = (cwd_dir + projet_name + "/") if opt.export_dir == None else opt.export_dir if opt.export_dir[-1] == "/" else opt.export_dir + "/"
 	export_dir = cwd_dir if not make_stl else export_dir
@@ -143,7 +122,7 @@ def main():
 
 	if make_stl: # si on compile les stl
 		if is_csv: # à partir d'un .csv
-			table_path = input_path
+			table_path = input_stl_path
 		else: # à partir d'un .stl
 			table_path = tmp_dir + "table.csv"
 	else: # si on construit une table à partir d'un stl (-b [nom_table])
@@ -154,7 +133,7 @@ def main():
 			table_path = opt.table_path.name
 
 	# print "  version:", version
-	# print "  input_path:", input_path
+	# print "  input_stl_path:", input_stl_path
 	# print "  is_csv:", is_csv
 	# print "  projet_name:", projet_name
 	# print "  export_dir:", export_dir
@@ -169,22 +148,21 @@ def main():
 	# print "  finish_at:", opt.finish_at
 	# print "  full_model_path:", full_model_path
 
-	corner_scad_path = ouack_scad_dir + "/corner.scad"
+	exp = export.Export(openscad_path, table_path, zazoucko_scad_dir, export_dir, opt.verbose, opt.low_qlt)
 
 	if not is_csv:
-		make_csv(input_path, table_path, opt.shuffle, details_path, opt.start_from, opt.finish_at)
-
-	# ajouter 3 colonne au .csv pour la position en x,y,z.
-	if full_model_path != None:
-		export.make_model(full_model_path, table_path)
+		exp.make_csv(input_stl_path, details_path, opt.start_from, opt.finish_at, opt.shuffle)
 
 	if doc_dir != None:
-		export.make_pictures(table_path, doc_dir + "img", openscad_path, corner_scad_path, opt.verbose)
+		exp.make_pictures(doc_dir + "img")
 
 	if make_stl:
 		if os.path.exists(export_dir):
 			shutil.rmtree(export_dir)
 		os.makedirs(export_dir)
-		export.make_stls(table_path, export_dir, openscad_path, corner_scad_path, opt.verbose)
+		exp.make_stls()
+
+	if full_model_path != None:
+		exp.make_model(full_model_path)
 
 main()

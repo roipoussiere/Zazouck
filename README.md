@@ -1,4 +1,4 @@
-ouack
+Zazoucko
 =====
 
 ## Description :
@@ -19,15 +19,15 @@ $ sudo apt-get install git openscad
 
 ```shell
 $ cd your_favorite_path
-$ git clone https://github.com/roipoussiere/ouack.git
+$ git clone https://github.com/roipoussiere/zazoucko.git
 ```
 
 - Make it easy to use :
 
 ```shell
-$ cd ouack
+$ cd zazoucko
 $ chmod +xX *.py
-$ export PATH=$PATH:your_favorite_path/ouack_python/ >> ~/.bashrc
+$ export PATH=$PATH:your_favorite_path/zazoucko_python/ >> ~/.bashrc
 ```
 
 ##Usage
@@ -36,18 +36,18 @@ $ export PATH=$PATH:your_favorite_path/ouack_python/ >> ~/.bashrc
 - To create a table describing each file, without generate them :
 
 ```shell
-$ ouack cube.stl -b ./table.csv
-$ ouack cube.stl -b # will create cube.csv
+$ zazoucko cube.stl -b ./table.csv
+$ zazoucko cube.stl -b # will create cube.csv
 ```
 
 - To generate a directory containing all the .stl files :
 
 ```shell
-$ ouack cube.stl # from a 3D model
-$ ouack cube.csv -c # from a table
+$ zazoucko cube.stl # from a 3D model
+$ zazoucko cube.csv -c # from a table
 ```
 
-Use ouack -h to see all available options.
+Use zazoucko -h to see all available options.
 
 ##Contact :
 

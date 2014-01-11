@@ -1,6 +1,6 @@
-
 // Uncomment this bloc to see how to use this library.
 
+/*
 // strToInt(string [,base])
 
 // Resume : Converts a number in string.
@@ -56,8 +56,8 @@ echo("*** getsplit() ***");
 echo(getsplit(str)); // ECHO: "OpenScad"
 echo(getsplit(str, 3)); // ECHO: "free"
 echo(getsplit("123; 456; 789", 2, "; ")); // ECHO: "789"
-
-function strToInt(str, base=10, i=0, nb=0) = (str[0] == "-") ? -1*_strToInt(str, base, 1) : _strToInt(str, base);
+*/
+function strToInt(str, base=10, i=0, nb=0) = (str == undef) ? undef : (str[0] == "-") ? -1*_strToInt(str, base, 1) : _strToInt(str, base);
 function _strToInt(str, base, i=0, nb=0) = (i == len(str)) ? nb : nb+_strToInt(str, base, i+1, search(str[i],"0123456789ABCDEF")[0]*pow(base,len(str)-i-1));
 
 function strcat(v, car="") = _strcat(v, len(v)-1, car, 0);
@@ -68,7 +68,5 @@ function _substr(str, i, j, out="") = (i==j) ? out : str(str[i], _substr(str, i+
 
 function fill(car, nb_occ, out="") = (nb_occ == 0) ? out : str(fill(car, nb_occ-1, out), car);
 
-function getsplit(text, index=0, car=" ") = substr(text, get_index(text, index, car), get_index(text, index+1, car)-get_index(text, index, car)-len(car));
+function getsplit(text, index=0, car=" ") = get_index(text, index, car) == len(text)+1 ? undef : substr(text, get_index(text, index, car), get_index(text, index+1, car) - get_index(text, index, car) - len(car));
 function get_index(text, word_number, car) = word_number == 0 ? 0 : search(car, text, len(text))[0][word_number-1] == undef ? len(text)+len(car) : len(car) + search(car, text, len(text))[0][word_number-1];
-//function getsplit(text, index, car) = (index==0) ? substr(text, 0, search(car, text)[0]) : getsplit(substr(str, len(car) + search(car, text)[0]), index-1, car);
-//function getsplit(str, index=0, char=" ") = (index==0) ? substr(str, 0, search(char, str)[0]) : getsplit(substr(str, len(car)+search(car, str)[0]), index-1, char);

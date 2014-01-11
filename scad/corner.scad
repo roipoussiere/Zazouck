@@ -1,7 +1,7 @@
 use <string.scad>;
 use <MQR-code.scad>;
 
-data = "12345,000,000,090,000,090,090";
+data = "12345,070,080,090,000,090,090";
 
 edge_shape = "rectangular"; // [rectangular, circular, sphere]
 edge_hole_shape = "rectangular"; // [rectangular, circular, none]
@@ -21,13 +21,8 @@ edge_bevel = "none"; // [none, thin, medium, large, sphere]
 external_bevel = "sphere"; // [none, sphere]
 holes_bevel = "none"; // [none, thin, medium, large]
 
-csv = search(",", data, 20)[0];
-v = [p2i(0), p2i(1), p2i(2), p2i(3), p2i(4), p2i(5), p2i(6), p2i(7), p2i(8), p2i(9), p2i(10), p2i(11)];
+part([[d(1),d(2)], [d(3),d(4)], [d(5),d(6)], [d(7),d(8)], [d(9),d(10)], [d(11),d(12)]]);
 
-part([[v[0],v[1]], [v[2],v[3]], [v[4],v[5]], [v[6],v[7]], [v[8],v[9]], [v[10],v[11]]]);
-
-echo([[v[0],v[1]], [v[2],v[3]], [v[4],v[5]], [v[6],v[7]], [v[8],v[9]], [v[10],v[11]]]);
-//echo(d(1), d(2), d(3), d(4), d(5), d(6), d(7), d(8), d(9), d(10), d(11), d(12), d(13));
 // ajouter getnbargs() dans string.scad puis modifier part() pour générer directement à partir de data.
 
 module part(v)
@@ -117,23 +112,4 @@ module block(block_width, length, shape, bevel)
 
 function bevel(type, ref) = (type == "thin") ? ref*0.2 : (type == "medium") ? ref*0.3 : (type == "large") ? ref*0.6 : 0;
 
-function d(i) = strToInt(getsplit(data, i, ",")); // just to save space
-
-function sumv(v,i,s=0) = (i==s ? v[i] : v[i] + sumv(v,i-1,s));
-
-function p2i(index) = (index >= len(csv)) ? -1 : strToNumber(str(
-		data[csv[index]+1],
-		data[csv[index]+2],
-		data[csv[index]+3]));
-
-function strToNumber(str) = (
-		search(str[2],"0123456789")[0] +
-		10 * search(str[1],"0123456789")[0] +
-		100 * search(str[0],"0123456789")[0]);
-
-function longStrToNumber(str) = (
-		search(str[4],"0123456789")[0] +
-		10 * search(str[3],"0123456789")[0] +
-		100 * search(str[2],"0123456789")[0] +
-		1000 * search(str[1],"0123456789")[0] +
-		10000 * search(str[0],"0123456789")[0]);
+function d(i) = strToInt(getsplit(data, i, ","));
