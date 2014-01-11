@@ -2,6 +2,7 @@ Zazoucko
 =====
 
 ## Description :
+ZAZOUCK generatOr - Zazouck is an AmaZing Opensource Construction Kit
 Generate stl files to build a wonderful construction, from an stl file.
 
 This project is licenced under GNU GPLv3 : see COPYING.txt for details.
