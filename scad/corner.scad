@@ -1,17 +1,17 @@
 use <string.scad>;
 use <MQR-code.scad>;
 
-data = "12345,070,080,090,000,090,090";
+data = "06253,180,090,225,090,270,090,090,000";
 
 edge_shape = "rectangular"; // [rectangular, circular, sphere]
 edge_hole_shape = "rectangular"; // [rectangular, circular, none]
 main_hole_shape = "none"; // [rectangular, circular, none]
 
 width = 7.5;
-edge_length = 11;  // Set 0 if you want than edge length equals Width.
+edge_length = 14;  // Set 0 if you want than edge length equals Width.
 notch_size = 1.5;
 microhole_width = 2;
-microhole_position = 4.5;
+microhole_position = 4;
 
 hole_width = 4.5; // edges hole width size.
 hole_deep = 8.5; // Set 0 if you want than edge length equals Width.
@@ -22,8 +22,6 @@ external_bevel = "sphere"; // [none, sphere]
 holes_bevel = "none"; // [none, thin, medium, large]
 
 part([[d(1),d(2)], [d(3),d(4)], [d(5),d(6)], [d(7),d(8)], [d(9),d(10)], [d(11),d(12)]]);
-
-// ajouter getnbargs() dans string.scad puis modifier part() pour générer directement à partir de data.
 
 module part(v)
 {
@@ -112,4 +110,4 @@ module block(block_width, length, shape, bevel)
 
 function bevel(type, ref) = (type == "thin") ? ref*0.2 : (type == "medium") ? ref*0.3 : (type == "large") ? ref*0.6 : 0;
 
-function d(i) = strToInt(getsplit(data, i, ","));
+function d(i) = (strToInt(getsplit(data, i, ",")) == undef) ? -1 : strToInt(getsplit(data, i, ","));

@@ -10,7 +10,7 @@ This program generates stl files to build a wonderful construction, from a 3D mo
 
 ### How it works
 The program works in 2 steps:
-- First, it creates a table file which containing the connectors parameters.
+- First, it creates a table file (.csv) which containing the connectors parameters.
 - Then, it creates stl files of the connectors, from the table.
 
 ### Differences between Zazouck and Zazoucko
@@ -49,7 +49,7 @@ Comming soon...
 You can try to build from the sources, but it's never tested on these platforms.
 
 ##Usage
-See [examples](examples/) to get 3D model examples
+See [examples folder](examples/) to get 3D model examples
 
 - To create a table describing each file, without generate them
 
@@ -80,7 +80,10 @@ usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
                 [-m [FULL_MODEL_PATH]]
                 input_path
 
-Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).
+Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows
+you to build constructions, with generating files to print from your model. It
+works in 2 times: first, it build a .csv table file (very fast) describing the
+parts, then it compile this one into a lot of .stl files (can be long).
 
 positional arguments:
   input_path            3d model (.stl) or table (.csv) path of your model.
