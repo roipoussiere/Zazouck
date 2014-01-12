@@ -73,12 +73,13 @@ $ zazoucko cube.stl -d
 ##Options
 Use zazoucko -h to see all available options :
 
-```usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
+```
+usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
                 [-p PARAMETER_PATH] [-l] [-S] [-s START_FROM] [-f FINISH_AT]
                 [-d [DOC_DIR]] [-V [{0,1,2,3}]] [-D [DETAILS_PATH]]
                 [-m [FULL_MODEL_PATH]]
                 input_path
-```
+
 Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).
 
 positional arguments:
@@ -117,6 +118,7 @@ optional arguments:
   -m [FULL_MODEL_PATH], --make_full_model [FULL_MODEL_PATH]
                         Create the 3d model of the construction in
                         FULL_MODEL_PATH (./full_model.stl by default).
+```
 
 ##Contact
 
