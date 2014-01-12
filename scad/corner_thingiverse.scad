@@ -1,5 +1,5 @@
-use <string.scad>;
-use <MQR-code.scad>;
+//use <string.scad>;
+//use <MQR-code.scad>;
 
 /* [Shapes] */
 
@@ -135,3 +135,21 @@ module block(block_width, length, shape, bevel)
 function bevel(type, ref) = (type == "thin") ? ref*0.2 : (type == "medium") ? ref*0.3 : (type == "large") ? ref*0.6 : 0;
 
 function d(i) = (strToInt(getsplit(angles, i, ",")) == undef) ? -1 : strToInt(getsplit(angles, i, ","));
+
+
+// *** string.scad library : http://www.thingiverse.com/thing:202724 ***
+
+
+function strToInt(str, base=10, i=0, nb=0) = (str == undef) ? undef : (str[0] == "-") ? -1*_strToInt(str, base, 1) : _strToInt(str, base);
+function _strToInt(str, base, i=0, nb=0) = (i == len(str)) ? nb : nb+_strToInt(str, base, i+1, search(str[i],"0123456789ABCDEF")[0]*pow(base,len(str)-i-1));
+
+function strcat(v, car="") = _strcat(v, len(v)-1, car, 0);
+function _strcat(v, i, car, s) = (i==s ? v[i] : str(_strcat(v, i-1, car, s), str(car,v[i]) ));
+
+function substr(data, i, length=0) = (length == 0) ? _substr(data, i, len(data)) : _substr(data, i, length+i);
+function _substr(str, i, j, out="") = (i==j) ? out : str(str[i], _substr(str, i+1, j, out));
+
+function fill(car, nb_occ, out="") = (nb_occ == 0) ? out : str(fill(car, nb_occ-1, out), car);
+
+function getsplit(text, index=0, car=" ") = get_index(text, index, car) == len(text)+1 ? undef : substr(text, get_index(text, index, car), get_index(text, index+1, car) - get_index(text, index, car) - len(car));
+function get_index(text, word_number, car) = word_number == 0 ? 0 : search(car, text, len(text))[0][word_number-1] == undef ? len(text)+len(car) : len(car) + search(car, text, len(text))[0][word_number-1];

@@ -76,14 +76,14 @@ class Export: # TODO : singleton
 
 			for i, line in enumerate(f_table):
 				self._print_status(i, nb_corners, t_init, True)
-				name = line[0:5]
-				start = [m.start() for m in re.finditer(r",",line)][3] # position de départ des données
-				data = line[:5] + line.rstrip('\n')[start:]
+				corner_id = line[0:line.index(",")]
+				start = [m.start() for m in re.finditer(r",",line)][3]+1 # position de départ des données
+				data = line.rstrip('\n')[start:]
 
-				data_options = "-D 'data=\"" + data + "\"'"
+				data_options = "-D 'id=" + str(corner_id) + "; data=\"" + data + "\"'"
 				pict_options = "--imgsize=" + str(PICT_WIDTH) + "," + str(PICT_WIDTH) + " --camera=0,0,0,0,45,45,45"
 				options = data_options + " " + pict_options
-				output_file = img_dir + name + ".png"
+				output_file = img_dir + corner_id + ".png"
 				
 				self.openscad(corner_scad_path, options, output_file)
 
@@ -95,16 +95,16 @@ class Export: # TODO : singleton
 		print "\n*** Compilation started.", nb_corners, "files will be created in", self.export_dir, "***"
 
 		with open(self.table_path, 'r') as f_table:
-			print "Model details: " + f_table.readline() + "."
+			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
 			f_table.readline()
 			
 			for i, line in enumerate(f_table):
 				self._print_status(i, nb_corners, t_init)
-				name = line[:5]
-				start = [m.start() for m in re.finditer(r",",line)][3] # position de départ des données
-				data = line[:5] + line.rstrip('\n')[start:]
-				options = "-D 'data=\"" + data + "\"'"
-				output_file = self.export_dir + name + ".stl"
+				corner_id = line[0:line.index(",")]
+				start = [m.start() for m in re.finditer(r",",line)][3]+1 # position de départ des données
+				data = line.rstrip('\n')[start:]
+				options = "-D 'id=" + str(corner_id) + "; data=\"" + data + "\"'"
+				output_file = self.export_dir + corner_id + ".stl"
 
 				self.openscad(corner_scad_path, options, output_file)
 
@@ -123,7 +123,7 @@ class Export: # TODO : singleton
 			for line in f_table:
 				t = line.split(",")[1:4]
 				name = line[:5] + ".stl"
-				options = "-D 'file=\"" + file_name + "\", tx=" + t[0] + ", ty=" + t[1] + ", tz=" + t[2] + "'"
+				options = "-D 'file=\"" + file_name + "\"; tx=" + t[0] + "; ty=" + t[1] + "; tz=" + t[2] + "'"
 				self.openscad(corner_move_scad_path, options, full_model_path)
 
 	def openscad(self, scad_file, options, output_file):
