@@ -4,12 +4,19 @@ Zazoucko
 ## Description
 ZAZOUCK generatOr - Zazouck is an AmaZing Opensource Construction Kit
 
-This program generates stl files to build a wonderful construction, from a 3D model.
+This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :
 
-![Zazouck](./pictures/Zazouck-1_wide.png "Zazouck")
+![A generated part](./pictures/generated_part.png "A generated part")
+
+### How it works
+The program works in 2 steps:
+- First, it creates a table file wich containing parameters of the 3d model.
+- Then, it creates the stl files of the connectors, from this table.
 
 ### Differences between Zazouck and Zazoucko
-On the picture hereabove, this is Zazouck, the construction kit. Zazoucko is a program which generates Zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using [the Openscad file](scad/corner.scad) or simply going on the  [Thingiverse page](http://www.thingiverse.com/thing:179597).
+On the picture herebelow, this is Zazouck, the construction kit : it's a customisable 3d printable part to connect wood, platic or metal rods together. Zazoucko is a program which generates Zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using [the Openscad file](scad/corner.scad) or simply going on the  [Thingiverse page](http://www.thingiverse.com/thing:179597).
+
+![Zazouck](./pictures/Zazouck_wide.png "Zazouck")
 
 ##Installation instuctions
 
@@ -39,7 +46,7 @@ $ echo export PATH=$PATH:your_favorite_path/zazoucko_python/ >> ~/.bashrc
 
 Comming soon...
 
-You can try to build from the sources, but it's never tested.
+You can try to build from the sources, but it's never tested on these platforms.
 
 ##Usage
 -> see ./examples to get 3D model examples
