@@ -10,8 +10,8 @@ This program generates stl files to build a wonderful construction, from a 3D mo
 
 ### How it works
 The program works in 2 steps:
-- First, it creates a table file wich containing parameters of the 3d model.
-- Then, it creates the stl files of the connectors, from this table.
+- First, it creates a table file which containing the connectors parameters.
+- Then, it creates stl files of the connectors, from the table.
 
 ### Differences between Zazouck and Zazoucko
 On the picture herebelow, this is Zazouck, the construction kit : it's a customisable 3d printable part to connect wood, platic or metal rods together. Zazoucko is a program which generates Zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using [the Openscad file](scad/corner.scad) or simply going on the  [Thingiverse page](http://www.thingiverse.com/thing:179597).

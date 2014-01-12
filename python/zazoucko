@@ -8,8 +8,9 @@
 # You should have received a copy of the GNU General Public License along with Zazoucko. If not, see <http://www.gnu.org/licenses/>.
 
 # TODO : alléger avec from .. import ..
-import argparse, os, sys, datetime, shutil, tempfile
-import export
+from datetime import datetime as date
+import argparse, os, sys, shutil, tempfile
+import export # lol
 
 #TODO : utiliser tempfile.tempdir
 tmp_dir = tempfile.gettempdir() + "/"
@@ -28,6 +29,8 @@ def correct_input(string):
 	return string
 
 def parser():
+	version = str(date.now().year-2013) + "." + str(date.now().month) + "." + str(date.now().day)
+
 	parser = argparse.ArgumentParser(
 			formatter_class=argparse.RawDescriptionHelpFormatter,
 			description = 'Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).',
@@ -37,11 +40,10 @@ def parser():
 	parser.add_argument('input_path', action = 'store',
 		type = correct_input,
 		help = '3d model (.stl) or table (.csv) path of your model. The program will automatically generates the .stl files according to the file type.')
-	
+
 	# ok
-	parser.add_argument('-v', '--version', action = 'store_true',
-		dest = 'version', default = False,
-		help = 'Displays program version.')
+	parser.add_argument('-v', '--version', action='version',                    
+		version="Zazoucko version " + version, help = 'Show program version and exit.')
 
 	# ok
 	parser.add_argument('-b', '--build-only', action = 'store', nargs = '?',
@@ -102,12 +104,6 @@ def parser():
 def main():
 
 	opt = parser()
-
-	if opt.version:
-		date = datetime.datetime.now()
-		version = str(date.year-2013) + "." + str(date.month) + "." + str(date.day)
-		print "Zazoucko version " + version
-		exit()
 
 	is_csv = True if opt.input_path[-4:] == ".csv" else False # True if *.csv ; False if *.stl
 	input_stl_path = cwd_dir + opt.input_path
