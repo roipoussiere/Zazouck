@@ -10,7 +10,7 @@
 import time, os, re, tempfile
 import solid, stl
 
-class Export:
+class Export: # TODO : singleton
 
 	def __init__(self, openscad_path, table_path, zazoucko_scad_dir, export_dir, verbose_lvl, low_qlt):
 		self.openscad_path = openscad_path

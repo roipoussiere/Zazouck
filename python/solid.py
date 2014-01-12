@@ -8,10 +8,11 @@
 # You should have received a copy of the GNU General Public License along with Zazoucko. If not, see <http://www.gnu.org/licenses/>.
 
 import random, math
+from random import randint
 import corner, polygon, edge
 
-class Solid: #singleton
-	# def __init__(self): # marche pas
+class Solid: # TODO : singleton
+	# def __init__(self): # à tester
 	# 	self.polygons = []
 	# 	self.corners = []
 	# 	self.edges = []
@@ -22,7 +23,7 @@ class Solid: #singleton
 	def get_nb_corners(self): return len(self.corners)	
 	def get_nb_polygons(self): return len(self.polygons)
 	
-	def get_position_by_corner_id(self, corner_id):
+	def _get_position_by_corner_id(self, corner_id):
 		position = False
 		for corner in self.corners:
 			if corner.get_id() == corner_id:
@@ -38,15 +39,27 @@ class Solid: #singleton
 				if positions.count(point) == 0:
 					positions.append(point)
 		
-		i=0
+		id_list = []
 		for position in positions:
-			self.corners.append(corner.Corner(position, i))
-			i+=1
+			while True:
+				id = randint(1,32766) # values 0 and 32767 are not visible on a MQRcode
+				if id not in id_list:
+					id_list.append(id)
+					break
+
+			self.corners.append(corner.Corner(position, id))
 	
 	def fill_polygons(self, _model):
-		i=0
+		id_list = []
 		for polygon_model in _model:
-			poly = polygon.Polygon(i)
+
+			while True:
+				id = randint(1,32766)
+				if id not in id_list:
+					id_list.append(id)
+					break
+
+			poly = polygon.Polygon(id)
 			for position in polygon_model:
 				for corner in self.corners:
 					if corner.get_position() == position:
@@ -54,7 +67,6 @@ class Solid: #singleton
 						break
 				poly.add_corner_id(corner_id)
 			self.polygons.append(poly)
-			i+=1
 		
 	def set_connected_corners(self):
 		for corner in self.corners:
@@ -63,14 +75,14 @@ class Solid: #singleton
 	def set_angles(self):
 		for corner in self.corners:
 			for target in corner.get_connected_corners():
-				corner.set_angles(self.get_position_by_corner_id(target))
+				corner.set_angles(self._get_position_by_corner_id(target))
 	
 	def set_datas(self):
 		for corner in self.corners:
 			corner.set_data()
 	
 	def fill_edges(self):
-		edge_id = 0
+		id_list = []
 		for i in range(self.get_nb_corners()):
 			for cc in self.corners[i].get_connected_corners():
 				add = True
@@ -79,13 +91,17 @@ class Solid: #singleton
 						add = False
 						break;
 				if add:
-					edge_id += 1
-					px = pow(self.get_position_by_corner_id(cc)[0] - self.get_position_by_corner_id(i)[0], 2)
-					py = pow(self.get_position_by_corner_id(cc)[1] - self.get_position_by_corner_id(i)[1], 2)
-					pz = pow(self.get_position_by_corner_id(cc)[2] - self.get_position_by_corner_id(i)[2], 2)
+					while True:
+						id = randint(1,32766)
+						if id not in id_list:
+							id_list.append(id)
+							break
+					px = pow(self._get_position_by_corner_id(cc)[0] - self.corners[i].get_position()[0], 2)
+					py = pow(self._get_position_by_corner_id(cc)[1] - self.corners[i].get_position()[1], 2)
+					pz = pow(self._get_position_by_corner_id(cc)[2] - self.corners[i].get_position()[2], 2)
 					#deplacer dans corner: d = c1.dist(c2)
 					dist = math.sqrt( px + py + pz)
-					e = edge.Edge(edge_id, (i, cc), dist)
+					e = edge.Edge(id, (i, cc), dist)
 					self.edges.append(e)
 
 	def shuffle(self):

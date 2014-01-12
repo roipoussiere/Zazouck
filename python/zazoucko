@@ -121,32 +121,13 @@ def main():
 	full_model_path = (export_dir + "full_model.stl" if opt.full_model_path.name == tmp_dir + "_" else opt.full_model_path.name) if opt.full_model_path != None else None
 
 	if make_stl: # si on compile les stl
-		if is_csv: # à partir d'un .csv
-			table_path = input_stl_path
-		else: # à partir d'un .stl
-			table_path = tmp_dir + "table.csv"
+		table_path = input_stl_path if is_csv else tmp_dir + "table.csv"
 	else: # si on construit une table à partir d'un stl (-b [nom_table])
 		if opt.table_path.name == tmp_dir + "_":
 			table_path = cwd_dir + projet_name + ".csv"
 			os.remove(tmp_dir + "_")
 		else:
 			table_path = opt.table_path.name
-
-	# print "  version:", version
-	# print "  input_stl_path:", input_stl_path
-	# print "  is_csv:", is_csv
-	# print "  projet_name:", projet_name
-	# print "  export_dir:", export_dir
-	# print "  doc_dir:", doc_dir
-	# print "  make_stl:", make_stl
-	# print "  table_path:", table_path
-	# print "  parameter_path:", parameter_path
-	# print "  details_path:", details_path
-	# print "  verbose_lvl:", opt.verbose
-	# print "  shuffle:", opt.shuffle
-	# print "  start_from:", opt.start_from
-	# print "  finish_at:", opt.finish_at
-	# print "  full_model_path:", full_model_path
 
 	exp = export.Export(openscad_path, table_path, zazoucko_scad_dir, export_dir, opt.verbose, opt.low_qlt)
 
