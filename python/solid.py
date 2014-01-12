@@ -116,25 +116,24 @@ class Solid: # TODO : singleton
 	def display(self, debug_path):
 		with open(debug_path, 'w') as f_debug:
 			f_debug.write("*** Corners position and connexions ***\n\n")
-			for corner in self.corners:
-				f_debug.write(str(corner.get_id()) + ": " + str(corner.get_position()))
-				f_debug.write(" - " + str(corner.get_connected_corners()) + "\n")
+			for i, corner in enumerate(self.corners):
+				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - " + str(corner.get_position()) + " - " + str(corner.get_connected_corners()) + "\n")
 
 			f_debug.write("\n*** Polygons connexions ***\n\n")
-			for polygon in self.polygons:
-				f_debug.write(str(polygon.get_id()) + ": " + str(polygon.get_corners()) + "\n")
+			for i, polygon in enumerate(self.polygons):
+				f_debug.write(str(i+1) + ": " + str(polygon.get_id()) + " - " + str(polygon.get_corners()) + "\n")
 
 			f_debug.write("\n*** Edges connexions and length ***\n\n")
-			for edge in self.edges:
-				f_debug.write(str(edge.get_id()) + ": " + str(edge.get_extremities()) + " - " + str(edge.get_length()) + "\n")
+			for i, edge in enumerate(self.edges):
+				f_debug.write(str(i+1) + ": " + str(edge.get_id()) + " - " + str(edge.get_extremities()) + " - " + str(edge.get_length()) + "\n")
 
-			f_debug.write("\n*** Parameters ***\n\n")
-			for corner in self.corners:
-				f_debug.write(str(corner.get_id()) + ": " + str(corner.get_data()))
+			f_debug.write("\n*** Angles ***\n\n")
+			for i, corner in enumerate(self.corners):
+				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - " + str(corner.get_angles()) + "\n")
 
 	def build_csv(self, f_table_path, start_from, finish_at, shuffle):
 		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + " polygons\n"
-		labels = "id,x,y,z,rod 1-H,rod 1-V,rod 2-H,rod 2-V,rod 3-H,rod 3-V,rod 4-H,rod 4-V,rod 5-H,rod 5-V,rod 6-H,rod 6-V,rod 7-H,rod 7-V,rod 8-H,rod 8-V\n"
+		labels = "id,x,y,z,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H,rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
 		finish_at = self.get_nb_corners() if finish_at == 0 else finish_at+1
 
 		right_limit = self.get_nb_corners()-finish_at

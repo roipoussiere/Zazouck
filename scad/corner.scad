@@ -1,7 +1,7 @@
 use <string.scad>;
 use <MQR-code.scad>;
 
-data = "06253,180,090,225,090,270,090,090,000";
+data = "01234,270,090,090,000,000,090,000,045";
 
 edge_shape = "rectangular"; // [rectangular, circular, sphere]
 edge_hole_shape = "rectangular"; // [rectangular, circular, none]

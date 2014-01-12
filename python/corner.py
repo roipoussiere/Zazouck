@@ -33,8 +33,8 @@ class Corner:
 	def set_angles(self, target_position):
 		init_pos = self.position
 		
-		relative_pos = [target_position[0]-self.position[0], target_position[1]-self.position[1], target_position[2]-self.position[2]]
-	
+		relative_pos = [target_position[0]-init_pos[0], target_position[1]-init_pos[1], target_position[2]-init_pos[2]]
+		
 		# calcul angle_h
 		if relative_pos[0] == 0:
 			angle_h = 90 if relative_pos[1] >= 0 else -90
@@ -43,9 +43,7 @@ class Corner:
 		else:
 			angle_h = math.degrees(math.atan(relative_pos[0] / relative_pos[1]))
 			if relative_pos[0] < 0 and relative_pos[1] < 0: angle_h -= 180
-
 		angle_h = angle_h+360 if angle_h < 0 else angle_h
-		self.angles.append(angle_h)
 		
 		#calcul angle_v
 		hypot = math.hypot(relative_pos[0], relative_pos[1])
@@ -54,7 +52,8 @@ class Corner:
 		else:
 			angle_v = 90-math.degrees(math.atan(relative_pos[2] / hypot))
 	
-		self.angles.append(angle_v)
+		self.angles.append(int(round(angle_v)))
+		self.angles.append(int(round(angle_h)))
 	
 	def set_data(self):
 		self.data += self.number_to_txt(self.id, 5)
@@ -68,10 +67,8 @@ class Corner:
 		self.data += "\n"
 
 	def number_to_txt(self, nb, size):
-		max_nb = pow(10, size)-1
-		nb = max_nb if nb > max_nb else nb
-		word = str(int(round(nb)))
+		nb = "err" if nb > pow(10, size)-1 else str(nb)
 
-		while len(word) < size:
-			word = "0" + word
-		return word
+		while len(nb) < size:
+			nb = "0" + nb
+		return nb

@@ -21,10 +21,10 @@ class Export: # TODO : singleton
 		self.low_qlt = low_qlt
 
 	def _get_nb_lines(self, input_path):
-		nb_lines = 0
 		with open(input_path, 'r') as f_input:
-			for line in f_input: nb_lines += 1
-		return nb_lines
+			for nb_lines, line in enumerate(f_input):
+				pass
+		return nb_lines + 1
 
 	def _print_status(self, i, nb_corners, t_init, picture=False):
 		f_type = "picture" if picture else "stl file"
@@ -74,8 +74,7 @@ class Export: # TODO : singleton
 			print f_table.readline()
 			f_table.readline()
 
-			i = 0
-			for line in f_table:
+			for i, line in enumerate(f_table):
 				self._print_status(i, nb_corners, t_init, True)
 				name = line[0:5]
 				start = [m.start() for m in re.finditer(r",",line)][3] # position de départ des données
@@ -87,7 +86,6 @@ class Export: # TODO : singleton
 				output_file = img_dir + name + ".png"
 				
 				self.openscad(corner_scad_path, options, output_file)
-				i += 1
 
 	def make_stls(self):
 		nb_corners = self._get_nb_lines(self.table_path)-2
@@ -100,9 +98,7 @@ class Export: # TODO : singleton
 			print "Model details: " + f_table.readline() + "."
 			f_table.readline()
 			
-			i = 0
-			for line in f_table: # ugly
-				i+=1
+			for i, line in enumerate(f_table):
 				self._print_status(i, nb_corners, t_init)
 				name = line[:5]
 				start = [m.start() for m in re.finditer(r",",line)][3] # position de départ des données
