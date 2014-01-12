@@ -60,12 +60,15 @@ class Solid: # TODO : singleton
 					break
 
 			poly = polygon.Polygon(id)
+			corners_pos = []
 			for position in polygon_model:
 				for corner in self.corners:
 					if corner.get_position() == position:
 						corner_id = corner.get_id()
+						corners_pos.append(corner.get_position())
 						break
-				poly.add_corner_id(corner_id)
+				poly.add_corner(corner_id)
+			poly.set_normal(corners_pos)
 			self.polygons.append(poly)
 		
 	def set_connected_corners(self):
@@ -109,9 +112,20 @@ class Solid: # TODO : singleton
 		random.shuffle(self.polygons)
 		random.shuffle(self.edges)
 
-#	def merge_coplanar_polygons():
-#		for poly in polygons():
-#			poly.merge_coplanar()
+	def _find_coplanar_polygons(self):
+		normals = []
+		coplanar_polys = []
+		for poly in self.polygons:
+			normal = poly.get_normal()
+			for i, n in enumerate(normals):
+				if n == normal:
+					coplanar_polys.append((poly.get_id(), self.polygons[i].get_id()))
+			else:
+				normals.append(normal)
+		return coplanar_polys
+
+	def merge_coplanar_polygons(self):
+		print "coplanar_polygons:", self._find_coplanar_polygons();
 	
 	def display(self, debug_path):
 		with open(debug_path, 'w') as f_debug:

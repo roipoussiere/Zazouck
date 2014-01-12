@@ -35,6 +35,13 @@ class Corner:
 		
 		relative_pos = [target_position[0]-init_pos[0], target_position[1]-init_pos[1], target_position[2]-init_pos[2]]
 		
+		#calcul angle_v
+		hypot = math.hypot(relative_pos[0], relative_pos[1])
+		if hypot == 0:
+			angle_v = 0 if relative_pos[2] > 0 else 180
+		else:
+			angle_v = 90-math.degrees(math.atan(relative_pos[2] / hypot))
+
 		# calcul angle_h
 		if relative_pos[0] == 0:
 			angle_h = 90 if relative_pos[1] >= 0 else -90
@@ -44,14 +51,7 @@ class Corner:
 			angle_h = math.degrees(math.atan(relative_pos[0] / relative_pos[1]))
 			if relative_pos[0] < 0 and relative_pos[1] < 0: angle_h -= 180
 		angle_h = angle_h+360 if angle_h < 0 else angle_h
-		
-		#calcul angle_v
-		hypot = math.hypot(relative_pos[0], relative_pos[1])
-		if hypot == 0:
-			angle_v = 0 if relative_pos[2] > 0 else 180
-		else:
-			angle_v = 90-math.degrees(math.atan(relative_pos[2] / hypot))
-	
+			
 		self.angles.append(int(round(angle_v)))
 		self.angles.append(int(round(angle_h)))
 	

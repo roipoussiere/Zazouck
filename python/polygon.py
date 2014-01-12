@@ -11,9 +11,29 @@ class Polygon:
 	def __init__(self, polygon_id):
 		self.id = polygon_id
 		self.corners_id = []
+		self.normal = (0,0,0)
 	
 	def get_corners(self): return self.corners_id
 	def get_id(self): return self.id
+	def get_normal(self): return self.normal
 	
-	def add_corner_id(self, corner_id):
+	def add_corner(self, corner_id):
 		self.corners_id.append(corner_id)
+
+	def set_normal(self, positions):
+		p1 = positions[0]
+		p2 = positions[1]
+		p3 = positions[2]
+
+		x = (p2[1]-p1[1])*(p3[2]-p1[2]) - (p2[2]-p1[2])*(p3[1]-p1[1])
+		y = (p2[2]-p1[2])*(p3[0]-p1[0]) - (p2[0]-p1[0])*(p3[2]-p1[2])
+		z = (p2[0]-p1[0])*(p3[1]-p1[1]) - (p2[1]-p1[1])*(p3[0]-p1[0])
+
+		# S1S2(x2-x1,y2-y1,z2-z1)
+		# S1S3(x3-x1,y3-y1,z3-z1)
+
+		# N(X,Y,Z)
+		# X = (y2-y1)*(z3-z1) - (z2-z1)*(y3-y1)
+		# Y = (z2-z1)*(x3-x1) - (x2-x1)*(z3-z1)
+		# Z = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1) 
+		self.normal = (x,y,z)

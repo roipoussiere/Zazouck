@@ -53,7 +53,7 @@ class Export: # TODO : singleton
 		s.set_angles()
 		s.set_datas()
 		s.fill_edges()
-		# TODO : s.merge_coplanar_polygons()
+		s.merge_coplanar_polygons()
 
 		s.build_csv(self.table_path, start_from, finish_at, shuffle)
 		
