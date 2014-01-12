@@ -4,11 +4,12 @@ Zazoucko
 ## Description
 ZAZOUCK generatOr - Zazouck is an AmaZing Opensource Construction Kit
 
-This program generates stl files to build a wonderful construction, from a 3D model.
-
 ![Zazouck](./pictures/Zazouck-1_wide.png "Zazouck")
 
-This project is licenced under GNU GPLv3 see COPYING.txt for details.
+### Differences between Zazouck and Zazoucko
+On the picture hereabove, this is Zazouck, the construction kit. Zazoucko is a program which generates zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using [the Openscad file](scad/corner.scad) or simply going on the  [Thingiverse page](http://www.thingiverse.com/thing:179597).
+
+This program generates stl files to build a wonderful construction, from a 3D model.
 
 ##Installation instuctions
 
@@ -62,3 +63,5 @@ Use zazoucko -h to see all available options.
 ##Contact
 
 natha[AT]jourdane[DOT]net
+
+This project is licenced under GNU GPLv3 see COPYING.txt for details.
