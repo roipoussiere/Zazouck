@@ -13,7 +13,7 @@ On the picture hereabove, this is Zazouck, the construction kit. Zazoucko is a p
 
 ##Installation instuctions
 
-### On Unix platforms
+### On Linux platforms
 - Install dependencies
 
 ```shell
@@ -35,9 +35,11 @@ $ chmod +xX *.py
 $ echo export PATH=$PATH:your_favorite_path/zazoucko_python/ >> ~/.bashrc
 ```
 
-### On Windows platforms
+### On Windows and MacOS platforms
 
 Comming soon...
+
+You can try to build from the sources, but it's never tested.
 
 ##Usage
 -> see ./examples to get 3D model examples
