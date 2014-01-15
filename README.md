@@ -80,7 +80,11 @@ usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-j NB_JOB_SLOTS] [-e EXPORT_DIR]
                 [-m [FULL_MODEL_PATH]]
                 input_path
 
-Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).
+Zazoucko - The Open-source Universal Awesome Construction Kit.
+This program allows you to build constructions, with generating files to print
+from your model. It works in 2 times: first, it build a .csv table file (very
+fast) describing the parts, then it compile this one into a lot of .stl files
+(can be long).
 
 positional arguments:
   input_path            3d model (.stl) or table (.csv) path of your model.
@@ -123,6 +127,7 @@ optional arguments:
                         Create the 3d model of the construction in
                         FULL_MODEL_PATH (./full_model.stl by default).
 
+Author: Nathanaël Jourdane - nathanael@jourdane.net
 Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
 ```
 
