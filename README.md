@@ -74,16 +74,13 @@ $ zazoucko cube.stl -d
 Use zazoucko -h to see all available options :
 
 ```
-usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
+usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-j NB_JOB_SLOTS] [-e EXPORT_DIR]
                 [-p PARAMETER_PATH] [-l] [-S] [-s START_FROM] [-f FINISH_AT]
                 [-d [DOC_DIR]] [-V [{0,1,2,3}]] [-D [DETAILS_PATH]]
                 [-m [FULL_MODEL_PATH]]
                 input_path
 
-Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows
-you to build constructions, with generating files to print from your model. It
-works in 2 times: first, it build a .csv table file (very fast) describing the
-parts, then it compile this one into a lot of .stl files (can be long).
+Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).
 
 positional arguments:
   input_path            3d model (.stl) or table (.csv) path of your model.
@@ -96,6 +93,10 @@ optional arguments:
   -b [TABLE_PATH], --build-only [TABLE_PATH]
                         Build only table (.csv) as TABLE_PATH (projet_name.csv
                         by default), without compile stl files.
+  -j NB_JOB_SLOTS, --jobs NB_JOB_SLOTS
+                        Compile NB_JOB_SLOTS parts simultaneously (usually,
+                        set the same as the number of cores on your computer
+                        is a good choice).
   -e EXPORT_DIR, --export-dir EXPORT_DIR
                         Directory where .stl files will be exported
                         (./projet_name/ by default)
@@ -121,6 +122,8 @@ optional arguments:
   -m [FULL_MODEL_PATH], --make_full_model [FULL_MODEL_PATH]
                         Create the 3d model of the construction in
                         FULL_MODEL_PATH (./full_model.stl by default).
+
+Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
 ```
 
 ##Contact

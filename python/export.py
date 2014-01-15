@@ -11,6 +11,7 @@ import time, os, re, tempfile
 import solid, stl
 from os import path as op
 import subprocess
+import shlex
 
 class Export: # TODO : singleton
 
@@ -57,7 +58,7 @@ class Export: # TODO : singleton
 		s.set_angles()
 		s.set_datas()
 		s.fill_edges()
-		s.merge_coplanar_polygons()
+		#s.merge_coplanar_polygons() # TODO
 
 		s.build_csv(self.table_path, start_from, finish_at, shuffle)
 		
@@ -92,8 +93,8 @@ class Export: # TODO : singleton
 				self.openscad(corner_scad_path, options, output_file)
 
 	def make_stls(self):
-		nb_corners = self._get_nb_lines(self.table_path)-2
 		t_init = time.time()
+		nb_corners = self._get_nb_lines(self.table_path)-2
 		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.low_qlt else "corner.scad"))
 		
 		print "\n*** Compilation started.", nb_corners, "stl files will be created in", self.export_dir, "***\n"
@@ -102,22 +103,38 @@ class Export: # TODO : singleton
 			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
 			if self.nb_job_slots == 1:
 				print "Tip : You can parallelize this task on several cores with -j option."
-			print ""
+				print "\nCompiling the first stl file, please wait..."
+			else:
+				print "\nCompiling", self.nb_job_slots if self.nb_job_slots < nb_corners else nb_corners, "stl files simultaneously, please wait..."
 			f_table.readline()
-			
+
+			nb_created = 0
 			for i, line in enumerate(f_table):
-				self._print_status(i, nb_corners, t_init)
 				corner_id = line[0:line.index(",")]
+				#self._print_status(i, nb_corners, t_init)
 				start = [m.start() for m in re.finditer(r",",line)][3]+1 # position de départ des données
 				data = line.rstrip('\n')[start:]
 				options = "-D 'id=" + str(corner_id) + "; angles=\"" + data + "\"'"
 				output_file = op.join(self.export_dir, corner_id + ".stl")
 
-				self.openscad(corner_scad_path, options, output_file)
+				self.openscad(corner_scad_path, options, output_file, corner_id)
+				nb_created = self.end_of_process(nb_created, nb_corners, t_init)
+	
+			while self.process:
+				nb_created = self.end_of_process(nb_created, nb_corners, t_init)
 
 		total_time = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time()-t_init))
 		print "\n*** Finished! ***"
 		print i+1, "stl files successfully created in " + total_time + "."	
+
+	def end_of_process(self, nb_created, nb_corners, t_init):
+		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time()-t_init))
+		for i, p in enumerate(self.process):
+			if p[0].poll() == 0:
+				del self.process[i]
+				nb_created += 1
+				print spent + ": Created file " + str(nb_created) + "/" + str(nb_corners) + ", n°" + str(p[1]) + "."
+		return nb_created
 
 	def make_model(self, full_model_path):
 		print "Creating full model ", full_model_path
@@ -133,9 +150,7 @@ class Export: # TODO : singleton
 				options = "-D 'file=\"" + file_name + "\"; tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
 				self.openscad(corner_move_scad_path, options, full_model_path)
 
-	def openscad(self, scad_file_path, options, output_file):
-		import shlex
-		
+	def openscad(self, scad_file_path, options, output_file, i):
 		cmd = self.openscad_path + " " + scad_file_path + " -o " + output_file + " " + options
 
 		if self.verbose_lvl >= 1:
@@ -143,11 +158,8 @@ class Export: # TODO : singleton
 		err = None if self.verbose_lvl >= 2 else open(os.devnull, 'w')
 		out = None if self.verbose_lvl == 3 else open(os.devnull, 'w')
 
-		for i, p in enumerate(self.process):
-			if p.poll() == 0:
-				del self.process[i]
-
 		p = subprocess.Popen(shlex.split(cmd), stdout = out, stderr = err)
-		self.process.append(p)
+		self.process.append((p,i))
+
 		if len(self.process) >= self.nb_job_slots:
 			p.wait()

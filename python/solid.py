@@ -124,8 +124,8 @@ class Solid: # TODO : singleton
 				normals.append(normal)
 		return coplanar_polys
 
-	def merge_coplanar_polygons(self):
-		print "coplanar_polygons:", self._find_coplanar_polygons();
+	#def merge_coplanar_polygons(self): # TODO
+	#	print "coplanar_polygons:", self._find_coplanar_polygons();
 	
 	def display(self, debug_path):
 		with open(debug_path, 'w') as f_debug:
