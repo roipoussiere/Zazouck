@@ -9,28 +9,26 @@
 
 # TODO : alléger avec from .. import ..
 from datetime import datetime as date
+from os import path as op
 import argparse, os, sys, shutil, tempfile
 import export # lol
 
-#TODO : utiliser tempfile.tempdir
-tmp_dir = tempfile.gettempdir() + "/"
+tmp_dir = tempfile.gettempdir()
 openscad_path = "openscad"
-
-zazoucko_python_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-zazoucko_scad_dir = zazoucko_python_dir + "/../scad/"
-cwd_dir = os.getcwd() + "/"
-
-def correct_input(string):
-	if not os.path.exists(string):
-		raise argparse.ArgumentTypeError("Filename %r doesn\'t exists in this directory." % string)
-
-	if string[-4:] != ".stl" and string[-4:] != ".csv":
-		raise argparse.ArgumentTypeError("%r is not a .stl or a .csv file." % string)
-	return string
+zazoucko_python_dir = op.abspath(op.dirname(sys.argv[0]))
+zazoucko_scad_dir = op.join(op.dirname(zazoucko_python_dir), "scad")
+cwd_dir = os.getcwd()
 
 def parser():
-	version = str(date.now().year-2013) + "." + str(date.now().month) + "." + str(date.now().day)
+	def _correct_input(string):
+		if not op.exists(string):
+			raise argparse.ArgumentTypeError("Filename %r doesn\'t exists in this directory." % string)
 
+		ext = fileExtension = op.splitext(string)[1]
+		if ext not in (".stl", ".csv"):
+			raise argparse.ArgumentTypeError("%r is not a .stl or a .csv file." % string)
+		return string
+ 
 	parser = argparse.ArgumentParser(
 			formatter_class=argparse.RawDescriptionHelpFormatter,
 			description = 'Zazoucko - The Open-source Universal Awesome Construction Kit. This program allows you to build constructions, with generating files to print from your model. It works in 2 times: first, it build a .csv table file (very fast) describing the parts, then it compile this one into a lot of .stl files (can be long).',
@@ -38,18 +36,23 @@ def parser():
 	
 	# ok
 	parser.add_argument('input_path', action = 'store',
-		type = correct_input,
+		type = _correct_input,
 		help = '3d model (.stl) or table (.csv) path of your model. The program will automatically generates the .stl files according to the file type.')
 
 	# ok
 	parser.add_argument('-v', '--version', action='version',                    
-		version="Zazoucko version " + version, help = 'Show program version and exit.')
+		version="Zazoucko version " + str(date.now().year-2013) + "." + str(date.now().month) + "." + str(date.now().day), help = 'Show program version and exit.')
 
 	# ok
 	parser.add_argument('-b', '--build-only', action = 'store', nargs = '?',
-		dest = 'table_path', type = argparse.FileType('w'), default = None, const = tmp_dir + "_",
+		dest = 'table_path', type = argparse.FileType('w'), default = None, const = op.join(tmp_dir, "_"),
 		help = 'Build only table (.csv) as TABLE_PATH (projet_name.csv by default), without compile stl files.')
 	
+	# ok
+	parser.add_argument('-j', '--jobs', action = 'store',
+		dest = 'nb_job_slots', type = int, default = 1,
+		help = 'Compile NB_JOB_SLOTS parts simultaneously (usually, set the same as the number of cores on your computer is a good choice).')
+
 	# ok
 	parser.add_argument('-e', '--export-dir', action = 'store',
 		dest = 'export_dir', default = None,
@@ -82,7 +85,7 @@ def parser():
 	
 	# ok
 	parser.add_argument('-d', '--documentation', action = 'store', nargs = '?',
-		dest = 'doc_dir', default = None, const = tmp_dir + "_",
+		dest = 'doc_dir', default = None, const = op.join(tmp_dir, "_"),
 		help = 'Build a nice document in DOC_DIR (./doc by default), to help you to build your construction easily.')
 	
 	# ok
@@ -92,11 +95,11 @@ def parser():
 
 	# ok
 	parser.add_argument('-D', '--details', action = 'store', nargs = '?',
-		dest = 'details_path', type = argparse.FileType('w'), default = None, const = cwd_dir + "details.txt",
+		dest = 'details_path', type = argparse.FileType('w'), default = None, const = op.join(cwd_dir, "details.txt"),
 		help = 'Export details about the model (corners position, polygons, corners_network, edges, etc.) in DETAILS_PATH (./details.txt by default).')
 	
 	parser.add_argument('-m', '--make_full_model', action = 'store', nargs = '?',
-		dest = 'full_model_path', type = argparse.FileType('w'), default = None, const = tmp_dir + "_",
+		dest = 'full_model_path', type = argparse.FileType('w'), default = None, const = op.join(tmp_dir, "_"),
 		help = 'Create the 3d model of the construction in FULL_MODEL_PATH (./full_model.stl by default).')
 
 	return parser.parse_args()
@@ -105,33 +108,32 @@ def main():
 
 	opt = parser()
 
-	is_csv = True if opt.input_path[-4:] == ".csv" else False # True if *.csv ; False if *.stl
-	input_stl_path = cwd_dir + opt.input_path
-	projet_name = os.path.splitext(os.path.basename(input_stl_path))[0]
+	is_csv = True if op.splitext(opt.input_path)[1] == ".csv" else False # True if *.csv ; False if *.stl
+	input_stl_path = op.join(cwd_dir, opt.input_path)
+	projet_name = op.splitext(op.basename(input_stl_path))[0]
 	make_stl = True if opt.table_path == None else False
-	export_dir = (cwd_dir + projet_name + "/") if opt.export_dir == None else opt.export_dir if opt.export_dir[-1] == "/" else opt.export_dir + "/"
+	export_dir = op.join(cwd_dir, projet_name) if opt.export_dir == None else opt.export_dir
 	export_dir = cwd_dir if not make_stl else export_dir
-	doc_dir = (export_dir + "doc/" if opt.doc_dir == tmp_dir + "_" else opt.doc_dir) if opt.doc_dir != None else None
+	doc_dir = None if opt.doc_dir == None else op.join(export_dir, "doc") if opt.doc_dir == op.join(tmp_dir, "_") else opt.doc_dir
 	parameter_path = None if opt.parameter_path == None else opt.parameter_path.name
 	details_path = None if opt.details_path == None else opt.details_path.name
-	full_model_path = (export_dir + "full_model.stl" if opt.full_model_path.name == tmp_dir + "_" else opt.full_model_path.name) if opt.full_model_path != None else None
+	full_model_path = None if opt.full_model_path == None else op.join(export_dir, "full_model.stl") if opt.full_model_path.name == op.join(tmp_dir, "_") else opt.full_model_path.name
 
 	if make_stl: # si on compile les stl
-		table_path = input_stl_path if is_csv else tmp_dir + "table.csv"
+		table_path = input_stl_path if is_csv else op.join(tmp_dir, "table.csv")
 	else: # si on construit une table à partir d'un stl (-b [nom_table])
-		if opt.table_path.name == tmp_dir + "_":
-			table_path = cwd_dir + projet_name + ".csv"
-			os.remove(tmp_dir + "_")
+		if opt.table_path.name == op.join(tmp_dir, "_"):
+			table_path = op.join(cwd_dir, projet_name + ".csv")
 		else:
 			table_path = opt.table_path.name
 
-	exp = export.Export(openscad_path, table_path, zazoucko_scad_dir, export_dir, opt.verbose, opt.low_qlt)
+	exp = export.Export(openscad_path, table_path, zazoucko_scad_dir, export_dir, opt.nb_job_slots, opt.verbose, opt.low_qlt)
 
 	if not is_csv:
 		exp.make_csv(input_stl_path, details_path, opt.start_from, opt.finish_at, opt.shuffle)
 
 	if doc_dir != None:
-		exp.make_pictures(doc_dir + "img")
+		exp.make_pictures(op.join(doc_dir, "img"))
 
 	if make_stl:
 		if os.path.exists(export_dir):

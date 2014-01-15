@@ -9,16 +9,20 @@
 
 import time, os, re, tempfile
 import solid, stl
+from os import path as op
+import subprocess
 
 class Export: # TODO : singleton
 
-	def __init__(self, openscad_path, table_path, zazoucko_scad_dir, export_dir, verbose_lvl, low_qlt):
+	def __init__(self, openscad_path, table_path, zazoucko_scad_dir, export_dir, nb_job_slots, verbose_lvl, low_qlt):
 		self.openscad_path = openscad_path
 		self.table_path = table_path
 		self.zazoucko_scad_dir = zazoucko_scad_dir
 		self.export_dir = export_dir
+		self.nb_job_slots = nb_job_slots
 		self.verbose_lvl = verbose_lvl
 		self.low_qlt = low_qlt
+		self.process = list()
 
 	def _get_nb_lines(self, input_path):
 		with open(input_path, 'r') as f_input:
@@ -38,7 +42,7 @@ class Export: # TODO : singleton
 			print "- started for " + spent + ", please wait", remaining + "."
 
 	def make_csv(self, input_stl_path, details_path, start_from, finish_at, shuffle):
-		cleaned_path = tempfile.gettempdir() + "/" + "zazoucko_cleaned" # os.path.join
+		cleaned_path = op.join(tempfile.gettempdir(), "zazoucko_cleaned")
 
 		stl.clean_file(input_stl_path, cleaned_path)
 		_model = stl.file_to_model(cleaned_path)
@@ -60,14 +64,14 @@ class Export: # TODO : singleton
 		if details_path != None:
 			s.display(details_path)
 
-		print "Successfully created table file " + self.table_path + "."
+		print "Successfully created table file in " + self.table_path + "."
 
 	def make_pictures(self, img_dir):
 		PICT_WIDTH = 150
 
 		nb_corners = self._get_nb_lines(self.table_path)-2
 		t_init = time.time()
-		corner_scad_path = self.zazoucko_scad_dir + ("corner_light.scad" if self.low_qlt else "corner.scad")
+		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.low_qlt else "corner.scad"))
 
 		print "\n*** Creating pictures in " + img_dir + " ***"
 		with open(self.table_path, 'r') as f_table:		
@@ -80,22 +84,25 @@ class Export: # TODO : singleton
 				start = [m.start() for m in re.finditer(r",",line)][3]+1 # position de départ des données
 				data = line.rstrip('\n')[start:]
 
-				data_options = "-D 'id=" + str(corner_id) + "; data=\"" + data + "\"'"
+				data_options = "-D 'id=" + str(corner_id) + "; angles=\"" + data + "\"'"
 				pict_options = "--imgsize=" + str(PICT_WIDTH) + "," + str(PICT_WIDTH) + " --camera=0,0,0,0,45,45,45"
 				options = data_options + " " + pict_options
-				output_file = img_dir + corner_id + ".png"
+				output_file = op.join(img_dir, corner_id + ".png")
 				
 				self.openscad(corner_scad_path, options, output_file)
 
 	def make_stls(self):
 		nb_corners = self._get_nb_lines(self.table_path)-2
 		t_init = time.time()
-		corner_scad_path = self.zazoucko_scad_dir + ("corner_light.scad" if self.low_qlt else "corner.scad")
+		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.low_qlt else "corner.scad"))
 		
-		print "\n*** Compilation started.", nb_corners, "files will be created in", self.export_dir, "***"
+		print "\n*** Compilation started.", nb_corners, "stl files will be created in", self.export_dir, "***\n"
 
 		with open(self.table_path, 'r') as f_table:
 			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
+			if self.nb_job_slots == 1:
+				print "Tip : You can parallelize this task on several cores with -j option."
+			print ""
 			f_table.readline()
 			
 			for i, line in enumerate(f_table):
@@ -103,31 +110,44 @@ class Export: # TODO : singleton
 				corner_id = line[0:line.index(",")]
 				start = [m.start() for m in re.finditer(r",",line)][3]+1 # position de départ des données
 				data = line.rstrip('\n')[start:]
-				options = "-D 'id=" + str(corner_id) + "; data=\"" + data + "\"'"
-				output_file = self.export_dir + corner_id + ".stl"
+				options = "-D 'id=" + str(corner_id) + "; angles=\"" + data + "\"'"
+				output_file = op.join(self.export_dir, corner_id + ".stl")
 
 				self.openscad(corner_scad_path, options, output_file)
 
 		total_time = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time()-t_init))
 		print "\n*** Finished! ***"
-		print i, "stl files successfully created in " + total_time + "."	
+		print i+1, "stl files successfully created in " + total_time + "."	
 
 	def make_model(self, full_model_path):
 		print "Creating full model ", full_model_path
-		corner_move_scad_path = self.zazoucko_scad_dir + "move_part.scad"
+		corner_move_scad_path = op.join(self.zazoucko_scad_dir, "move_part.scad")
 
 		with open(self.table_path, 'r') as f_table:
 			f_table.readline()
 			f_table.readline()
 			
 			for line in f_table:
-				t = line.split(",")[1:4]
-				name = line[:5] + ".stl"
-				options = "-D 'file=\"" + file_name + "\"; tx=" + t[0] + "; ty=" + t[1] + "; tz=" + t[2] + "'"
+				data = line.split(",")[0:4]
+				name = data[0] + ".stl"
+				options = "-D 'file=\"" + file_name + "\"; tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
 				self.openscad(corner_move_scad_path, options, full_model_path)
 
-	def openscad(self, scad_file, options, output_file):
-		redirection = "" if self.verbose_lvl == 3 else "> /dev/null" if self.verbose_lvl == 2 else "> /dev/null 2> /dev/null"
-		cmd = self.openscad_path + " " + scad_file + " -o " + output_file + " " + options + " " + redirection
-		if self.verbose_lvl >= 1: print ">>>" + cmd
-		os.system(cmd)
+	def openscad(self, scad_file_path, options, output_file):
+		import shlex
+		
+		cmd = self.openscad_path + " " + scad_file_path + " -o " + output_file + " " + options
+
+		if self.verbose_lvl >= 1:
+			print ">>>" + cmd
+		err = None if self.verbose_lvl >= 2 else open(os.devnull, 'w')
+		out = None if self.verbose_lvl == 3 else open(os.devnull, 'w')
+
+		for i, p in enumerate(self.process):
+			if p.poll() == 0:
+				del self.process[i]
+
+		p = subprocess.Popen(shlex.split(cmd), stdout = out, stderr = err)
+		self.process.append(p)
+		if len(self.process) >= self.nb_job_slots:
+			p.wait()

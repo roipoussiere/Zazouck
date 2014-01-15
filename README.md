@@ -46,7 +46,7 @@ $ echo export PATH=$PATH:your_favorite_path/zazoucko_python/ >> ~/.bashrc
 
 Comming soon...
 
-You can try to build from the sources, but it's never tested on these platforms.
+You can try to build from the sources, but it has never tested on these platforms yet.
 
 ##Usage
 See [examples folder](examples/) to get 3D model examples
@@ -125,6 +125,6 @@ optional arguments:
 
 ##Contact
 
-natha[AT]jourdane[DOT]net
+nathanael[AT]jourdane[DOT]net
 
 This project is licenced under GNU GPLv3 see COPYING.txt for details.

@@ -8,7 +8,7 @@ edge_hole_shape = "rectangular"; // [rectangular, circular, none]
 // The main hole is usefull if you want a mobile construction
 main_hole_shape = "none"; // [rectangular, circular, none]
 // The angles of the part members, by pairs of vertical angle and horizontal angle.
-angles = "090,000,000,090,090,090";
+angles = "090,000,000,090,045,090";
 
 /* [Dimentions] */
 
