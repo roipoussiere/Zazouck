@@ -7,8 +7,12 @@ edge_shape = "rectangular"; // [rectangular, circular, sphere]
 edge_hole_shape = "rectangular"; // [rectangular, circular, none]
 // The main hole is usefull if you want a mobile construction
 main_hole_shape = "none"; // [rectangular, circular, none]
-// The angles of the part members, by pairs of vertical angle and horizontal angle.
-angles = "090,000,000,090,045,090";
+// The main shape of your corner.
+shape = "Personalised"; // [Extremity, I, T, L, X, Cube_corner, T_corner, Half_star, Star, Tetrahedron_corner, Octahedron_corner, Personalised]
+// On several shapes, you can change the number of members.
+edges_number = 1; // [0:min, 1:medium, 2:max]
+// In case of a personalised part, set here the part members angles, by pairs of vertical angle and horizontal angle.
+angles = "090,000,000,090,090,090";
 
 /* [Dimentions] */
 
@@ -42,7 +46,77 @@ id = 12345;
 notch_size = 1.5;
 code = false;
 
-part([[d(0),d(1)], [d(2),d(3)], [d(4),d(5)], [d(6),d(7)], [d(8),d(9)], [d(10),d(11)]]);
+/* Here is the serious stuff */
+
+print_parts(shape);
+
+module print_parts(part)
+{
+	if (part == "Extremity")
+		part([[90,0]]);
+
+	else if (part == "I")
+		part([[90,0], [90,180]]);
+
+	else if (part == "T")
+		if (edges_number == 0)
+			part([[90,0], [90,90], [90,180]]);
+		else
+			part([[90,0], [90,45], [90,90], [90,135], [90,180]]);
+
+	else if (part == "L")
+		if (edges_number == 0)
+			part([[90,0], [90,90]]);
+		else
+			part([[90,0], [90,45], [90,90]]);
+
+	else if (part == "X")
+		if (edges_number == 0)
+			part([[90,0], [90,90], [90,180], [90,270]]);
+		else
+			part([[90,0], [90,45], [90,90], [90,135], [90,180], [90,225], [90,270], [90,315]]);
+
+	else if (part == "Cube_corner")
+		if (edges_number == 0)
+			part([[0,0],[90,0],[90,90]]);
+		else if (edges_number == 1)
+			part([[0,0],[45,0],[90,0],[45,90],[90,90]]);
+		else
+			part([[0,0],[45,0],[90,0],[45,90],[90,90],[90,45]]);
+
+	else if (part == "T_corner")
+		if (edges_number == 0)
+			part([[0,0],[90,0],[90,90],[90,180]]);
+		else if (edges_number == 1)
+			part([[0,0],[45, 0],[90,0],[45,90],[90,90],[45,180],[90,180]]);
+		else
+			part([[0,0],[45, 0],[90,0],[45,90],[90,90],[45,180],[90,180],[90,45],[90,135]]);
+
+	else if (part == "Half_star")
+		if (edges_number == 0)
+			part([[0,0],[90,0],[90,90],[90,180],[90,270]]);
+		else if (edges_number == 1)
+			part([[0,0],[45,0],[90,0],[45,90],[90,90],[45,180],[90,180],[90,270],[45,270]]);
+		else
+			part([[0,0],[45,0],[90,0],[45,90],[90,90],[45,180],[90,180],[90,45],[90,135],[90,270],[45,270],[90,225],[90,315]]);
+
+	else if (part == "Star")
+		if (edges_number == 0)
+			part([[0,0],[90,0],[90,90],[90,180],[90,270],[180,0]]);
+		else if (edges_number == 1)
+			part([[0,0],[45,0],[90,0],[45,90],[90,90],[45,180],[90,180],[90,270],[45,270],[180,0],[135,0],[135,90],[135,180],[135,270]]);
+		else
+			part([[0,0],[45,0],[90,0],[45,90],[90,90],[45,180],[90,180],[90,45],[90,135],[90,270],[45,270],[90,225],[90,315],[180,0],[135,0],[135,90],[135,180],[135,270]]);
+	
+	else if (part == "Tetrahedron_corner")
+		part([[35.26,0],[35.26,120],[35.26,240]]); // acos(sqrt(6)/3)
+
+	else if (part == "Octahedron_corner")
+		part([[45,0],[45,90],[45,180],[45,270]]); // acos(sqrt(2)/2)
+
+	else if (part == "Personalised")
+		part([[d(0),d(1)],[d(2),d(3)],[d(4),d(5)],[d(6),d(7)],[d(8),d(9)],[d(10),d(11)]]);
+}
 
 module part(v)
 {

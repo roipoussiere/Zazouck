@@ -32,7 +32,7 @@ def parser():
 	parser = argparse.ArgumentParser(
 			formatter_class=argparse.RawDescriptionHelpFormatter,
 			description = """\
-Zazoucko - The Open-source Universal Awesome Construction Kit.
+                               *** Zazoucko ***
 This program allows you to build constructions, with generating files to print
 from your model. It works in 2 times: first, it build a .csv table file (very
 fast) describing the parts, then it compile this one into a lot of .stl files
@@ -55,11 +55,6 @@ Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		dest = 'table_path', type = argparse.FileType('w'), default = None, const = op.join(tmp_dir, "_"),
 		help = 'Build only table (.csv) as TABLE_PATH (projet_name.csv by default), without compile stl files.')
 	
-	# ok
-	parser.add_argument('-j', '--jobs', action = 'store',
-		dest = 'nb_job_slots', type = int, default = 1,
-		help = 'Compile NB_JOB_SLOTS parts simultaneously (usually, set the same as the number of cores on your computer is a good choice).')
-
 	# ok
 	parser.add_argument('-e', '--export-dir', action = 'store',
 		dest = 'export_dir', default = None,
@@ -109,6 +104,11 @@ Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		dest = 'full_model_path', type = argparse.FileType('w'), default = None, const = op.join(tmp_dir, "_"),
 		help = 'Create the 3d model of the construction in FULL_MODEL_PATH (./full_model.stl by default).')
 
+	# ok
+	parser.add_argument('-j', '--jobs', action = 'store',
+		dest = 'nb_job_slots', type = int, default = 1,
+		help = 'Compile NB_JOB_SLOTS parts simultaneously (usually, set the same as the number of cores on your computer is a good choice).')
+
 	return parser.parse_args()
 
 def main():
@@ -146,7 +146,7 @@ def main():
 		if os.path.exists(export_dir):
 			shutil.rmtree(export_dir)
 		os.makedirs(export_dir)
-		exp.make_stls()
+		exp.make_corners()
 
 	if full_model_path != None:
 		exp.make_model(full_model_path)
