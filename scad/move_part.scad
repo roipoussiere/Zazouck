@@ -1,6 +1,4 @@
-file = "stl/00000.stl";
-
-//data = "010,020,000,045,000,000"
+file = "part.stl";
 
 tx=0;
 ty=0;

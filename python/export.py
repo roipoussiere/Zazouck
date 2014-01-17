@@ -16,14 +16,14 @@ import signal
 
 class Export: # TODO : singleton
 
-	def __init__(self, openscad_path, table_path, zazoucko_scad_dir, export_dir, nb_job_slots, verbose_lvl, low_qlt):
+	def __init__(self, openscad_path, table_path, zazoucko_scad_dir, export_dir, nb_job_slots, verbose_lvl, test):
 		self.openscad_path = openscad_path
 		self.table_path = table_path
 		self.zazoucko_scad_dir = zazoucko_scad_dir
 		self.export_dir = export_dir
 		self.nb_job_slots = nb_job_slots
 		self.verbose_lvl = verbose_lvl
-		self.low_qlt = low_qlt
+		self.test = test
 		self.process = list()
 		self.nb_created = 0
 		signal.signal(signal.SIGINT, self.signal_handler)
@@ -71,11 +71,9 @@ class Export: # TODO : singleton
 
 		print "Successfully created table file in " + self.table_path + "."
 
-	def make_pictures(self, img_dir):
-		PICT_WIDTH = 150
-
+	def make_pictures(self, img_dir, pict_width):
 		nb_corners = self._get_nb_lines(self.table_path)-2
-		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.low_qlt else "corner.scad"))
+		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
 
 		print "\n*** Creating pictures ***\n"
 		print nb_corners + " pictures will be created in " + img_dir + "."
@@ -83,13 +81,13 @@ class Export: # TODO : singleton
 		with open(self.table_path, 'r') as f_table:		
 			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
 			f_table.readline()
-			extra_options = "--imgsize=" + str(PICT_WIDTH) + "," + str(PICT_WIDTH) + " --camera=0,0,0,0,45,45,45"
+			extra_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,0,45,45,45"
 
 			self._start_processes(corner_scad_path, nb_corners, f_table, "png", extra_options)
 
 	def make_corners(self):
 		nb_corners = self._get_nb_lines(self.table_path)-2
-		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.low_qlt else "corner.scad"))
+		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
 		
 		print "\n*** Creating corners ***\n"
 		print nb_corners, "stl files will be created in " + self.export_dir + "."
@@ -121,7 +119,7 @@ class Export: # TODO : singleton
 			options = "-D 'id=" + str(corner_id) + "; angles=\"" + data + "\"'" + extra_options
 			output_file = op.join(self.export_dir, corner_id + "." + extension)
 
-			self.openscad(scad_path, options, output_file, corner_id)
+			self._openscad(scad_path, options, output_file, corner_id)
 			self._end_of_process(nb_files, t_init, extension)
 
 		while self.process:
@@ -136,21 +134,31 @@ class Export: # TODO : singleton
 				name = str(p[1]) + "." + extension
 				print spent + ": Created file " + str(self.nb_created) + "/" + str(nb_files) + ": " + name + "."
 
-	def make_model(self, full_model_path):
-		print "Creating full model ", full_model_path
+	def make_model(self, stls_dir, full_model_path):
+		import shutil
+
+		print "\n*** Creating full model ***\n"
+		print "This file will be created in " + full_model_path
+
+		temp_path = op.join(tempfile.gettempdir(), "full_model")
+		if os.path.exists(temp_path):
+			shutil.rmtree(temp_path)
+		os.makedirs(temp_path)
+
 		corner_move_scad_path = op.join(self.zazoucko_scad_dir, "move_part.scad")
 
 		with open(self.table_path, 'r') as f_table:
 			f_table.readline()
 			f_table.readline()
 			
-			for line in f_table:
+			for i, line in enumerate(f_table): # utiliser start_processes ?
 				data = line.split(",")[0:4]
-				name = data[0] + ".stl"
-				options = "-D 'file=\"" + file_name + "\"; tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
-				self.openscad(corner_move_scad_path, options, full_model_path)
+				file_name = data[0] + ".stl"
+				options = "-D 'file=\"" + op.join(stls_dir, file_name) + "\"; tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
+				output_file = op.join(temp_path, "moved_" + file_name)
+				self._openscad(corner_move_scad_path, options, output_file, i)
 
-	def openscad(self, scad_file_path, options, output_file, i):
+	def _openscad(self, scad_file_path, options, output_file, i):
 		cmd = self.openscad_path + " " + scad_file_path + " -o " + output_file + " " + options
 
 		if self.verbose_lvl >= 1:

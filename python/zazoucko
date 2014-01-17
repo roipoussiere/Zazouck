@@ -20,6 +20,8 @@ zazoucko_scad_dir = op.join(op.dirname(zazoucko_python_dir), "scad")
 cwd_dir = os.getcwd()
 
 def parser():
+	import multiprocessing
+
 	def _correct_input(string):
 		if not op.exists(string):
 			raise argparse.ArgumentTypeError("Filename %r doesn\'t exists in this directory." % string)
@@ -66,9 +68,9 @@ Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		help = 'Parameters file path, containing parts parameters.')
 	
 	# ok
-	parser.add_argument('-l', '--low_qlt', action = 'store_true',
-		dest = 'low_qlt', default = False,
-		help = 'The files are quickly compiled in low-quality. Usefull for testing, not able to be print.')
+	parser.add_argument('-t', '--test', action = 'store_true',
+		dest = 'test', default = False,
+		help = 'The files are quickly compiled for testing, not able to be print.')
 
 	# ok
 	parser.add_argument('-S', '--sort', action = 'store_false',
@@ -93,7 +95,7 @@ Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 	# ok
 	parser.add_argument('-V', '--verbose-cmd', action = 'store', nargs = '?',
 		dest = 'verbose', type=int, choices=xrange(0, 4), default = 0, const = 1,
-		help = 'Verbose level: 0 = nothing, 1 = OpenScad calls (default), 2 = OpenScad warning messages, 3 = all OpenScad messages.')
+		help = 'Verbose level: 0 = nothing, 1 = OpenScad calls (default value), 2 = OpenScad warning messages, 3 = all OpenScad messages.')
 
 	# ok
 	parser.add_argument('-D', '--details', action = 'store', nargs = '?',
@@ -105,9 +107,9 @@ Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		help = 'Create the 3d model of the construction in FULL_MODEL_PATH (./full_model.stl by default).')
 
 	# ok
-	parser.add_argument('-j', '--jobs', action = 'store',
-		dest = 'nb_job_slots', type = int, default = 1,
-		help = 'Compile NB_JOB_SLOTS parts simultaneously (usually, set the same as the number of cores on your computer is a good choice).')
+	parser.add_argument('-j', '--jobs', action = 'store', nargs = '?',
+		dest = 'nb_job_slots', type = int, default = 1, const = multiprocessing.cpu_count(),
+		help = 'Compile NB_JOB_SLOTS parts simultaneously (the number of cores on your computer by default).')
 
 	return parser.parse_args()
 
@@ -119,8 +121,11 @@ def main():
 	input_stl_path = op.join(cwd_dir, opt.input_path)
 	projet_name = op.splitext(op.basename(input_stl_path))[0]
 	make_stl = True if opt.table_path == None else False
+
+	# ??
 	export_dir = op.join(cwd_dir, projet_name) if opt.export_dir == None else opt.export_dir
 	export_dir = cwd_dir if not make_stl else export_dir
+
 	doc_dir = None if opt.doc_dir == None else op.join(export_dir, "doc") if opt.doc_dir == op.join(tmp_dir, "_") else opt.doc_dir
 	parameter_path = None if opt.parameter_path == None else opt.parameter_path.name
 	details_path = None if opt.details_path == None else opt.details_path.name
@@ -134,13 +139,13 @@ def main():
 		else:
 			table_path = opt.table_path.name
 
-	exp = export.Export(openscad_path, table_path, zazoucko_scad_dir, export_dir, opt.nb_job_slots, opt.verbose, opt.low_qlt)
+	exp = export.Export(openscad_path, table_path, zazoucko_scad_dir, export_dir, opt.nb_job_slots, opt.verbose, opt.test)
 
 	if not is_csv:
 		exp.make_csv(input_stl_path, details_path, opt.start_from, opt.finish_at, opt.shuffle)
 
 	if doc_dir != None:
-		exp.make_pictures(op.join(doc_dir, "img"))
+		exp.make_pictures(op.join(doc_dir, "img"), 150)
 
 	if make_stl:
 		if os.path.exists(export_dir):
@@ -148,7 +153,8 @@ def main():
 		os.makedirs(export_dir)
 		exp.make_corners()
 
-	if full_model_path != None:
-		exp.make_model(full_model_path)
+	# Problème d'import du fichier .scad
+	#if full_model_path != None:
+		#exp.make_model(export_dir, full_model_path)
 
 main()

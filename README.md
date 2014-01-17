@@ -21,15 +21,11 @@ On the picture herebelow, this is Zazouck, the construction kit : it's a customi
 ##Installation instuctions
 
 ### On Linux platforms
-- Install dependencies
-
-```shell
-$ sudo apt-get install git openscad
-```
+- Install dependencies: `sudo apt-get install git openscad`
 
 - Get the sources
 
-```shell
+```
 $ cd your_favorite_path
 $ git clone https://github.com/roipoussiere/zazoucko.git
 ```
@@ -75,12 +71,12 @@ Use zazoucko -h to see all available options :
 
 ```
 usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
-                [-p PARAMETER_PATH] [-l] [-S] [-s START_FROM] [-f FINISH_AT]
+                [-p PARAMETER_PATH] [-t] [-S] [-s START_FROM] [-f FINISH_AT]
                 [-d [DOC_DIR]] [-V [{0,1,2,3}]] [-D [DETAILS_PATH]]
-                [-m [FULL_MODEL_PATH]] [-j NB_JOB_SLOTS]
+                [-m [FULL_MODEL_PATH]] [-j [NB_JOB_SLOTS]]
                 input_path
 
-Zazoucko - The Open-source Universal Awesome Construction Kit.
+                               *** Zazoucko ***
 This program allows you to build constructions, with generating files to print
 from your model. It works in 2 times: first, it build a .csv table file (very
 fast) describing the parts, then it compile this one into a lot of .stl files
@@ -102,8 +98,8 @@ optional arguments:
                         (./projet_name/ by default)
   -p PARAMETER_PATH, --param-path PARAMETER_PATH
                         Parameters file path, containing parts parameters.
-  -l, --low_qlt         The files are quickly compiled in low-quality. Usefull
-                        for testing, not able to be print.
+  -t, --test            The files are quickly compiled for testing, not able
+                        to be print.
   -S, --sort            Doesn't shuffle the list of corners and polygons in
                         random order.
   -s START_FROM         Start compilation from line xx in the .csv file.
@@ -113,8 +109,8 @@ optional arguments:
                         to help you to build your construction easily.
   -V [{0,1,2,3}], --verbose-cmd [{0,1,2,3}]
                         Verbose level: 0 = nothing, 1 = OpenScad calls
-                        (default), 2 = OpenScad warning messages, 3 = all
-                        OpenScad messages.
+                        (default value), 2 = OpenScad warning messages, 3 =
+                        all OpenScad messages.
   -D [DETAILS_PATH], --details [DETAILS_PATH]
                         Export details about the model (corners position,
                         polygons, corners_network, edges, etc.) in
@@ -122,10 +118,9 @@ optional arguments:
   -m [FULL_MODEL_PATH], --make_full_model [FULL_MODEL_PATH]
                         Create the 3d model of the construction in
                         FULL_MODEL_PATH (./full_model.stl by default).
-  -j NB_JOB_SLOTS, --jobs NB_JOB_SLOTS
-                        Compile NB_JOB_SLOTS parts simultaneously (usually,
-                        set the same as the number of cores on your computer
-                        is a good choice).
+  -j [NB_JOB_SLOTS], --jobs [NB_JOB_SLOTS]
+                        Compile NB_JOB_SLOTS parts simultaneously (the number
+                        of cores on your computer by default).
 
 Author: Nathanaël Jourdane - nathanael@jourdane.net
 Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
