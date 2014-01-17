@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
+
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>Zazoucko by roipoussiere</title>
+  </head>
+
+  <body>
+    <a id="forkme_banner" href="https://github.com/roipoussiere/Zazoucko">View on GitHub</a>
+    <div class="shell">
+
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Zazoucko</h1>
+            <h2>ZAZOUCK generatOr : generates stl files to build a wonderful construction from a 3D model.</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
+
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/roipoussiere/Zazoucko/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/roipoussiere/Zazoucko/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
+
+
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
+        <h1>
+<a name="zazoucko" class="anchor" href="#zazoucko"><span class="octicon octicon-link"></span></a>Zazoucko</h1>
+
+<h2>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>Description</h2>
+
+<p>ZAZOUCK generatOr - Zazouck is an AmaZing Opensource Construction Kit</p>
+
+<p>This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :</p>
+
+<p><img src="./pictures/generated_part.png" alt="A generated part" title="A generated part"></p>
+
+<h3>
+<a name="how-it-works" class="anchor" href="#how-it-works"><span class="octicon octicon-link"></span></a>How it works</h3>
+
+<p>The program works in 2 steps:</p>
+
+<ul>
+<li>First, it creates a table file (.csv) which containing the connectors parameters.</li>
+<li>Then, it creates stl files of the connectors, from the table.</li>
+</ul><h3>
+<a name="differences-between-zazouck-and-zazoucko" class="anchor" href="#differences-between-zazouck-and-zazoucko"><span class="octicon octicon-link"></span></a>Differences between Zazouck and Zazoucko</h3>
+
+<p>On the picture herebelow, this is Zazouck, the construction kit : it's a customisable 3d printable part to connect wood, platic or metal rods together. Zazoucko is a program which generates Zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using <a href="scad/corner.scad">the Openscad file</a> or simply going on the  <a href="http://www.thingiverse.com/thing:179597">Thingiverse page</a>.</p>
+
+<p><img src="./pictures/Zazouck_wide.png" alt="Zazouck" title="Zazouck"></p>
+
+<h2>
+<a name="installation-instuctions" class="anchor" href="#installation-instuctions"><span class="octicon octicon-link"></span></a>Installation instuctions</h2>
+
+<h3>
+<a name="on-linux-platforms" class="anchor" href="#on-linux-platforms"><span class="octicon octicon-link"></span></a>On Linux platforms</h3>
+
+<ul>
+<li><p>Install dependencies:
+<code>sudo apt-get install git openscad imagemagick</code></p></li>
+<li><p>Get the sources</p></li>
+</ul><pre><code>$ cd your_favorite_path
+$ git clone https://github.com/roipoussiere/zazoucko.git
+</code></pre>
+
+<ul>
+<li>Make it easy to use</li>
+</ul><pre><code>$ cd zazoucko
+$ chmod +xX *.py
+$ echo export PATH=$PATH:your_favorite_path/zazoucko_python/ &gt;&gt; ~/.bashrc
+</code></pre>
+
+<h3>
+<a name="on-windows-and-macos-platforms" class="anchor" href="#on-windows-and-macos-platforms"><span class="octicon octicon-link"></span></a>On Windows and MacOS platforms</h3>
+
+<p>Comming soon...</p>
+
+<p>You can try to build from the sources, but it has never tested on these platforms yet.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>See <a href="examples/">examples folder</a> to get 3D model examples</p>
+
+<ul>
+<li>To create a table describing each file, without generate them</li>
+</ul><pre><code>$ zazoucko cube.stl -b ./table.csv # will create file 'table.csv'
+$ zazoucko cube.stl -b # will create file 'cube.csv'
+</code></pre>
+
+<ul>
+<li>To generate a directory containing all the .stl files</li>
+</ul><pre><code>$ zazoucko cube.stl # from a 3D model
+$ zazoucko cube.csv # from a table
+</code></pre>
+
+<ul>
+<li>To generate a nice documentation:</li>
+</ul><pre><code>$ zazoucko cube.stl -d
+</code></pre>
+
+<h2>
+<a name="options" class="anchor" href="#options"><span class="octicon octicon-link"></span></a>Options</h2>
+
+<p>Use zazoucko -h to see all available options :</p>
+
+<pre><code>usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
+                [-p PARAMETER_PATH] [-t] [-S] [-s START_FROM] [-f FINISH_AT]
+                [-d [DOC_DIR]] [-V [{0,1,2,3}]] [-D [DETAILS_PATH]]
+                [-m [FULL_MODEL_PATH]] [-j [NB_JOB_SLOTS]]
+                input_path
+
+                               *** Zazoucko ***
+This program allows you to build constructions, with generating files to print
+from your model. It works in 2 times: first, it build a .csv table file (very
+fast) describing the parts, then it compile this one into a lot of .stl files
+(can be long).
+
+positional arguments:
+  input_path            3d model (.stl) or table (.csv) path of your model.
+                        The program will automatically generates the .stl
+                        files according to the file type.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --version         Show program version and exit.
+  -b [TABLE_PATH], --build-only [TABLE_PATH]
+                        Build only table (.csv) as TABLE_PATH (projet_name.csv
+                        by default), without compile stl files.
+  -e EXPORT_DIR, --export-dir EXPORT_DIR
+                        Directory where .stl files will be exported
+                        (./projet_name/ by default)
+  -p PARAMETER_PATH, --param-path PARAMETER_PATH
+                        Parameters file path, containing parts parameters.
+  -t, --test            The files are quickly compiled for testing, not able
+                        to be print.
+  -S, --sort            Doesn't shuffle the list of corners and polygons in
+                        random order.
+  -s START_FROM         Start compilation from line xx in the .csv file.
+  -f FINISH_AT          Finish compilation at line xx in the .csv file.
+  -d [DOC_DIR], --documentation [DOC_DIR]
+                        Build a nice document in DOC_DIR (./doc by default),
+                        to help you to build your construction easily.
+  -V [{0,1,2,3}], --verbose-cmd [{0,1,2,3}]
+                        Verbose level: 0 = nothing, 1 = OpenScad calls
+                        (default value), 2 = OpenScad warning messages, 3 =
+                        all OpenScad messages.
+  -D [DETAILS_PATH], --details [DETAILS_PATH]
+                        Export details about the model (corners position,
+                        polygons, corners_network, edges, etc.) in
+                        DETAILS_PATH (./details.txt by default).
+  -m [FULL_MODEL_PATH], --make_full_model [FULL_MODEL_PATH]
+                        Create the 3d model of the construction in
+                        FULL_MODEL_PATH (./full_model.stl by default).
+  -j [NB_JOB_SLOTS], --jobs [NB_JOB_SLOTS]
+                        Compile NB_JOB_SLOTS parts simultaneously (the number
+                        of cores on your computer by default).
+
+Author: Nathanaël Jourdane - nathanael@jourdane.net
+Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
+</code></pre>
+
+<h2>
+<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact</h2>
+
+<p>Nathanaël Jourdane : nathanael[AT]jourdane[DOT]net</p>
+
+<p>This project is licenced under GNU GPLv3 - see COPYING.txt for details.</p>
+      </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/roipoussiere">roipoussiere</a> can be found on <a href="https://github.com/roipoussiere/Zazoucko">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
