@@ -71,19 +71,28 @@ class Export: # TODO : singleton
 
 		print "Successfully created table file in " + self.table_path + "."
 
+	def make_documentation(self, doc_dir):
+		img_dir = op.join(doc_dir, "img")
+
+		os.makedirs(img_dir)
+		self.make_pictures(img_dir, 150)
+
 	def make_pictures(self, img_dir, pict_width):
 		nb_corners = self._get_nb_lines(self.table_path)-2
 		corner_scad_path = op.join(self.zazoucko_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
 
 		print "\n*** Creating pictures ***\n"
-		print nb_corners + " pictures will be created in " + img_dir + "."
+		print str(nb_corners) + " pictures will be created in " + img_dir + "."
 
 		with open(self.table_path, 'r') as f_table:		
 			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
 			f_table.readline()
-			extra_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,0,45,45,45"
+			extra_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,45,0,45,140"
 
-			self._start_processes(corner_scad_path, nb_corners, f_table, "png", extra_options)
+			self._start_processes(corner_scad_path, nb_corners, f_table, img_dir, "png", extra_options)
+
+		cmd = 'mogrify -transparent "#FFFFE5" ' + op.join(img_dir, "*.png")
+		subprocess.Popen(shlex.split(cmd))
 
 	def make_corners(self):
 		nb_corners = self._get_nb_lines(self.table_path)-2
@@ -98,12 +107,12 @@ class Export: # TODO : singleton
 				print "Tip : You can parallelize this task on several cores with -j option."
 			
 			f_table.readline()
-			self._start_processes(corner_scad_path, nb_corners, f_table, "stl")
+			self._start_processes(corner_scad_path, nb_corners, f_table, self.export_dir, "stl")
 
 		print "\n*** Finished! ***"
 		print self.nb_created, "stl files successfully created in " + self.export_dir + "."
 
-	def _start_processes(self, scad_path, nb_files, f_table, extension, extra_options = ""):
+	def _start_processes(self, scad_path, nb_files, f_table, output_dir, extension, extra_options = ""):
 		t_init = time.time()
 		self.nb_created = 0
 
@@ -116,23 +125,22 @@ class Export: # TODO : singleton
 			corner_id = line[0:line.index(",")]
 			start = [m.start() for m in re.finditer(r",",line)][3]+1 # position de départ des données
 			data = line.rstrip('\n')[start:]
-			options = "-D 'id=" + str(corner_id) + "; angles=\"" + data + "\"'" + extra_options
-			output_file = op.join(self.export_dir, corner_id + "." + extension)
+			options = "-D 'id=" + str(corner_id) + "; angles=\"" + data + "\"' " + extra_options
+			output_path = op.join(output_dir, corner_id + "." + extension)
 
-			self._openscad(scad_path, options, output_file, corner_id)
-			self._end_of_process(nb_files, t_init, extension)
+			self._openscad(scad_path, options, output_path, corner_id)
+			self._end_of_process(nb_files, t_init, op.basename(output_path))
 
 		while self.process:
-			self._end_of_process(nb_files, t_init, extension)
+			self._end_of_process(nb_files, t_init, op.basename(output_path))
 
-	def _end_of_process(self, nb_files, t_init, extension):
-		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time()-t_init))
+	def _end_of_process(self, nb_files, t_init, file_name):
+		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - t_init))
 		for i, p in enumerate(self.process):
-			if p[0].poll() == 0:
+			if p.poll() == 0:
 				del self.process[i]
 				self.nb_created += 1
-				name = str(p[1]) + "." + extension
-				print spent + ": Created file " + str(self.nb_created) + "/" + str(nb_files) + ": " + name + "."
+				print spent + ": Created file " + str(self.nb_created) + "/" + str(nb_files) + ": " + file_name + "."
 
 	def make_model(self, stls_dir, full_model_path):
 		import shutil
@@ -167,7 +175,7 @@ class Export: # TODO : singleton
 		out = None if self.verbose_lvl == 3 else open(os.devnull, 'w')
 
 		p = subprocess.Popen(shlex.split(cmd), stdout = out, stderr = err)
-		self.process.append((p,i))
+		self.process.append(p)
 
 		if len(self.process) >= self.nb_job_slots:
 			p.wait()
@@ -175,6 +183,6 @@ class Export: # TODO : singleton
 	def signal_handler(self, signal, frame):
 		import sys
 		print "\n\nCompilation interrupted by the user."
-		print self.nb_created, "files were created."
+		print self.nb_created, "file" + ("s" if self.nb_created > 1 else "") + " were created."
 		print "Tip : You can continue this work with -s option."
 		sys.exit(0)

@@ -21,7 +21,8 @@ On the picture herebelow, this is Zazouck, the construction kit : it's a customi
 ##Installation instuctions
 
 ### On Linux platforms
-- Install dependencies: `sudo apt-get install git openscad`
+- Install dependencies:
+```sudo apt-get install git openscad imagemagick```
 
 - Get the sources
 
@@ -32,7 +33,7 @@ $ git clone https://github.com/roipoussiere/zazoucko.git
 
 - Make it easy to use
 
-```shell
+```
 $ cd zazoucko
 $ chmod +xX *.py
 $ echo export PATH=$PATH:your_favorite_path/zazoucko_python/ >> ~/.bashrc
@@ -49,21 +50,21 @@ See [examples folder](examples/) to get 3D model examples
 
 - To create a table describing each file, without generate them
 
-```shell
+```
 $ zazoucko cube.stl -b ./table.csv # will create file 'table.csv'
 $ zazoucko cube.stl -b # will create file 'cube.csv'
 ```
 
 - To generate a directory containing all the .stl files
 
-```shell
+```
 $ zazoucko cube.stl # from a 3D model
 $ zazoucko cube.csv # from a table
 ```
 
 - To generate a nice documentation:
 
-```shell
+```
 $ zazoucko cube.stl -d
 ```
 ##Options

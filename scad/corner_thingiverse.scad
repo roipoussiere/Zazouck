@@ -126,7 +126,7 @@ module part(v)
 	main_hole_width = hole_width + main_hole_slack;
 	hole_deep = (hole_deep <=0) ? edge_length : hole_deep;
 
-	translate([0,0,width/2]) intersection() {
+	intersection() {
 		if (external_bevel == "sphere") 
 			sphere(edge_length);
 
