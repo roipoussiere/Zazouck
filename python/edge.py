@@ -16,3 +16,6 @@ class Edge:
 	def get_id(self): return self.id
 	def get_extremities(self): return self.extremities
 	def get_length(self): return self.length
+
+	def get_data(self):
+		return str(self.id) + "," + str(self.length) + "\n"

@@ -56,17 +56,17 @@ class Corner:
 		self.angles.append(int(round(angle_h)))
 	
 	def set_data(self):
-		self.data += self.number_to_txt(self.id, 5)
+		self.data += self._number_to_txt(self.id, 5)
 
 		self.data += "," + str(self.position[0])
 		self.data += "," + str(self.position[1])
 		self.data += "," + str(self.position[2])
 
 		for angle in self.angles:
-			self.data += "," + self.number_to_txt(angle, 3)
+			self.data += "," + self._number_to_txt(angle, 3)
 		self.data += "\n"
 
-	def number_to_txt(self, nb, size):
+	def _number_to_txt(self, nb, size):
 		nb = "err" if nb > pow(10, size)-1 else str(nb)
 
 		while len(nb) < size:

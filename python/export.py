@@ -29,7 +29,7 @@ class Export: # TODO : singleton
 		signal.signal(signal.SIGINT, self.signal_handler)
 
 		if test:
-			print "\n*** Testing mode - don't print these files ***\n"
+			print "You are in testing mode - don't print these files."
 
 
 	def _get_nb_lines(self, input_path):
@@ -51,6 +51,7 @@ class Export: # TODO : singleton
 
 
 	def make_tables(self, input_stl_path, details_path, start_from, finish_at, shuffle):
+		print "\n*** Creating tables ***\n"
 		cleaned_path = op.join(tempfile.gettempdir(), "zazouck_cleaned")
 
 		stl.clean_file(input_stl_path, cleaned_path)
@@ -70,11 +71,10 @@ class Export: # TODO : singleton
 
 		s.build_corners_table(self.corners_table_path, start_from, finish_at, shuffle)
 		s.build_edges_table(self.edges_table_path, start_from, finish_at, shuffle)		
-		print "Successfully created table files in " + self.corners_table_path + " and " + self.edges_table_path + "."
+		print "Successfully created table files in " + op.dirname(self.corners_table_path) + "."
 
 		if details_path != None:
 			s.display(details_path)
-			print "\nA file describing the model has been created on " + details_path + "."
 
 	def make_documentation(self, doc_dir):
 		img_dir = op.join(doc_dir, "img")
@@ -87,10 +87,11 @@ class Export: # TODO : singleton
 		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
 
 		print "\n*** Creating pictures ***\n"
-		print str(nb_corners) + " pictures will be created in " + img_dir + "."
 
-		with open(self.corners_table_path, 'r') as f_table:		
+		with open(self.corners_table_path, 'r') as f_table:
 			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
+			print str(nb_corners) + " pictures will be created in " + img_dir + "."
+
 			f_table.readline()
 			extra_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,45,0,45,140"
 
@@ -104,33 +105,33 @@ class Export: # TODO : singleton
 		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
 		
 		print "\n*** Creating corners ***\n"
-		print nb_corners, "stl files will be created in " + corners_dir + "."
 
 		with open(self.corners_table_path, 'r') as f_table:
 			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
+			print nb_corners, "stl files will be created in " + corners_dir + "."
+
 			if self.nb_job_slots == 1:
 				print "Tip : You can parallelize this task on several cores with -j option."
 			
 			f_table.readline()
 			self._start_processes(corner_scad_path, nb_corners, f_table, corners_dir, "stl")
 
-		print "\n*** Finished! ***"
-		print self.nb_created, "stl files successfully created in " + corners_dir + "."
+		print "\nFinished!", self.nb_created, "stl files successfully created in " + corners_dir + "."
 
 	def make_edges(self, edges_dir):
 		print "\n*** Creating edges ***\n"
 		nb_corners = self._get_nb_lines(self.corners_table_path)-2
-		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))		
+		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
 
 	def _start_processes(self, scad_path, nb_files, f_table, output_dir, extension, extra_options = ""):
 		t_init = time.time()
 		self.nb_created = 0
 
 		if self.nb_job_slots == 1:
-			print "\nCompiling the first " + extension + " file, please wait..."
+			print "Compiling the first " + extension + " file, please wait...\n"
 		else:
-			nb_creating = self.nb_job_slots if self.nb_job_slots < nb_files else nb_files, extension
-			print "\nCompiling", nb_creating, "files simultaneously, please wait..."
+			nb_creating = self.nb_job_slots if self.nb_job_slots < nb_files else nb_files
+			print "Compiling", nb_creating, extension, "files simultaneously, please wait...\n"
 
 		for line in f_table:
 			corner_id = line[0:line.index(",")]

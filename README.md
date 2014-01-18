@@ -10,7 +10,8 @@ This program generates stl files to build a wonderful construction, from a 3D mo
 
 ### The 3d printable parts
 The generated files are 3d printable connectors to connect wood, platic or metal rods together.
-If you want to make some connectors by hand, you can also use Zazouck without the generator, by using [the Openscad file](scad/corner.scad) or simply going on the [Thingiverse page](http://www.thingiverse.com/thing:179597).
+
+If you want to create corners with specific angles, you can also use Zazouck manually, without the generator : just use [the Openscad file](scad/corner.scad) or simply go on the [Thingiverse page](http://www.thingiverse.com/thing:179597).
 
 ![Zazouck](https://raw2.github.com/roipoussiere/Zazouck/master/pictures/Zazouck_wide.png "Zazouck")
 
@@ -24,11 +25,13 @@ The program works in 2 steps:
 ### On Linux platforms
 - Install dependencies:
 
-`sudo apt-get install git openscad imagemagick`
+```
+sudo apt-get install git openscad imagemagick
+```
 
-	- git : You need it to get sources, but you can also download them manually on the GiHub page.
-	- openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
-	- imagemagick : An image editor, only used to generate the documentation.
+  - git : You need it to get sources, but you can also download them manually on the GiHub page.
+  - openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
+  - imagemagick : An image editor, only used to generate the documentation.
 
 - Get the sources
 
@@ -40,7 +43,7 @@ $ git clone https://github.com/roipoussiere/zazouck.git
 - Make it easy to use
 
 ```
-$ chmod +xX zazouck/*.py
+$ chmod +xX zazouck/python/*.py
 $ echo export PATH=$PATH:your_favorite_path/zazouck/python/ >> ~/.bashrc
 ```
 
@@ -76,57 +79,53 @@ $ zazoucko cube.stl -d
 Use zazoucko -h to see all available options :
 
 ```
-usage: zazouck [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
-                [-p PARAMETER_PATH] [-t] [-S] [-s START_FROM] [-f FINISH_AT]
-                [-d [DOC_DIR]] [-V [{0,1,2,3}]] [-D [DETAILS_PATH]]
-                [-m [FULL_MODEL_PATH]] [-j [NB_JOB_SLOTS]]
-                input_path
+usage: zazouck [-h] [-o OUTPUT_DIR] [-p PARAM_PATH] [-t] [-s FIRST_LINE]
+               [-f LAST_LINE] [-d DIR] [-ns] [-nd] [-ni] [-na] [-nf]
+               [-V [{1,2,3}]] [-j [NB_JOBS_SLOTS]] [-v]
+               input_path
 
                                *** Zazouck ***
-This program allows you to build constructions, with generating files to print
-from your model. It works in 2 times: first, it build a .csv table file (very
-fast) describing the parts, then it compile this one into a lot of .stl files
-(can be long).
+This program allows you to build constructions, by generating 3D files
+from your model. It works in 2 times: first, it build .csv table files
+describing the parts (very fast), then it compile this one into a lot
+of .stl files (can be long). See README.md for getting started.
 
 positional arguments:
-  input_path            3d model (.stl) or table (.csv) path of your model.
-                        The program will automatically generates the .stl
-                        files according to the file type.
+  input_path            3d model (stl file) or model directory if it's already
+                        created.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -v, --version         Show program version and exit.
-  -b [TABLE_PATH], --build-only [TABLE_PATH]
-                        Build only table (.csv) as TABLE_PATH (projet_name.csv
-                        by default), without compile stl files.
-  -e EXPORT_DIR, --export-dir EXPORT_DIR
-                        Directory where .stl files will be exported
-                        (./projet_name/ by default)
-  -p PARAMETER_PATH, --param-path PARAMETER_PATH
-                        Parameters file path, containing parts parameters.
+  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
+                        Directory where all the files will be exported
+                        (current dir. by default)
+  -p PARAM_PATH, --param-path PARAM_PATH
+                        Load a parameters file from PARAM_PATH, containing the
+                        parts parameters.
   -t, --test            The files are quickly compiled for testing, not able
-                        to be print.
-  -S, --sort            Doesn't shuffle the list of corners and polygons in
-                        random order.
-  -s START_FROM         Start compilation from line xx in the .csv file.
-  -f FINISH_AT          Finish compilation at line xx in the .csv file.
-  -d [DOC_DIR], --documentation [DOC_DIR]
-                        Build a nice document in DOC_DIR (./doc by default),
-                        to help you to build your construction easily.
-  -V [{0,1,2,3}], --verbose-cmd [{0,1,2,3}]
-                        Verbose level: 0 = nothing, 1 = OpenScad calls
-                        (default value), 2 = OpenScad warning messages, 3 =
-                        all OpenScad messages.
-  -D [DETAILS_PATH], --details [DETAILS_PATH]
-                        Export details about the model (corners position,
-                        polygons, corners_network, edges, etc.) in
-                        DETAILS_PATH (./details.txt by default).
-  -m [FULL_MODEL_PATH], --make_full_model [FULL_MODEL_PATH]
-                        Create the 3d model of the construction in
-                        FULL_MODEL_PATH (./full_model.stl by default).
-  -j [NB_JOB_SLOTS], --jobs [NB_JOB_SLOTS]
-                        Compile NB_JOB_SLOTS parts simultaneously (the number
+                        to be printed.
+  -s FIRST_LINE, --start-from FIRST_LINE
+                        Start compilation from line FIRST_LINE in the .csv
+                        file.
+  -f LAST_LINE, --finish-at LAST_LINE
+                        Finish compilation at line LAST_LINE in the .csv file.
+  -d DIR, --doc-dir DIR
+                        Assembly instructions directory (OUTPUT_DIR/doc by
+                        default).
+  -ns, --no-stl         Doesn't compile stl files, only build csv tables.
+  -nd, --no-doc         Doesn't build assembly instructions.
+  -ni, --no-infos       Doesn't make a text file containing informations about
+                        the model.
+  -na, --no-assembly    Doesn't create the 3d model of the assembly.
+  -nf, --no-shuffle     Doesn't shuffle the lists of corners, polygons and
+                        edges.
+  -V [{1,2,3}], --verbose [{1,2,3}]
+                        Verbose level: 1 = OpenScad calls (default value), 2 =
+                        OpenScad warnings, 3 = all OpenScad messages.
+  -j [NB_JOBS_SLOTS], --jobs [NB_JOBS_SLOTS]
+                        Compile NB_JOBS_SLOTS files simultaneously (the number
                         of cores on your computer by default).
+  -v, --version         Show program version and exit.
 
 Author: Nathanaël Jourdane - nathanael@jourdane.net
 Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html

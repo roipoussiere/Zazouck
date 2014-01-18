@@ -22,6 +22,7 @@ class Solid: # TODO : singleton
 	
 	def get_nb_corners(self): return len(self.corners)	
 	def get_nb_polygons(self): return len(self.polygons)
+	def get_nb_edges(self): return len(self.edges)
 	
 	def _get_position_by_corner_id(self, corner_id):
 		position = False
@@ -145,12 +146,12 @@ class Solid: # TODO : singleton
 			for i, corner in enumerate(self.corners):
 				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - " + str(corner.get_angles()) + "\n")
 
-	def build_corners_table(self, f_table_path, start_from, finish_at, shuffle):
-		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + " polygons\n"
-		labels = "id,x,y,z,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H,rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
+	def build_corners_table(self, corners_table_path, start_from, finish_at, shuffle):
+		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + " polygons," + str(self.get_nb_edges()) + " edges\n"
+		labels = "id,posX,posY,posZ,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H,rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
 		finish_at = self.get_nb_corners() if finish_at == 0 else finish_at+1
+		right_limit = self.get_nb_corners() - finish_at
 
-		right_limit = self.get_nb_corners()-finish_at
 		for i in range(start_from):
 			self.corners.pop(0)
 		for i in range(right_limit):
@@ -159,12 +160,28 @@ class Solid: # TODO : singleton
 		if shuffle:
 			self.shuffle()
 
-		with open(f_table_path, 'w') as f_table:
-			f_table.write(infos)
-			f_table.write(labels)
+		with open(corners_table_path, 'w') as table:
+			table.write(infos)
+			table.write(labels)
 			for corner in self.corners:
-				f_table.write(corner.get_data())
+				table.write(corner.get_data())
 
-				################### TODO ##############
-	def build_edges_table(self, f_table_path, start_from, finish_at, shuffle):
-		print "build_edges_table()"
+	def build_edges_table(self, edges_table_path, start_from, finish_at, shuffle):
+		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + " polygons," + str(self.get_nb_edges()) + " edges\n"
+		labels = "id,posX,posY,posZ,rotX,rotY,rotZ,length\n"
+		finish_at = self.get_nb_edges() if finish_at == 0 else finish_at+1
+		right_limit = self.get_nb_corners() - finish_at
+
+		for i in range(start_from):
+			self.edges.pop(0)
+		for i in range(right_limit):
+			self.edges.pop()
+
+		if shuffle:
+			self.shuffle()
+
+		with open(edges_table_path, 'w') as table:
+			table.write(infos)
+			table.write(labels)
+			for edge in self.edges:
+				table.write(edge.get_data())
