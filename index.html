@@ -56,7 +56,7 @@
 
 <p>This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :</p>
 
-<p><img src="./pictures/generated_part.png" alt="A generated part" title="A generated part"></p>
+<p><img src="https://raw2.github.com/roipoussiere/Zazoucko/master/pictures/generated_part.png" alt="A generated part" title="A generated part"></p>
 
 <h3>
 <a name="how-it-works" class="anchor" href="#how-it-works"><span class="octicon octicon-link"></span></a>How it works</h3>
@@ -71,7 +71,7 @@
 
 <p>On the picture herebelow, this is Zazouck, the construction kit : it's a customisable 3d printable part to connect wood, platic or metal rods together. Zazoucko is a program which generates Zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using <a href="scad/corner.scad">the Openscad file</a> or simply going on the  <a href="http://www.thingiverse.com/thing:179597">Thingiverse page</a>.</p>
 
-<p><img src="./pictures/Zazouck_wide.png" alt="Zazouck" title="Zazouck"></p>
+<p><img src="https://raw2.github.com/roipoussiere/Zazoucko/master/pictures/Zazouck_wide.png" alt="Zazouck" title="Zazouck"></p>
 
 <h2>
 <a name="installation-instuctions" class="anchor" href="#installation-instuctions"><span class="octicon octicon-link"></span></a>Installation instuctions</h2>
@@ -80,9 +80,15 @@
 <a name="on-linux-platforms" class="anchor" href="#on-linux-platforms"><span class="octicon octicon-link"></span></a>On Linux platforms</h3>
 
 <ul>
-<li><p>Install dependencies:
-<code>sudo apt-get install git openscad imagemagick</code></p></li>
-<li><p>Get the sources</p></li>
+<li>Install dependencies:</li>
+</ul><p><code>sudo apt-get install git openscad imagemagick</code></p>
+
+<p>-- git : You need it to get sources, but you can also download them manually on the GiHub page.
+-- openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
+-- imagemagick : An image editor, only used to generate the documentation.</p>
+
+<ul>
+<li>Get the sources</li>
 </ul><pre><code>$ cd your_favorite_path
 $ git clone https://github.com/roipoussiere/zazoucko.git
 </code></pre>
