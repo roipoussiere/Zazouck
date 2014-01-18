@@ -1,47 +1,47 @@
-Zazoucko
+Zazouck
 =====
 
 ## Description
-ZAZOUCK generatOr - Zazouck is an AmaZing Opensource Construction Kit
+Zazouck is an AmaZing Opensource Universal Construction Kit
 
 This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :
 
-![A generated part](https://raw2.github.com/roipoussiere/Zazoucko/master/pictures/generated_part.png "A generated part")
+![A generated part](https://raw2.github.com/roipoussiere/Zazouck/master/pictures/generated_part.png "A generated part")
 
-### How it works
+### The 3d printable parts
+The generated files are 3d printable connectors to connect wood, platic or metal rods together.
+If you want to make some connectors by hand, you can also use Zazouck without the generator, by using [the Openscad file](scad/corner.scad) or simply going on the [Thingiverse page](http://www.thingiverse.com/thing:179597).
+
+![Zazouck](https://raw2.github.com/roipoussiere/Zazouck/master/pictures/Zazouck_wide.png "Zazouck")
+
+### The generator
 The program works in 2 steps:
 - First, it creates a table file (.csv) which containing the connectors parameters.
 - Then, it creates stl files of the connectors, from the table.
-
-### Differences between Zazouck and Zazoucko
-On the picture herebelow, this is Zazouck, the construction kit : it's a customisable 3d printable part to connect wood, platic or metal rods together. Zazoucko is a program which generates Zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using [the Openscad file](scad/corner.scad) or simply going on the  [Thingiverse page](http://www.thingiverse.com/thing:179597).
-
-![Zazouck](https://raw2.github.com/roipoussiere/Zazoucko/master/pictures/Zazouck_wide.png "Zazouck")
 
 ##Installation instuctions
 
 ### On Linux platforms
 - Install dependencies:
 
-```sudo apt-get install git openscad imagemagick```
+`sudo apt-get install git openscad imagemagick`
 
--- git : You need it to get sources, but you can also download them manually on the GiHub page.
--- openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
--- imagemagick : An image editor, only used to generate the documentation.
+	- git : You need it to get sources, but you can also download them manually on the GiHub page.
+	- openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
+	- imagemagick : An image editor, only used to generate the documentation.
 
 - Get the sources
 
 ```
 $ cd your_favorite_path
-$ git clone https://github.com/roipoussiere/zazoucko.git
+$ git clone https://github.com/roipoussiere/zazouck.git
 ```
 
 - Make it easy to use
 
 ```
-$ cd zazoucko
-$ chmod +xX *.py
-$ echo export PATH=$PATH:your_favorite_path/zazoucko_python/ >> ~/.bashrc
+$ chmod +xX zazouck/*.py
+$ echo export PATH=$PATH:your_favorite_path/zazouck/python/ >> ~/.bashrc
 ```
 
 ### On Windows and MacOS platforms
@@ -56,15 +56,15 @@ See [examples folder](examples/) to get 3D model examples
 - To create a table describing each file, without generate them
 
 ```
-$ zazoucko cube.stl -b ./table.csv # will create file 'table.csv'
-$ zazoucko cube.stl -b # will create file 'cube.csv'
+$ zazouck cube.stl -b ./table.csv # will create file 'table.csv'
+$ zazouck cube.stl -b # will create file 'cube.csv'
 ```
 
 - To generate a directory containing all the .stl files
 
 ```
-$ zazoucko cube.stl # from a 3D model
-$ zazoucko cube.csv # from a table
+$ zazouck cube.stl # from a 3D model
+$ zazouck cube.csv # from a table
 ```
 
 - To generate a nice documentation:
@@ -76,13 +76,13 @@ $ zazoucko cube.stl -d
 Use zazoucko -h to see all available options :
 
 ```
-usage: zazoucko [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
+usage: zazouck [-h] [-v] [-b [TABLE_PATH]] [-e EXPORT_DIR]
                 [-p PARAMETER_PATH] [-t] [-S] [-s START_FROM] [-f FINISH_AT]
                 [-d [DOC_DIR]] [-V [{0,1,2,3}]] [-D [DETAILS_PATH]]
                 [-m [FULL_MODEL_PATH]] [-j [NB_JOB_SLOTS]]
                 input_path
 
-                               *** Zazoucko ***
+                               *** Zazouck ***
 This program allows you to build constructions, with generating files to print
 from your model. It works in 2 times: first, it build a .csv table file (very
 fast) describing the parts, then it compile this one into a lot of .stl files
@@ -129,7 +129,7 @@ optional arguments:
                         of cores on your computer by default).
 
 Author: Nathanaël Jourdane - nathanael@jourdane.net
-Zazoucko is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
+Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
 ```
 
 ##Contact

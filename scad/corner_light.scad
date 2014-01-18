@@ -1,11 +1,11 @@
 use <string.scad>;
 
-data = "12345,000,000,070,120,090,090";
+angles = "090,180,090,225,090,270,000,090";
 
 width = 7.5;
 edge_length = 11;  // Set 0 if you want than edge length equals Width.
 
-part([[d(1),d(2)], [d(3),d(4)], [d(5),d(6)], [d(7),d(8)], [d(9),d(10)], [d(11),d(12)]]);
+part([[d(0),d(1)], [d(2),d(3)], [d(4),d(5)], [d(6),d(7)], [d(8),d(9)], [d(10),d(11)]]);
 
 module part(v)
 {
@@ -22,4 +22,4 @@ module part(v)
 	}
 }
 
-function d(i) = strToInt(getsplit(data, i, ","));
+function d(i) = (strToInt(getsplit(angles, i, ",")) == undef) ? -1 : strToInt(getsplit(angles, i, ","));

@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2013 Nathanaël Jourdane
-# This file is part of Zazoucko.
-# Zazoucko is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-# Zazoucko is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License along with Zazoucko. If not, see <http://www.gnu.org/licenses/>.
+# This file is part of Zazouck.
+# Zazouck is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+# Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
 
 import random, math
 from random import randint
@@ -145,7 +145,7 @@ class Solid: # TODO : singleton
 			for i, corner in enumerate(self.corners):
 				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - " + str(corner.get_angles()) + "\n")
 
-	def build_csv(self, f_table_path, start_from, finish_at, shuffle):
+	def build_corners_table(self, f_table_path, start_from, finish_at, shuffle):
 		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + " polygons\n"
 		labels = "id,x,y,z,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H,rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
 		finish_at = self.get_nb_corners() if finish_at == 0 else finish_at+1
@@ -164,3 +164,7 @@ class Solid: # TODO : singleton
 			f_table.write(labels)
 			for corner in self.corners:
 				f_table.write(corner.get_data())
+
+				################### TODO ##############
+	def build_edges_table(self, f_table_path, start_from, finish_at, shuffle):
+		print "build_edges_table()"

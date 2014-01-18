@@ -12,7 +12,7 @@ shape = "Personalised"; // [Extremity, I, T, L, X, Cube_corner, T_corner, Half_s
 // On several shapes, you can change the number of members.
 edges_number = 1; // [0:min, 1:medium, 2:max]
 // In case of a personalised part, set here the part members angles, by pairs of vertical angle and horizontal angle.
-angles = "090,000,000,090,090,090";
+angles = "090,180,090,225,090,270,000,090";
 
 /* [Dimentions] */
 
