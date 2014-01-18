@@ -6,7 +6,7 @@ ZAZOUCK generatOr - Zazouck is an AmaZing Opensource Construction Kit
 
 This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :
 
-![A generated part](./pictures/generated_part.png "A generated part")
+![A generated part](https://raw2.github.com/roipoussiere/Zazoucko/master/pictures/generated_part.png "A generated part")
 
 ### How it works
 The program works in 2 steps:
@@ -16,13 +16,18 @@ The program works in 2 steps:
 ### Differences between Zazouck and Zazoucko
 On the picture herebelow, this is Zazouck, the construction kit : it's a customisable 3d printable part to connect wood, platic or metal rods together. Zazoucko is a program which generates Zazouck kits from a 3D model. You can use Zazouck without Zazoucko by using [the Openscad file](scad/corner.scad) or simply going on the  [Thingiverse page](http://www.thingiverse.com/thing:179597).
 
-![Zazouck](./pictures/Zazouck_wide.png "Zazouck")
+![Zazouck](https://raw2.github.com/roipoussiere/Zazoucko/master/pictures/Zazouck_wide.png "Zazouck")
 
 ##Installation instuctions
 
 ### On Linux platforms
 - Install dependencies:
+
 ```sudo apt-get install git openscad imagemagick```
+
+-- git : You need it to get sources, but you can also download them manually on the GiHub page.
+-- openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
+-- imagemagick : An image editor, only used to generate the documentation.
 
 - Get the sources
 
