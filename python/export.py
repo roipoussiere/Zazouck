@@ -26,7 +26,7 @@ class Export: # TODO : singleton
 		self.verbose_lvl = verbose_lvl
 		self.test = test
 		self.process = list() # liste de tuples (retour process, nom du fichier)
-		self.nb_created = 0
+		self.nb_created = 0 # pour afficher le nombre de fichiers crées lors d'un ctr-c
 		signal.signal(signal.SIGINT, self.signal_handler)
 
 		if test:
@@ -102,18 +102,15 @@ class Export: # TODO : singleton
 	def make_corners(self, corners_dir):
 		scad_name = "corner_light.scad" if self.test else "corner.scad"
 		corner_scad_path = op.join(self.zazouck_scad_dir, scad_name)		
-		print "\n*** Creating corners ***\n"
 
+		print "\n*** Creating corners ***\n"
 		self._start_processes(corner_scad_path, self.corners_table_path, corners_dir, "stl")
 
-		print "\nFinished!", self.nb_created, "stl files successfully created in " + corners_dir + "."
-
 	def make_edges(self, edges_dir):
-		scad_name = "corner_light.scad" if self.test else "corner.scad"
-		nb_edges = self._get_nb_lines(self.edges_table_path)-2
-		print "\n*** Creating edges ***\n"
+		edge_scad_path = op.join(self.zazouck_scad_dir, "edge.scad")
 
-		corner_scad_path = op.join(self.zazouck_scad_dir, scad_name)
+		print "\n*** Creating edges ***\n"
+		#self._start_processes(edge_scad_path, self.corners_table_path, edges_dir, "dxf")
 
 	def _start_processes(self, scad_path, table_path, output_dir, extension, extra_options = ""):
 		nb_files = self._get_nb_lines(table_path) - 2
@@ -136,13 +133,18 @@ class Export: # TODO : singleton
 				corner_id = line[0:line.index(",")]
 				start = [m.start() for m in re.finditer(r",",line)][3] + 1 # position des données
 				data = line.rstrip('\n')[start:]
+
+				######### et pour edge ??
 				options = "-D 'id=" + corner_id + "; angles=\"" + data + "\"' " + extra_options
+
 				output_path = op.join(output_dir, corner_id + "." + extension)
 				self._openscad(scad_path, options, output_path)
 				self._end_of_process(nb_files, t_init)
 
 			while self.process:
 				self._end_of_process(nb_files, t_init)
+
+		print "\nFinished!", self.nb_created, extension, "files successfully created in " + output_dir + "."
 
 	def _end_of_process(self, nb_files, t_init):
 		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - t_init))
@@ -166,20 +168,17 @@ class Export: # TODO : singleton
 
 		corner_move_scad_path = op.join(self.zazouck_scad_dir, "move_part.scad")
 
-		with open(self.corners_table_path, 'r') as f_table:
-			f_table.readline()
-			f_table.readline()
+		with open(self.corners_table_path, 'r') as table:
+			table.readline()
+			table.readline()
 			
-			for i, line in enumerate(f_table): # utiliser start_processes ?
+			for i, line in enumerate(table): # utiliser start_processes ?
 				data = line.split(",")[0:4]
 				file_name = data[0] + ".stl"
 				options = "-D 'file=\"" + op.join(stls_dir, file_name) + "\"; " + \
 						"tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
 				output_file = op.join(temp_path, "moved_" + file_name)
 				self._openscad(corner_move_scad_path, options, output_file)
-
-		#with open(self.edges_table_path, 'r') as f_table:
-
 
 	def _openscad(self, scad_file_path, options, output_file):
 		cmd = self.openscad_path + " " + scad_file_path + " -o " + output_file + " " + options

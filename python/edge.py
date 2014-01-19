@@ -41,10 +41,11 @@ class Edge:
 	def set_length(self):
 		self.length = self.corner_start.get_dist(self.corner_end)
 
+	# position au centre
 	def set_position(self):
-		tx = 1
-		ty = 1
-		tz = 1
+		tx = (self.corner_start.get_position()[0] + self.corner_end.get_position()[0])/2
+		ty = (self.corner_start.get_position()[1] + self.corner_end.get_position()[1])/2
+		tz = (self.corner_start.get_position()[2] + self.corner_end.get_position()[2])/2
 		self.position = (tx, ty, tz)
 
 	def set_rotation(self):

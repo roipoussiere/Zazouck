@@ -1,5 +1,7 @@
 Zazouck
 =====
+## Work in progress
+The first version of Zazouck is not finished yet. Please be patient. ;)
 
 ## Description
 **Z**azouck is an **A**ma **Z**ing<b>O</b>pensource **U**niversal **C**onstruction **K**it
@@ -27,11 +29,11 @@ The program works in 2 steps:
 
 - Install dependencies:
 
-    - **Git**: You need git to get sources, but you can also download files manually on the GitHub page.
-    - **Svn**: Used to download the latest version of Jsc3d
-    - **Openscad**: The CAD software used to create the files. v2013.05+ is required to generate images for the documentation.
-    - **Imagemagick**: An image editor, only used to generate the documentation.
-	- **Jsc3d**: An HTML5 stl viewer, used to display stl files on a web page (not yet used)
+    - **Git** (version control system): To get the sources. You can also download the files manually from the [GitHub page](https://github.com/roipoussiere/Zazouck).
+    - **Svn** (version control system): To get the latest version of Jsc3d. You can also download the files manually from the [web page](https://code.google.com/p/jsc3d/).
+    - **Openscad** (CAD software): To create the files. v2013.05+ is required to generate images for the documentation.
+    - **Imagemagick** (image editor): To process images for the documentation.
+	- **Jsc3d** (HTML5 stl viewer): To display stl files on a web page (not yet used)
 
 ```
 sudo apt-get install git svn openscad imagemagick

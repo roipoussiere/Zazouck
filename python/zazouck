@@ -72,7 +72,7 @@ def main():
 		exp.make_corners(corners_dir)
 		exp.make_edges(edges_dir)
 
-	# Problème d'import du fichier .scad
+	# Problème d'import du fichier scad :/
 	#if full_model_path != None:
 		#exp.make_model(output_dir, full_model_path)
 
