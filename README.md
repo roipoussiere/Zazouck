@@ -31,7 +31,8 @@ The program works in 2 steps:
     - **Svn**: Used to download the latest version of Jsc3d
     - **Openscad**: The CAD software used to create the files. v2013.05+ is required to generate images for the documentation.
     - **Imagemagick**: An image editor, only used to generate the documentation.
-	- **Jsc3d**: An HTML5 stl viewer, used to display stl on a web page (not yet used)
+	- **Jsc3d**: An HTML5 stl viewer, used to display stl files on a web page (not yet used)
+
 ```
 sudo apt-get install git svn openscad imagemagick
 svn checkout --non-recursive http://jsc3d.googlecode.com/svn/trunk/jsc3d jsc3d

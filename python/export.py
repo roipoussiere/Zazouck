@@ -30,8 +30,7 @@ class Export: # TODO : singleton
 		signal.signal(signal.SIGINT, self.signal_handler)
 
 		if test:
-			print "Note: you are in testing mode - don't print these files."
-
+			print "Running in testing mode - don't print these files."
 
 	def _get_nb_lines(self, input_path):
 		with open(input_path, 'r') as f_input:
@@ -74,6 +73,7 @@ class Export: # TODO : singleton
 		s.build_corners_table(self.corners_table_path, start_from, finish_at, shuffle)
 		s.build_edges_table(self.edges_table_path, start_from, finish_at, shuffle)		
 		print "Successfully created table files in " + op.dirname(self.corners_table_path) + "."
+		#print "Model details: " + s
 
 		if details_path != None:
 			s.display(details_path)

@@ -34,7 +34,7 @@ class Corner:
 		init_pos = self.position
 		
 		#for i in range(3):
-		
+
 		relative_pos = (target_position[0] - init_pos[0], target_position[1] - init_pos[1], target_position[2] - init_pos[2])
 		
 		#calcul angle_v
@@ -67,6 +67,12 @@ class Corner:
 		for angle in self.angles:
 			self.data += "," + self._number_to_txt(angle, 3)
 		self.data += "\n"
+
+	def get_dist(self, corner):
+		px = pow(self.position[0] - corner.get_position()[0], 2)
+		py = pow(self.position[1] - corner.get_position()[1], 2)
+		pz = pow(self.position[2] - corner.get_position()[2], 2)
+		return math.sqrt(px + py + pz)
 
 	def _number_to_txt(self, nb, size):
 		nb = "err" if nb > pow(10, size)-1 else str(nb)

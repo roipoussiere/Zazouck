@@ -24,13 +24,12 @@ class Solid: # TODO : singleton
 	def get_nb_polygons(self): return len(self.polygons)
 	def get_nb_edges(self): return len(self.edges)
 	
-	def _get_position_by_corner_id(self, corner_id):
-		position = False
-		for corner in self.corners:
-			if corner.get_id() == corner_id:
-				position = corner.get_position()
-				break
-		return position
+	def _get_corner_by_id(self, corner_id):
+		corner = False
+		for c in self.corners:
+			if c.get_id() == corner_id:
+				corner = c
+		return corner
 
 	def _get_random_id(self, id_list):
 		MAX_ID = 32766 # values 0 and 32767 are not visible on a MQRcode
@@ -43,13 +42,13 @@ class Solid: # TODO : singleton
 
 	def fill_corners(self, _model):
 		positions = list()
+		id_list = list()
 
 		for polygon_model in _model:
 			for point in polygon_model:
 				if positions.count(point) == 0:
 					positions.append(point)
 		
-		id_list = list()
 		for position in positions:
 			self.corners.append(corner.Corner(self._get_random_id(id_list), position))
 	
@@ -78,7 +77,7 @@ class Solid: # TODO : singleton
 	def set_corners_data(self):
 		for corner in self.corners:
 			for target in corner.get_connected_corners():
-				corner.set_angles(self._get_position_by_corner_id(target))
+				corner.set_angles(self._get_corner_by_id(target).get_position())
 
 		for corner in self.corners:
 			corner.set_data()
@@ -95,8 +94,13 @@ class Solid: # TODO : singleton
 			for c2 in c1.get_connected_corners():
 				if (c1.get_id(),c2) not in extremities and (c2,c1.get_id()) not in extremities:
 					extremities.append((c1.get_id(), c2))
-					self.edges.append(edge.Edge(self._get_random_id(id_list), c1.get_position(),
-							self._get_position_by_corner_id(c2)))
+					self.edges.append(edge.Edge(
+							self._get_random_id(id_list), c1, self._get_corner_by_id(c2)))
+
+		for e in self.edges:
+			e.set_length()
+			e.set_position()
+			e.set_rotation()
 
 	def shuffle(self):
 		random.shuffle(self.corners)
@@ -118,6 +122,7 @@ class Solid: # TODO : singleton
 	#def merge_coplanar_polygons(self): # TODO
 	#	print "coplanar_polygons:", self._find_coplanar_polygons();
 	
+	# TODO: appeler __strs__ de chaque classe
 	def display(self, debug_path):
 		with open(debug_path, 'w') as f_debug:
 			f_debug.write("*** Corners position and connexions ***\n\n")
