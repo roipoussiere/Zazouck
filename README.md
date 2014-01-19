@@ -25,13 +25,9 @@ The program works in 2 steps:
 ### On Linux platforms
 - Install dependencies:
 
-    - git : You need it to get sources, but you can also download them manually on the GiHub page.
-    - openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
-    - imagemagick : An image editor, only used to generate the documentation.
-
-    1. git : You need it to get sources, but you can also download them manually on the GiHub page.
-    1. openscad : The CAD software used to create the files. v2013.05+ is required to generate documentation.
-    1. imagemagick : An image editor, only used to generate the documentation.
+    - **git** : You need it to get sources, but you can also download them manually on the GiHub page.
+    - **openscad** : The CAD software used to create the files. v2013.05+ is required to generate documentation.
+    - **imagemagick** : An image editor, only used to generate the documentation.
 
 ```
 sudo apt-get install git openscad imagemagick
