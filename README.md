@@ -23,21 +23,25 @@ The program works in 2 steps:
 ##Installation instuctions
 
 ### On Linux platforms
+- Go where you want to install Zazouck: `$ cd your_favorite_path`
+
 - Install dependencies:
 
-    - **git** : You need it to get sources, but you can also download them manually on the GiHub page.
-    - **openscad** : The CAD software used to create the files. v2013.05+ is required to generate documentation.
-    - **imagemagick** : An image editor, only used to generate the documentation.
-
+    - **Git**: You need git to get sources, but you can also download files manually on the GitHub page.
+    - **Svn**: Used to download the latest version of Jsc3d
+    - **Openscad**: The CAD software used to create the files. v2013.05+ is required to generate images for the documentation.
+    - **Imagemagick**: An image editor, only used to generate the documentation.
+	- **Jsc3d**: An HTML5 stl viewer, used to display stl on a web page (not yet used)
 ```
-sudo apt-get install git openscad imagemagick
+sudo apt-get install git svn openscad imagemagick
+svn checkout --non-recursive http://jsc3d.googlecode.com/svn/trunk/jsc3d jsc3d
 ```
 
 - Get the sources
 
 ```
-$ cd your_favorite_path
 $ git clone https://github.com/roipoussiere/zazouck.git
+$ mv jsc3d zazouck
 ```
 
 - Make it easy to use
