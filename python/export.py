@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright 2013 Nathanaël Jourdane
+# Copyright 2013-2014 Nathanaël Jourdane
 # This file is part of Zazouck.
 # Zazouck is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 # Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
@@ -29,7 +29,7 @@ class Export: # TODO : singleton
 		signal.signal(signal.SIGINT, self.signal_handler)
 
 		if test:
-			print "You are in testing mode - don't print these files."
+			print "Note: you are in testing mode - don't print these files."
 
 
 	def _get_nb_lines(self, input_path):
@@ -65,7 +65,7 @@ class Export: # TODO : singleton
 		
 		s.set_connected_corners()
 		s.set_angles()
-		s.set_datas()
+		s.set_data()
 		s.fill_edges()
 		#s.merge_coplanar_polygons() # TODO
 
@@ -83,67 +83,56 @@ class Export: # TODO : singleton
 		self.make_pictures(img_dir, 150)
 
 	def make_pictures(self, img_dir, pict_width):
-		nb_corners = self._get_nb_lines(self.corners_table_path)-2
 		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
-
+		extra_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,45,0,45,140"
 		print "\n*** Creating pictures ***\n"
 
-		with open(self.corners_table_path, 'r') as f_table:
-			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
-			print str(nb_corners) + " pictures will be created in " + img_dir + "."
+		self._start_processes(corner_scad_path, self.corners_table_path, img_dir, "png", extra_options)
 
-			f_table.readline()
-			extra_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,45,0,45,140"
-
-			self._start_processes(corner_scad_path, nb_corners, f_table, img_dir, "png", extra_options)
-
-		cmd = 'mogrify -transparent "#FFFFE5" ' + op.join(img_dir, "*.png")
-		subprocess.Popen(shlex.split(cmd))
+		process_image = 'mogrify -transparent "#FFFFE5" -trim +repage ' + op.join(img_dir, "*.png")
+		subprocess.Popen(shlex.split(process_image))
 
 	def make_corners(self, corners_dir):
-		nb_corners = self._get_nb_lines(self.corners_table_path)-2
-		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
-		
+		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))		
 		print "\n*** Creating corners ***\n"
 
-		with open(self.corners_table_path, 'r') as f_table:
-			print "Model details: " + f_table.readline().rstrip('\n').replace(",", ", ") + "."
-			print nb_corners, "stl files will be created in " + corners_dir + "."
-
-			if self.nb_job_slots == 1:
-				print "Tip : You can parallelize this task on several cores with -j option."
-			
-			f_table.readline()
-			self._start_processes(corner_scad_path, nb_corners, f_table, corners_dir, "stl")
+		self._start_processes(corner_scad_path, self.corners_table_path, corners_dir, "stl")
 
 		print "\nFinished!", self.nb_created, "stl files successfully created in " + corners_dir + "."
 
 	def make_edges(self, edges_dir):
 		print "\n*** Creating edges ***\n"
-		nb_corners = self._get_nb_lines(self.corners_table_path)-2
+		nb_edges = self._get_nb_lines(self.edges_table_path)-2
 		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
 
-	def _start_processes(self, scad_path, nb_files, f_table, output_dir, extension, extra_options = ""):
-		t_init = time.time()
-		self.nb_created = 0
+	def _start_processes(self, scad_path, table_path, output_dir, extension, extra_options = ""):
+		nb_files = self._get_nb_lines(table_path) - 2
 
-		if self.nb_job_slots == 1:
-			print "Compiling the first " + extension + " file, please wait...\n"
-		else:
-			nb_creating = self.nb_job_slots if self.nb_job_slots < nb_files else nb_files
-			print "Compiling", nb_creating, extension, "files simultaneously, please wait...\n"
+		with open(table_path, 'r') as table:
+			print "Model details: " + table.readline().rstrip('\n').replace(",", ", ") + "."
+			print nb_files, extension, "files will be created in " + output_dir + "."
 
-		for line in f_table:
-			corner_id = line[0:line.index(",")]
-			start = [m.start() for m in re.finditer(r",",line)][3]+1 # position de départ des données
-			data = line.rstrip('\n')[start:]
-			options = "-D 'id=" + corner_id + "; angles=\"" + data + "\"' " + extra_options
-			output_path = op.join(output_dir, corner_id + "." + extension)
-			self._openscad(scad_path, options, output_path)
-			self._end_of_process(nb_files, t_init)
+			table.readline()
+			t_init = time.time()
+			self.nb_created = 0
 
-		while self.process:
-			self._end_of_process(nb_files, t_init)
+			if self.nb_job_slots == 1:
+				print "Compiling the first " + extension + " file, please wait...\n"
+			else:
+				nb_creating = self.nb_job_slots if self.nb_job_slots < nb_files else nb_files
+				print "Compiling", nb_creating, extension, "files simultaneously, please wait...\n"
+
+			for line in table:
+				corner_id = line[0:line.index(",")]
+				start = [m.start() for m in re.finditer(r",",line)][3] + 1 # position de départ des données
+				data = line.rstrip('\n')[start:]
+				options = "-D 'id=" + corner_id + "; angles=\"" + data + "\"' " + extra_options
+				output_path = op.join(output_dir, corner_id + "." + extension)
+				self._openscad(scad_path, options, output_path)
+				self._end_of_process(nb_files, t_init)
+
+			while self.process:
+				self._end_of_process(nb_files, t_init)
 
 	def _end_of_process(self, nb_files, t_init):
 		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - t_init))

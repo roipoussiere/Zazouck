@@ -2,7 +2,7 @@ Zazouck
 =====
 
 ## Description
-Zazouck is an AmaZing Opensource Universal Construction Kit
+**Z**azouck is an **A**ma**Z**ing **O**pensource **U**niversal **C**onstruction **K**it
 
 This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :
 
@@ -135,4 +135,4 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
 
 Nathanaël Jourdane : nathanael[AT]jourdane[DOT]net
 
-This project is licenced under GNU GPLv3 - see COPYING.txt for details.
+This project is licenced under [GNU GPLv3](www.gnu.org/licenses/gpl-3.0.html).

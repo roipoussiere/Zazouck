@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright 2013 Nathanaël Jourdane
+# Copyright 2013-2014 Nathanaël Jourdane
 # This file is part of Zazouck.
 # Zazouck is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 # Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
@@ -33,8 +33,16 @@ class Solid: # TODO : singleton
 		return position
 
 	def fill_corners(self, _model):
+		MAX_ID = 32766 # values 0 and 32767 are not visible on a MQRcode
 		positions = []
-		
+
+		def _get_random_id():
+			while True:
+				corner_id = randint(1, MAX_ID)
+				if corner_id not in id_list:
+					id_list.append(corner_id)
+					return corner_id
+
 		for polygon_model in _model:
 			for point in polygon_model:
 				if positions.count(point) == 0:
@@ -42,25 +50,22 @@ class Solid: # TODO : singleton
 		
 		id_list = []
 		for position in positions:
-			while True:
-				id = randint(1,32766) # values 0 and 32767 are not visible on a MQRcode
-				if id not in id_list:
-					id_list.append(id)
-					break
-
-			self.corners.append(corner.Corner(position, id))
+			self.corners.append(corner.Corner(_get_random_id(), position))
 	
 	def fill_polygons(self, _model):
+		MAX_ID = 32766
 		id_list = []
+
+		def _get_random_id():
+			while True:
+				poly_id = randint(1, MAX_ID)
+				if poly_id not in id_list:
+					id_list.append(poly_id)
+					return poly_id
+
 		for polygon_model in _model:
 
-			while True:
-				id = randint(1,32766)
-				if id not in id_list:
-					id_list.append(id)
-					break
-
-			poly = polygon.Polygon(id)
+			poly = polygon.Polygon(_get_random_id())
 			corners_pos = []
 			for position in polygon_model:
 				for corner in self.corners:
@@ -76,37 +81,39 @@ class Solid: # TODO : singleton
 		for corner in self.corners:
 			corner.set_connected_corners(self.polygons)
 	
+	 # TODO: à déplacer
 	def set_angles(self):
 		for corner in self.corners:
 			for target in corner.get_connected_corners():
 				corner.set_angles(self._get_position_by_corner_id(target))
-	
-	def set_datas(self):
+
+	def set_data(self):
 		for corner in self.corners:
 			corner.set_data()
+
+#		for edge in self.edges:
+#			edge.set_data()
 	
 	def fill_edges(self):
-		id_list = []
+		MAX_ID = 32766
+		id_list = list()
+		extremities = list()
+
+		def _get_random_id():
+			while True:
+				edge_id = randint(1, MAX_ID)
+				if edge_id not in id_list:
+					id_list.append(edge_id)
+					return edge_id
+
 		for i in range(self.get_nb_corners()):
 			for cc in self.corners[i].get_connected_corners():
 				add = True
-				for ed in self.edges:
-					if (i,cc) == ed.get_extremities() or (cc,i) == ed.get_extremities():
-						add = False
-						break;
-				if add:
-					while True:
-						id = randint(1,32766)
-						if id not in id_list:
-							id_list.append(id)
-							break
-					px = pow(self._get_position_by_corner_id(cc)[0] - self.corners[i].get_position()[0], 2)
-					py = pow(self._get_position_by_corner_id(cc)[1] - self.corners[i].get_position()[1], 2)
-					pz = pow(self._get_position_by_corner_id(cc)[2] - self.corners[i].get_position()[2], 2)
-					#deplacer dans corner: d = c1.dist(c2)
-					dist = math.sqrt( px + py + pz)
-					e = edge.Edge(id, (i, cc), dist)
-					self.edges.append(e)
+				if (i,cc) in extremities or (cc,i) in extremities:
+					p1 = (self._get_position_by_corner_id(cc)[0], self._get_position_by_corner_id(cc)[1], self._get_position_by_corner_id(cc)[2])
+					p2 = (self.corners[i].get_position()[0], self.corners[i].get_position()[1], self.corners[i].get_position()[2])
+
+					self.edges.append(edge.Edge(_get_random_id(), p1, p2))
 
 	def shuffle(self):
 		random.shuffle(self.corners)
@@ -172,10 +179,10 @@ class Solid: # TODO : singleton
 		finish_at = self.get_nb_edges() if finish_at == 0 else finish_at+1
 		right_limit = self.get_nb_corners() - finish_at
 
-		for i in range(start_from):
-			self.edges.pop(0)
-		for i in range(right_limit):
-			self.edges.pop()
+		# for i in range(start_from):
+		# 	self.edges.pop(0)
+		# for i in range(right_limit):
+		# 	self.edges.pop()
 
 		if shuffle:
 			self.shuffle()
