@@ -1,0 +1,3 @@
+[submodule "jsc3d"]
+	path = jsc3d
+	url = https://github.com/roipoussiere/jsc3d.git
