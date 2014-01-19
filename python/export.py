@@ -80,16 +80,18 @@ class Export: # TODO : singleton
 		img_dir = op.join(doc_dir, "img")
 
 		os.makedirs(img_dir)
-		self.make_pictures(img_dir, 150)
+		self.make_pictures(img_dir, 200)
 
 	def make_pictures(self, img_dir, pict_width):
 		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
-		extra_options = "--imgsize=" + str(pict_width) + "," + str(pict_width) + " --camera=0,0,0,45,0,45,140"
+		extra_options = "--imgsize=" + str(pict_width*2) + "," + str(pict_width*2) + " --camera=0,0,0,45,0,45,140"
 		print "\n*** Creating pictures ***\n"
 
 		self._start_processes(corner_scad_path, self.corners_table_path, img_dir, "png", extra_options)
 
-		process_image = 'mogrify -transparent "#FFFFE5" -trim +repage ' + op.join(img_dir, "*.png")
+		dimentions = str(pict_width) + 'x' + str(pict_width) # 
+		process_image = 'mogrify -trim +repage -resize ' + dimentions + ' -background "#FFFFE5" -gravity center -extent ' + dimentions
+		process_image += ' -fuzz 5% -transparent "#FFFFE5" ' + op.join(img_dir, "*.png")
 		subprocess.Popen(shlex.split(process_image))
 
 	def make_corners(self, corners_dir):
