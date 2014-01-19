@@ -122,30 +122,23 @@ class Solid: # TODO : singleton
 	#def merge_coplanar_polygons(self): # TODO
 	#	print "coplanar_polygons:", self._find_coplanar_polygons();
 	
-	# TODO: appeler __strs__ de chaque classe
 	def display(self, debug_path):
 		with open(debug_path, 'w') as f_debug:
 			f_debug.write("*** Corners position and connexions ***\n\n")
 			for i, corner in enumerate(self.corners):
-				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - "
-						+ str(corner.get_position()) + " - "
-						+ str(corner.get_connected_corners()) + "\n")
+				f_debug.write(str(i+1) + ": " + str(corner) + "\n")
 
 			f_debug.write("\n*** Polygons connexions ***\n\n")
 			for i, polygon in enumerate(self.polygons):
-				f_debug.write(str(i+1) + ": " + str(polygon.get_id()) + " - "
-						+ str(polygon.get_corners()) + "\n")
+				f_debug.write(str(i+1) + ": " + str(polygon) + "\n")
 
 			f_debug.write("\n*** Edges position and length ***\n\n")
 			for i, edge in enumerate(self.edges):
-				f_debug.write(str(i+1) + ": " + str(edge.get_id()) + " - "
-						+ str(edge.get_position()) + " - "
-						+ str(edge.get_length()) + "\n")
+				f_debug.write(str(i+1) + ": " + str(edge) + "\n")
 
 			f_debug.write("\n*** Angles ***\n\n")
 			for i, corner in enumerate(self.corners):
-				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - "
-						+ str(corner.get_angles()) + "\n")
+				f_debug.write(str(i+1) + ": " + corner.print_angles() + "\n")
 
 	def build_corners_table(self, corners_table_path, start_from, finish_at, shuffle):
 		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + \

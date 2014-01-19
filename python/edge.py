@@ -29,8 +29,13 @@ class Edge:
 
 	def set_data(self):
 		self.data = str(self.id) + ","
-		for p in self.position: self.data += str(p) + ","
-		for r in self.rotation: self.data += str(r) + ","
+
+		for p in self.position:
+			self.data += str(p) + ","
+
+		for r in self.rotation:
+			self.data += str(r) + ","
+
 		self.data += str(self.length) + "\n"
 
 	def set_length(self):
@@ -48,4 +53,6 @@ class Edge:
 		rz = 1
 		self.rotation = (rx, ry, rz)
 	
-	# Ajouter __str__
+	def __str__(self):
+		return str(self.get_id()) + " - " + str(self.get_position()) + \
+				" - " + str(self.get_length())

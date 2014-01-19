@@ -60,9 +60,8 @@ class Corner:
 	def set_data(self):
 		self.data += self._number_to_txt(self.id, 5)
 
-		self.data += "," + str(self.position[0])
-		self.data += "," + str(self.position[1])
-		self.data += "," + str(self.position[2])
+		for p in self.position:
+			self.data += "," + str(p)
 
 		for angle in self.angles:
 			self.data += "," + self._number_to_txt(angle, 3)
@@ -80,3 +79,10 @@ class Corner:
 		while len(nb) < size:
 			nb = "0" + nb
 		return nb
+
+	def __str__(self):
+		return str(self.get_id()) + " - " + str(self.get_position()) + \
+				" - " + str(self.get_connected_corners())
+
+	def print_angles(self):
+		return str(self.get_id()) + " - " + str(self.get_angles())

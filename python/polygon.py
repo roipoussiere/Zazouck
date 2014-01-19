@@ -37,3 +37,6 @@ class Polygon:
 		# Y = (z2-z1)*(x3-x1) - (x2-x1)*(z3-z1)
 		# Z = (x2-x1)*(y3-y1) - (y2-y1)*(x3-x1) 
 		self.normal = (x,y,z)
+
+	def __str__(self):
+		return str(self.get_id()) + " - " + str(self.get_corners())
