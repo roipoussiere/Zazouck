@@ -32,40 +32,33 @@ class Solid: # TODO : singleton
 				break
 		return position
 
-	def fill_corners(self, _model):
+	def _get_random_id(self, id_list):
 		MAX_ID = 32766 # values 0 and 32767 are not visible on a MQRcode
-		positions = []
+		while True:
+			id = randint(1, MAX_ID)
+			if id not in id_list:
+				id_list.append(id)
+				return id
+		return False
 
-		def _get_random_id():
-			while True:
-				corner_id = randint(1, MAX_ID)
-				if corner_id not in id_list:
-					id_list.append(corner_id)
-					return corner_id
+	def fill_corners(self, _model):
+		positions = list()
 
 		for polygon_model in _model:
 			for point in polygon_model:
 				if positions.count(point) == 0:
 					positions.append(point)
 		
-		id_list = []
+		id_list = list()
 		for position in positions:
-			self.corners.append(corner.Corner(_get_random_id(), position))
+			self.corners.append(corner.Corner(self._get_random_id(id_list), position))
 	
 	def fill_polygons(self, _model):
-		MAX_ID = 32766
-		id_list = []
-
-		def _get_random_id():
-			while True:
-				poly_id = randint(1, MAX_ID)
-				if poly_id not in id_list:
-					id_list.append(poly_id)
-					return poly_id
+		id_list = list()
 
 		for polygon_model in _model:
 
-			poly = polygon.Polygon(_get_random_id())
+			poly = polygon.Polygon(self._get_random_id(id_list))
 			corners_pos = []
 			for position in polygon_model:
 				for corner in self.corners:
@@ -95,22 +88,14 @@ class Solid: # TODO : singleton
 			edge.set_data()
 
 	def fill_edges(self):
-		MAX_ID = 32766
 		id_list = list()
 		extremities = list()
-
-		def _get_random_id():
-			while True:
-				edge_id = randint(1, MAX_ID)
-				if edge_id not in id_list:
-					id_list.append(edge_id)
-					return edge_id
 
 		for c1 in self.corners:
 			for c2 in c1.get_connected_corners():
 				if (c1.get_id(),c2) not in extremities and (c2,c1.get_id()) not in extremities:
 					extremities.append((c1.get_id(), c2))
-					self.edges.append(edge.Edge(_get_random_id(), c1.get_position(),
+					self.edges.append(edge.Edge(self._get_random_id(id_list), c1.get_position(),
 							self._get_position_by_corner_id(c2)))
 
 	def shuffle(self):
