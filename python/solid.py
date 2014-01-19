@@ -81,19 +81,19 @@ class Solid: # TODO : singleton
 		for corner in self.corners:
 			corner.set_connected_corners(self.polygons)
 	
-	 # TODO: à déplacer
-	def set_angles(self):
+	# TODO: à déplacer
+	def set_corners_data(self):
 		for corner in self.corners:
 			for target in corner.get_connected_corners():
 				corner.set_angles(self._get_position_by_corner_id(target))
 
-	def set_data(self):
 		for corner in self.corners:
 			corner.set_data()
 
-#		for edge in self.edges:
-#			edge.set_data()
-	
+	def set_edges_data(self):
+		for edge in self.edges:
+			edge.set_data()
+
 	def fill_edges(self):
 		MAX_ID = 32766
 		id_list = list()
@@ -106,14 +106,12 @@ class Solid: # TODO : singleton
 					id_list.append(edge_id)
 					return edge_id
 
-		for i in range(self.get_nb_corners()):
-			for cc in self.corners[i].get_connected_corners():
-				add = True
-				if (i,cc) in extremities or (cc,i) in extremities:
-					p1 = (self._get_position_by_corner_id(cc)[0], self._get_position_by_corner_id(cc)[1], self._get_position_by_corner_id(cc)[2])
-					p2 = (self.corners[i].get_position()[0], self.corners[i].get_position()[1], self.corners[i].get_position()[2])
-
-					self.edges.append(edge.Edge(_get_random_id(), p1, p2))
+		for c1 in self.corners:
+			for c2 in c1.get_connected_corners():
+				if (c1.get_id(),c2) not in extremities and (c2,c1.get_id()) not in extremities:
+					extremities.append((c1.get_id(), c2))
+					self.edges.append(edge.Edge(_get_random_id(), c1.get_position(),
+							self._get_position_by_corner_id(c2)))
 
 	def shuffle(self):
 		random.shuffle(self.corners)
@@ -139,23 +137,33 @@ class Solid: # TODO : singleton
 		with open(debug_path, 'w') as f_debug:
 			f_debug.write("*** Corners position and connexions ***\n\n")
 			for i, corner in enumerate(self.corners):
-				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - " + str(corner.get_position()) + " - " + str(corner.get_connected_corners()) + "\n")
+				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - "
+						+ str(corner.get_position()) + " - "
+						+ str(corner.get_connected_corners()) + "\n")
 
 			f_debug.write("\n*** Polygons connexions ***\n\n")
 			for i, polygon in enumerate(self.polygons):
-				f_debug.write(str(i+1) + ": " + str(polygon.get_id()) + " - " + str(polygon.get_corners()) + "\n")
+				f_debug.write(str(i+1) + ": " + str(polygon.get_id()) + " - "
+						+ str(polygon.get_corners()) + "\n")
 
-			f_debug.write("\n*** Edges connexions and length ***\n\n")
+			f_debug.write("\n*** Edges position and length ***\n\n")
 			for i, edge in enumerate(self.edges):
-				f_debug.write(str(i+1) + ": " + str(edge.get_id()) + " - " + str(edge.get_extremities()) + " - " + str(edge.get_length()) + "\n")
+				f_debug.write(str(i+1) + ": " + str(edge.get_id()) + " - "
+						+ str(edge.get_position()) + " - "
+						+ str(edge.get_length()) + "\n")
 
 			f_debug.write("\n*** Angles ***\n\n")
 			for i, corner in enumerate(self.corners):
-				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - " + str(corner.get_angles()) + "\n")
+				f_debug.write(str(i+1) + ": " + str(corner.get_id()) + " - "
+						+ str(corner.get_angles()) + "\n")
 
 	def build_corners_table(self, corners_table_path, start_from, finish_at, shuffle):
-		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + " polygons," + str(self.get_nb_edges()) + " edges\n"
-		labels = "id,posX,posY,posZ,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H,rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
+		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + \
+				" polygons," + str(self.get_nb_edges()) + " edges\n"
+
+		labels = "id,posX,posY,posZ,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H,\
+				rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
+
 		finish_at = self.get_nb_corners() if finish_at == 0 else finish_at+1
 		right_limit = self.get_nb_corners() - finish_at
 
@@ -174,7 +182,8 @@ class Solid: # TODO : singleton
 				table.write(corner.get_data())
 
 	def build_edges_table(self, edges_table_path, start_from, finish_at, shuffle):
-		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + " polygons," + str(self.get_nb_edges()) + " edges\n"
+		infos = str(self.get_nb_corners()) + " corners," + \
+				str(self.get_nb_polygons()) + " polygons," + str(self.get_nb_edges()) + " edges\n"
 		labels = "id,posX,posY,posZ,rotX,rotY,rotZ,length\n"
 		finish_at = self.get_nb_edges() if finish_at == 0 else finish_at+1
 		right_limit = self.get_nb_corners() - finish_at

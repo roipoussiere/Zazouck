@@ -33,7 +33,9 @@ class Corner:
 	def set_angles(self, target_position):
 		init_pos = self.position
 		
-		relative_pos = [target_position[0]-init_pos[0], target_position[1]-init_pos[1], target_position[2]-init_pos[2]]
+		#for i in range(3):
+		
+		relative_pos = (target_position[0] - init_pos[0], target_position[1] - init_pos[1], target_position[2] - init_pos[2])
 		
 		#calcul angle_v
 		hypot = math.hypot(relative_pos[0], relative_pos[1])

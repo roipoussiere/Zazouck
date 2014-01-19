@@ -16,7 +16,8 @@ import signal
 
 class Export: # TODO : singleton
 
-	def __init__(self, openscad_path, corners_table_path, edges_table_path, zazouck_scad_dir, nb_job_slots, verbose_lvl, test):
+	def __init__(self, openscad_path, corners_table_path, edges_table_path, zazouck_scad_dir,
+			nb_job_slots, verbose_lvl, test):
 		self.openscad_path = openscad_path
 		self.corners_table_path = corners_table_path
 		self.edges_table_path = edges_table_path
@@ -55,18 +56,19 @@ class Export: # TODO : singleton
 		cleaned_path = op.join(tempfile.gettempdir(), "zazouck_cleaned")
 
 		stl.clean_file(input_stl_path, cleaned_path)
-		_model = stl.file_to_model(cleaned_path)
+		model = stl.file_to_model(cleaned_path)
 		os.remove(cleaned_path)
 		
 		s = solid.Solid()
-		s.fill_corners(_model)
-		s.fill_polygons(_model)
-		del _model
+		s.fill_corners(model)
+		s.fill_polygons(model)
+		del model
 		
 		s.set_connected_corners()
-		s.set_angles()
-		s.set_data()
+		s.set_corners_data()
+
 		s.fill_edges()
+		s.set_edges_data()
 		#s.merge_coplanar_polygons() # TODO
 
 		s.build_corners_table(self.corners_table_path, start_from, finish_at, shuffle)
@@ -83,19 +85,23 @@ class Export: # TODO : singleton
 		self.make_pictures(img_dir, 200)
 
 	def make_pictures(self, img_dir, pict_width):
-		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
-		extra_options = "--imgsize=" + str(pict_width*2) + "," + str(pict_width*2) + " --camera=0,0,0,45,0,45,140"
+		scad_name = "corner_light.scad" if self.test else "corner.scad"
+		corner_scad_path = op.join(self.zazouck_scad_dir, scad_name)
+		extra_options = "--imgsize=" + str(pict_width*2) + "," + str(pict_width*2) + \
+				" --camera=0,0,0,45,0,45,140"
 		print "\n*** Creating pictures ***\n"
 
 		self._start_processes(corner_scad_path, self.corners_table_path, img_dir, "png", extra_options)
 
 		dimentions = str(pict_width) + 'x' + str(pict_width) # 
-		process_image = 'mogrify -trim +repage -resize ' + dimentions + ' -background "#FFFFE5" -gravity center -extent ' + dimentions
-		process_image += ' -fuzz 5% -transparent "#FFFFE5" ' + op.join(img_dir, "*.png")
+		process_image = 'mogrify -trim +repage -resize ' + dimentions + \
+				' -background "#FFFFE5" ' + '-gravity center -extent ' + dimentions + \
+				' -fuzz 5% -transparent "#FFFFE5" ' + op.join(img_dir, "*.png")
 		subprocess.Popen(shlex.split(process_image))
 
 	def make_corners(self, corners_dir):
-		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))		
+		scad_name = "corner_light.scad" if self.test else "corner.scad"
+		corner_scad_path = op.join(self.zazouck_scad_dir, scad_name)		
 		print "\n*** Creating corners ***\n"
 
 		self._start_processes(corner_scad_path, self.corners_table_path, corners_dir, "stl")
@@ -103,9 +109,11 @@ class Export: # TODO : singleton
 		print "\nFinished!", self.nb_created, "stl files successfully created in " + corners_dir + "."
 
 	def make_edges(self, edges_dir):
-		print "\n*** Creating edges ***\n"
+		scad_name = "corner_light.scad" if self.test else "corner.scad"
 		nb_edges = self._get_nb_lines(self.edges_table_path)-2
-		corner_scad_path = op.join(self.zazouck_scad_dir, ("corner_light.scad" if self.test else "corner.scad"))
+		print "\n*** Creating edges ***\n"
+
+		corner_scad_path = op.join(self.zazouck_scad_dir, scad_name)
 
 	def _start_processes(self, scad_path, table_path, output_dir, extension, extra_options = ""):
 		nb_files = self._get_nb_lines(table_path) - 2
@@ -126,7 +134,7 @@ class Export: # TODO : singleton
 
 			for line in table:
 				corner_id = line[0:line.index(",")]
-				start = [m.start() for m in re.finditer(r",",line)][3] + 1 # position de départ des données
+				start = [m.start() for m in re.finditer(r",",line)][3] + 1 # position des données
 				data = line.rstrip('\n')[start:]
 				options = "-D 'id=" + corner_id + "; angles=\"" + data + "\"' " + extra_options
 				output_path = op.join(output_dir, corner_id + "." + extension)
@@ -142,7 +150,8 @@ class Export: # TODO : singleton
 			if p[0].poll() == 0:
 				del self.process[i]
 				self.nb_created += 1
-				print spent + ": Created file " + str(self.nb_created) + "/" + str(nb_files) + ": " + p[1] + "."
+				progress = str(self.nb_created) + "/" + str(nb_files)
+				print spent + ": Created file " + progress + ": " + p[1] + "."
 
 	def make_model(self, stls_dir, full_model_path):
 		import shutil
@@ -164,7 +173,8 @@ class Export: # TODO : singleton
 			for i, line in enumerate(f_table): # utiliser start_processes ?
 				data = line.split(",")[0:4]
 				file_name = data[0] + ".stl"
-				options = "-D 'file=\"" + op.join(stls_dir, file_name) + "\"; tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
+				options = "-D 'file=\"" + op.join(stls_dir, file_name) + "\"; " + \
+						"tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
 				output_file = op.join(temp_path, "moved_" + file_name)
 				self._openscad(corner_move_scad_path, options, output_file)
 

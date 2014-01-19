@@ -2,7 +2,7 @@ Zazouck
 =====
 
 ## Description
-**Z**azouck is an A**ma__Z__ing **O**pensource **U**niversal **C**onstruction **K**it
+**Z**azouck is an **A**ma **Z**ing<b>O</b>pensource **U**niversal **C**onstruction **K**it
 
 This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :
 
@@ -133,10 +133,6 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
 
 ##Contact
 
-If you discover a bug or if you have any suggestion, please report it by [opening an issue](https://github.com/roipoussiere/Zazouck/issues).
-
-If you have other comments to make about Zazouck, you can contact me directly:
+If you discover a bug or if you have any suggestion, please report it by [opening an issue](https://github.com/roipoussiere/Zazouck/issues). If you have other comments to make about Zazouck, you can contact me directly:
 
 Nathanaël Jourdane : nathanael at jourdane dot net
-
-This project is licenced under [GNU GPLv3](http://www.gnu.org/licenses/gpl-3.0.html).

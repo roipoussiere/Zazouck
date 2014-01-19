@@ -18,6 +18,8 @@ class Edge:
 		self.data = ""
 
 	def get_id(self): return self.id
+	def get_p1(self): return self.p1
+	def get_p2(self): return self.p2
 	def get_length(self): return self.length
 	def get_position(self): return self.position
 	def get_rotation(self): return self.rotation
@@ -25,10 +27,9 @@ class Edge:
 
 	def set_data(self):
 		self.data = str(self.id) + ","
-		self.data += str(self.position[0]) + "," + str(self.position[1]) + "," + str(self.position[2]) + ","
-		self.data += str(self.rotation[0]) + "," + str(self.rotation[1]) + "," + str(self.rotation[2]) + ","
+		for p in self.position: self.data += str(p) + ","
+		for r in self.rotation: self.data += str(r) + ","
 		self.data += str(self.length) + "\n"
-		print "data:", self.data
 
 	def set_length():
 		#deplacer dans corner: d = c1.dist(c2)
@@ -45,6 +46,6 @@ class Edge:
 
 	def set_rotation():
 		rx = 0
-		ry = 1
-		rz = 2
+		ry = 0
+		rz = 0
 		self.rotation = (rx, ry, rz)

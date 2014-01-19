@@ -56,12 +56,12 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		help = "The files are quickly compiled for testing, not able to be printed.")
 
 	# 
-	parser.add_argument('-s', '--start-from', action = 'store', type = int, default = 0, metavar = 'FIRST_LINE',
-		help = "Start compilation from line %(metavar)s in the .csv file.")
+	parser.add_argument('-s', '--start-from', action = 'store', type = int, default = 0,
+		metavar = 'FIRST_LINE', help = "Start compilation from line %(metavar)s in the .csv file.")
 
 	# 
-	parser.add_argument('-f', '--finish-at', action = 'store', type = int, default = 0, metavar = 'LAST_LINE',
-		help = "Finish compilation at line %(metavar)s in the .csv file.")
+	parser.add_argument('-f', '--finish-at', action = 'store', type = int, default = 0,
+		metavar = 'LAST_LINE', help = "Finish compilation at line %(metavar)s in the .csv file.")
 	
 	# 
 	parser.add_argument('-d', '--doc-dir', action = 'store', default = False, metavar = "DIR",
@@ -81,22 +81,24 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		help = "Doesn't make a text file containing informations about the model.")
 
 	# 
-	parser.add_argument('-na', '--no-assembly', action = 'store_false', default = True, dest = "assembly",
-		help = "Doesn't create the 3d model of the assembly.")
+	parser.add_argument('-na', '--no-assembly', action = 'store_false', default = True,
+		dest = "assembly", help = "Doesn't create the 3d model of the assembly.")
 
 	# 
-	parser.add_argument('-nf', '--no-shuffle', action = 'store_false', default = True, dest = "shuffle",
-		help = "Doesn't shuffle the lists of corners, polygons and edges.")
+	parser.add_argument('-nf', '--no-shuffle', action = 'store_false', default = True,
+		dest = "shuffle", help = "Doesn't shuffle the lists of corners, polygons and edges.")
 
 	# 
 	parser.add_argument('-V', '--verbose', action = 'store', nargs = '?',
 		type = int, choices = xrange(1, 4), default = 0, const = 1,
-		help = "Verbose level: 1 = OpenScad calls (default value), 2 = OpenScad warnings, 3 = all OpenScad messages.")
+		help = "Verbose level: 1 = OpenScad calls (default value), 2 = OpenScad warnings, \
+				3 = all OpenScad messages.")
 
 	# 
 	parser.add_argument('-j', '--jobs', action = 'store', nargs = '?', metavar = "NB_JOBS_SLOTS",
 		type = int, default = multiprocessing.cpu_count(),
-		help = "Compile %(metavar)s files simultaneously (the number of cores on your computer by default).")
+		help = "Compile %(metavar)s files simultaneously (the number of cores on your \
+				computer by default).")
 
 	# 
 	parser.add_argument('-v', '--version', action='version',
