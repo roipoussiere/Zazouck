@@ -1,7 +1,9 @@
 Zazouck
 =====
 ## Work in progress
-The first version of Zazouck is not finished yet. Please be patient. ;)
+The first release of Zazouck is not yet finished.
+
+Comming soon... please be patient. ;)
 
 ## Description
 **Z**azouck is an **A**ma **Z**ing<b>O</b>pensource **U**niversal **C**onstruction **K**it

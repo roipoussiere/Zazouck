@@ -15,8 +15,7 @@ import parser, export
 tmp_dir = tempfile.gettempdir()
 openscad_path = "openscad"
 zazouck_python_dir = op.abspath(op.dirname(sys.argv[0]))
-zazouck_scad_dir = op.join(op.dirname(zazouck_python_dir), "scad")
-cwd_dir = os.getcwd()
+scad_dir = op.join(op.dirname(zazouck_python_dir), "scad")
 
 def _create_dir(directory):
 	if os.path.exists(directory):
@@ -24,45 +23,33 @@ def _create_dir(directory):
 		print "The existing folder '" + op.basename(directory) + "' has been overwriten."
 	os.makedirs(directory)
 
-class ift(): stl, csv, dir = range(3) # input file type
-# ift.csv non utilisé pour le moment
-
 def main():
 	opt = parser.parser()
 
-	input_type = ift.stl if (op.splitext(opt.input_path)[1] == ".stl") else \
-			ift.csv if (op.splitext(opt.input_path)[1] == ".csv") else ift.dir
+	input_stl = True if (op.splitext(opt.input_path)[1] == ".stl") else False
 	projet_name = op.splitext(op.basename(opt.input_path))[0]
-	input_stl_path = op.join(cwd_dir, opt.input_path) if (input_type == ift.stl) else None
-	output_dir = op.join(cwd_dir, projet_name) if (opt.output_dir == None) else opt.output_dir
+	input_stl_path = op.join(os.getcwd(), opt.input_path) if input_stl else None
+	output_dir = opt.input_path if not input_stl else op.join(os.getcwd(), projet_name) if (opt.output_dir == None) else opt.output_dir
 	param_path = None if opt.param_path == None else opt.param_path.name
-	doc_dir =  op.join(output_dir, "doc") if (opt.doc_dir == False) else \
-			opt.doc_dir.name if opt.doc else None
-	infos_path = op.join(output_dir, "infos.txt") if opt.infos else None
-	assembly_path = op.join(output_dir, "assembly.stl") if opt.assembly else None
+	doc_dir = op.join(output_dir, "doc") if (opt.doc_dir == False) else opt.doc_dir.name
+	infos_path = op.join(output_dir, "infos.txt")
+	#assembly_path = op.join(output_dir, "assembly.stl") if opt.assembly else None
 
-	if input_type == ift.dir:
-		pass # copier les fichiers si les dossiers d'entrée et sortie sont différents
-	else:
+	if input_stl:
 		_create_dir(output_dir)
 
-	corners_table_path = op.join(opt.input_path, "corners.csv") if (input_type == ift.dir) else \
-			op.join(output_dir, "corners.csv")
-	edges_table_path = op.join(opt.input_path, "edges.csv") if (input_type == ift.dir) else \
-			op.join(output_dir, "edges.csv")
+	exp = export.Export(openscad_path, output_dir, scad_dir, opt.jobs, opt.verbose, opt.test)
 
-	exp = export.Export(openscad_path, corners_table_path, edges_table_path,
-			zazouck_scad_dir, opt.jobs, opt.verbose, opt.test)
+	if input_stl:
+		exp.make_tables(input_stl_path)
 
-	if input_type == ift.stl:
-		exp.make_tables(input_stl_path, infos_path, opt.start_from, opt.finish_at, opt.shuffle)
+	_create_dir(doc_dir)
+	exp.make_documentation(doc_dir)
 
-	if doc_dir != None:
-		_create_dir(doc_dir)
-		# tester existance des dossiers stl
-		exp.make_documentation(doc_dir)
-
-	if opt.stl: # si on crée les stl
+	if opt.infos:
+		pass
+		# TODO
+	else: # si on crée le stl
 		corners_dir = op.join(output_dir, "corners")
 		edges_dir = op.join(output_dir, "edges")
 

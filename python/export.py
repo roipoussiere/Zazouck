@@ -16,12 +16,12 @@ import signal
 
 class Export: # TODO : singleton
 
-	def __init__(self, openscad_path, corners_table_path, edges_table_path, zazouck_scad_dir,
-			nb_job_slots, verbose_lvl, test):
+	def __init__(self, openscad_path, project_dir, scad_dir, nb_job_slots, verbose_lvl, test):
 		self.openscad_path = openscad_path
-		self.corners_table_path = corners_table_path
-		self.edges_table_path = edges_table_path
-		self.zazouck_scad_dir = zazouck_scad_dir
+		self.project_dir = project_dir
+		self.scad_dir = scad_dir
+		self.corners_table_path = op.join(project_dir, "corners.csv")
+		self.edges_table_path = op.join(project_dir, "edges.csv")
 		self.nb_job_slots = nb_job_slots
 		self.verbose_lvl = verbose_lvl
 		self.test = test
@@ -50,7 +50,7 @@ class Export: # TODO : singleton
 			print "- started for " + spent + ", please wait", remaining + "."
 
 
-	def make_tables(self, input_stl_path, details_path, start_from, finish_at, shuffle):
+	def make_tables(self, input_stl_path):
 		print "\n*** Creating tables ***\n"
 		cleaned_path = op.join(tempfile.gettempdir(), "zazouck_cleaned")
 
@@ -70,13 +70,15 @@ class Export: # TODO : singleton
 		s.set_edges_data()
 		#s.merge_coplanar_polygons() # TODO
 
-		s.build_corners_table(self.corners_table_path, start_from, finish_at, shuffle)
-		s.build_edges_table(self.edges_table_path, start_from, finish_at, shuffle)		
-		print "Successfully created table files in " + op.dirname(self.corners_table_path) + "."
+		corners_dir = self.corners_table_path
+		edges_dir = self.edges_table_path
+
+		s.build_corners_table(corners_dir)
+		s.build_edges_table(edges_dir)
+		print "Successfully created table files in " + self.project_dir + "."
 		#print "Model details: " + s
 
-		if details_path != None:
-			s.display(details_path)
+		s.display(op.join(self.project_dir, "details.txt"))
 
 	def make_documentation(self, doc_dir):
 		img_dir = op.join(doc_dir, "img")
@@ -86,7 +88,7 @@ class Export: # TODO : singleton
 
 	def make_pictures(self, img_dir, pict_width):
 		scad_name = "corner_light.scad" if self.test else "corner.scad"
-		corner_scad_path = op.join(self.zazouck_scad_dir, scad_name)
+		corner_scad_path = op.join(self.scad_dir, scad_name)
 		extra_options = "--imgsize=" + str(pict_width*2) + "," + str(pict_width*2) + \
 				" --camera=0,0,0,45,0,45,140"
 		print "\n*** Creating pictures ***\n"
@@ -101,13 +103,13 @@ class Export: # TODO : singleton
 
 	def make_corners(self, corners_dir):
 		scad_name = "corner_light.scad" if self.test else "corner.scad"
-		corner_scad_path = op.join(self.zazouck_scad_dir, scad_name)		
+		corner_scad_path = op.join(self.scad_dir, scad_name)		
 
 		print "\n*** Creating corners ***\n"
 		self._start_processes(corner_scad_path, self.corners_table_path, corners_dir, "stl")
 
 	def make_edges(self, edges_dir):
-		edge_scad_path = op.join(self.zazouck_scad_dir, "edge.scad")
+		edge_scad_path = op.join(self.scad_dir, "edge.scad")
 
 		print "\n*** Creating edges ***\n"
 		#self._start_processes(edge_scad_path, self.corners_table_path, edges_dir, "dxf")
@@ -166,7 +168,7 @@ class Export: # TODO : singleton
 			shutil.rmtree(temp_path)
 		os.makedirs(temp_path)
 
-		corner_move_scad_path = op.join(self.zazouck_scad_dir, "move_part.scad")
+		corner_move_scad_path = op.join(self.scad_dir, "move_part.scad")
 
 		with open(self.corners_table_path, 'r') as table:
 			table.readline()
