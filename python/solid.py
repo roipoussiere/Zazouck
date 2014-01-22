@@ -20,8 +20,6 @@ class Solid: # TODO : singleton
 		self.edges = list()
 
 		self._create_solid()
-
-
 	
 	def get_nb_corners(self): return len(self.corners)	
 	def get_nb_polygons(self): return len(self.polygons)

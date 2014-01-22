@@ -49,19 +49,6 @@ class Export: # TODO : singleton
 			remaining = time.strftime("%Hh%Mm%Ss", time.gmtime((time.time()-t_init)/i*(nb_corners-i)))
 			print "- started for " + spent + ", please wait", remaining + "."
 
-
-	def make_tables(self, input_stl_path):
-		print "\n*** Creating tables ***\n"
-		
-		s = solid.Solid(input_stl_path)
-
-		s.build_corners_table(self.corners_table_path)
-		s.build_edges_table(self.edges_table_path)
-		print "Successfully created table files in " + self.project_dir + "."
-		#print "Model details: " + s
-
-		s.display(op.join(self.project_dir, "details.txt"))
-
 	def make_documentation(self, doc_dir):
 		img_dir = op.join(doc_dir, "img")
 

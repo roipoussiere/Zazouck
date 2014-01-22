@@ -17,6 +17,8 @@ openscad_path = "openscad"
 zazouck_python_dir = op.abspath(op.dirname(sys.argv[0]))
 scad_dir = op.join(op.dirname(zazouck_python_dir), "scad")
 
+class m(): roddy = range(1); # liste des modules disponibles
+
 def _create_dir(directory):
 	if os.path.exists(directory):
 		shutil.rmtree(directory)
@@ -35,31 +37,39 @@ def main():
 	infos_path = op.join(output_dir, "infos.txt")
 	#assembly_path = op.join(output_dir, "assembly.stl") if opt.assembly else None
 
+	module = m.roddy # à remplacer par un paramètre
+
 	if input_stl:
 		_create_dir(output_dir)
 
-	exp = export.Export(openscad_path, output_dir, scad_dir, opt.jobs, opt.verbose, opt.test)
+	if module == m.roddy:
+		model = roddy.Roddy(input_stl_path, output_dir)
 
 	if input_stl:
-		exp.make_tables(input_stl_path)
+		model.make_tables()
 
-	_create_dir(doc_dir)
-	exp.make_documentation(doc_dir)
+	#exp = export.Export(openscad_path, output_dir, scad_dir, opt.jobs, opt.verbose, opt.test)
 
-	#roddy = roddy.Roddy(s, input_stl_path, output_dir)
+	# if input_stl:
+	# 	exp.make_tables(input_stl_path)
 
-	if opt.infos:
-		pass
-		# TODO
-	else: # si on crée le stl
-		corners_dir = op.join(output_dir, "corners")
-		edges_dir = op.join(output_dir, "edges")
+	# _create_dir(doc_dir)
+	# exp.make_documentation(doc_dir)
 
-		_create_dir(corners_dir)
-		_create_dir(edges_dir)
+	# #roddy = roddy.Roddy(s, input_stl_path, output_dir)
 
-		exp.make_corners(corners_dir)
-		exp.make_edges(edges_dir)
+	# if opt.infos:
+	# 	pass
+	# 	# TODO
+	# else: # si on crée le stl
+	# 	corners_dir = op.join(output_dir, "corners")
+	# 	edges_dir = op.join(output_dir, "edges")
+
+	# 	_create_dir(corners_dir)
+	# 	_create_dir(edges_dir)
+
+	# 	exp.make_corners(corners_dir)
+	# 	exp.make_edges(edges_dir)
 
 	# Problème d'import du fichier scad :/
 	#if full_model_path != None:
