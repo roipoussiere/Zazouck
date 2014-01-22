@@ -10,7 +10,7 @@
 # TODO : alléger avec from .. import ..
 from os import path as op
 import os, sys, shutil, tempfile
-import parser, export
+import parser, export, roddy
 
 tmp_dir = tempfile.gettempdir()
 openscad_path = "openscad"
@@ -45,6 +45,8 @@ def main():
 
 	_create_dir(doc_dir)
 	exp.make_documentation(doc_dir)
+
+	#roddy = roddy.Roddy(s, input_stl_path, output_dir)
 
 	if opt.infos:
 		pass

@@ -7,23 +7,46 @@
 # Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
 
-import random, math
+import random, math, re, tempfile, os
 from random import randint
+from os import path as op
 import corner, polygon, edge
 
 class Solid: # TODO : singleton
-	# def __init__(self): # à tester
-	# 	self.polygons = []
-	# 	self.corners = []
-	# 	self.edges = []
-	polygons = []
-	corners = []
-	edges = []
+	def __init__(self, input_stl_path):
+		self.input_stl_path = input_stl_path
+		self.polygons = list()
+		self.corners = list()
+		self.edges = list()
+
+		self._create_solid()
+
+
 	
 	def get_nb_corners(self): return len(self.corners)	
 	def get_nb_polygons(self): return len(self.polygons)
 	def get_nb_edges(self): return len(self.edges)
 	
+	def _create_solid(self):
+		cleaned_path = op.join(tempfile.gettempdir(), "zazouck_cleaned")
+		self._clean_file(cleaned_path)
+		model = self._file_to_model(cleaned_path)
+		
+		os.remove(cleaned_path)
+
+		self.fill_corners(model)
+		self.fill_polygons(model)
+		del model
+		
+		self.set_connected_corners()
+		self.set_corners_data()
+
+		self.fill_edges()
+		self.set_edges_data()
+
+		#s.merge_coplanar_polygons() # TODO
+
+
 	def _get_corner_by_id(self, corner_id):
 		corner = False
 		for c in self.corners:
@@ -158,3 +181,32 @@ class Solid: # TODO : singleton
 			table.write(labels)
 			for edge in self.edges:
 				table.write(edge.get_data())
+
+	def _clean_file(self, cleaned_path):
+		words = 'vertex', 'endloop'
+		with open(self.input_stl_path, 'r') as f_stl, open(cleaned_path, 'w') as f_cleaned_stl:
+			for line in f_stl:
+				if any(word in line for word in words):
+					line = re.sub('^endloop.*', '|', line.lstrip())
+					line = line.replace("vertex", "")
+					line = line.lstrip().replace(" ", ",")
+					line = line.replace("\n", ";")
+					line = line.replace("|;", "\n")
+					f_cleaned_stl.write(line)
+
+	def _file_to_model(self, cleaned_path):
+		model = list()
+		with open(cleaned_path) as f_cleaned_stl:
+			for line in f_cleaned_stl:
+				line = re.sub('[;\n]$', '\n', line)
+				p = []
+				for point in line.split(';'):
+					pos_str = point.split(',')
+					pos_int = []
+					for nb in pos_str:
+						pos_int.append(float(nb))
+					p.append(pos_int)
+			
+				model.append(p)
+
+		return model

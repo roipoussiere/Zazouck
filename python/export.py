@@ -52,29 +52,11 @@ class Export: # TODO : singleton
 
 	def make_tables(self, input_stl_path):
 		print "\n*** Creating tables ***\n"
-		cleaned_path = op.join(tempfile.gettempdir(), "zazouck_cleaned")
-
-		stl.clean_file(input_stl_path, cleaned_path)
-		model = stl.file_to_model(cleaned_path)
-		os.remove(cleaned_path)
 		
-		s = solid.Solid()
-		s.fill_corners(model)
-		s.fill_polygons(model)
-		del model
-		
-		s.set_connected_corners()
-		s.set_corners_data()
+		s = solid.Solid(input_stl_path)
 
-		s.fill_edges()
-		s.set_edges_data()
-		#s.merge_coplanar_polygons() # TODO
-
-		corners_dir = self.corners_table_path
-		edges_dir = self.edges_table_path
-
-		s.build_corners_table(corners_dir)
-		s.build_edges_table(edges_dir)
+		s.build_corners_table(self.corners_table_path)
+		s.build_edges_table(self.edges_table_path)
 		print "Successfully created table files in " + self.project_dir + "."
 		#print "Model details: " + s
 
