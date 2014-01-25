@@ -20,11 +20,15 @@ class Export: # TODO : singleton
 		self.openscad_path = openscad_path
 		self.project_dir = project_dir
 		self.scad_dir = scad_dir
-		self.corners_table_path = op.join(project_dir, "corners.csv")
-		self.edges_table_path = op.join(project_dir, "edges.csv")
 		self.nb_job_slots = nb_job_slots
 		self.verbose_lvl = verbose_lvl
 		self.test = test
+
+		# TODO : modifier les 3 lignes
+		corners_table_dir = op.join(project_dir, "cmd")
+		self.corners_table_path = op.join(corners_table_dir, "corners.csv")
+		self.edges_table_path = op.join(corners_table_dir, "edges.csv")
+
 		self.process = list() # liste de tuples (retour process, nom du fichier)
 		self.nb_created = 0 # pour afficher le nombre de fichiers crées lors d'un ctr-c
 		signal.signal(signal.SIGINT, self.signal_handler)
@@ -64,20 +68,28 @@ class Export: # TODO : singleton
 
 		self._start_processes(corner_scad_path, self.corners_table_path, img_dir, "png", extra_options)
 
-		dimentions = str(pict_width) + 'x' + str(pict_width) # 
+		dimentions = str(pict_width) + 'x' + str(pict_width)
 		process_image = 'mogrify -trim +repage -resize ' + dimentions + \
 				' -background "#FFFFE5" ' + '-gravity center -extent ' + dimentions + \
 				' -fuzz 5% -transparent "#FFFFE5" ' + op.join(img_dir, "*.png")
 		subprocess.Popen(shlex.split(process_image))
 
-	def make_corners(self, corners_dir):
+	def make_stl(self):
+
+		# TODO: pas bien
+		corners_dir = op.join(self.project_dir, "corners")
+		os.makedirs(corners_dir)
+
 		scad_name = "corner_light.scad" if self.test else "corner.scad"
 		corner_scad_path = op.join(self.scad_dir, scad_name)		
 
 		print "\n*** Creating corners ***\n"
 		self._start_processes(corner_scad_path, self.corners_table_path, corners_dir, "stl")
 
-	def make_edges(self, edges_dir):
+		# TODO: pas bien
+		edges_dir = op.join(self.project_dir, "edges")
+		os.makedirs(edges_dir)
+	
 		edge_scad_path = op.join(self.scad_dir, "edge.scad")
 
 		print "\n*** Creating edges ***\n"

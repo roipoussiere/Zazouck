@@ -17,7 +17,6 @@ class Edge:
 		self.position = (0,0,0)
 		self.rotation = (0,0,0)
 		self.length = 0
-		self.data = ""
 
 	def get_id(self): return self.id
 	def get_corner_start(self): return self.corner_start
@@ -25,18 +24,6 @@ class Edge:
 	def get_length(self): return self.length
 	def get_position(self): return self.position
 	def get_rotation(self): return self.rotation
-	def get_data(self):	return self.data
-
-	def set_data(self):
-		self.data = str(self.id) + ","
-
-		for p in self.position:
-			self.data += str(p) + ","
-
-		for r in self.rotation:
-			self.data += str(r) + ","
-
-		self.data += str(self.length) + "\n"
 
 	def set_length(self):
 		self.length = self.corner_start.get_dist(self.corner_end)

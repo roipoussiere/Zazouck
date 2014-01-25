@@ -6,7 +6,7 @@ The first release of Zazouck is not yet finished.
 Comming soon... please be patient. ;)
 
 ## Description
-**Z**azouck is an **A**ma **Z**ing<b>O</b>pensource **U**niversal **C**onstruction **K**it
+**Z**azouck is an **A**ma<b>Z</b>ing **O**pensource **U**niversal **C**onstruction **K**it
 
 This program generates stl files to build a wonderful construction, from a 3D model. Here is an example of a generated part :
 

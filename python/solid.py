@@ -7,7 +7,7 @@
 # Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
 
-import random, math, re, tempfile, os
+import random, re, tempfile, os
 from random import randint
 from os import path as op
 import corner, polygon, edge
@@ -28,22 +28,17 @@ class Solid: # TODO : singleton
 	def _create_solid(self):
 		cleaned_path = op.join(tempfile.gettempdir(), "zazouck_cleaned")
 		self._clean_file(cleaned_path)
+
 		model = self._file_to_model(cleaned_path)
-		
 		os.remove(cleaned_path)
 
-		self.fill_corners(model)
-		self.fill_polygons(model)
+		self._fill_corners(model)
+		self._fill_polygons(model)
 		del model
 		
-		self.set_connected_corners()
-		self.set_corners_data()
-
-		self.fill_edges()
-		self.set_edges_data()
-
+		self._set_connected_corners()
+		self._fill_edges()
 		#s.merge_coplanar_polygons() # TODO
-
 
 	def _get_corner_by_id(self, corner_id):
 		corner = False
@@ -61,7 +56,7 @@ class Solid: # TODO : singleton
 				return id
 		return False
 
-	def fill_corners(self, _model):
+	def _fill_corners(self, _model):
 		positions = list()
 		id_list = list()
 
@@ -73,7 +68,7 @@ class Solid: # TODO : singleton
 		for position in positions:
 			self.corners.append(corner.Corner(self._get_random_id(id_list), position))
 	
-	def fill_polygons(self, _model):
+	def _fill_polygons(self, _model):
 		id_list = list()
 
 		for polygon_model in _model:
@@ -90,24 +85,11 @@ class Solid: # TODO : singleton
 			poly.set_normal(corners_pos)
 			self.polygons.append(poly)
 		
-	def set_connected_corners(self):
+	def _set_connected_corners(self):
 		for corner in self.corners:
 			corner.set_connected_corners(self.polygons)
-	
-	# TODO: à déplacer
-	def set_corners_data(self):
-		for corner in self.corners:
-			for target in corner.get_connected_corners():
-				corner.set_angles(self._get_corner_by_id(target).get_position())
 
-		for corner in self.corners:
-			corner.set_data()
-
-	def set_edges_data(self):
-		for edge in self.edges:
-			edge.set_data()
-
-	def fill_edges(self):
+	def _fill_edges(self):
 		id_list = list()
 		extremities = list()
 
@@ -138,47 +120,19 @@ class Solid: # TODO : singleton
 	#def merge_coplanar_polygons(self): # TODO
 	#	print "coplanar_polygons:", self._find_coplanar_polygons();
 	
-	def display(self, debug_path):
-		with open(debug_path, 'w') as f_debug:
-			f_debug.write("*** Corners position and connexions ***\n\n")
+	def display(self, details_path):
+		with open(details_path, 'w') as f_details:
+			f_details.write("*** Corners position and connexions ***\n\n")
 			for i, corner in enumerate(self.corners):
-				f_debug.write(str(i+1) + ": " + str(corner) + "\n")
+				f_details.write(str(i+1) + ": " + str(corner) + "\n")
 
-			f_debug.write("\n*** Polygons connexions ***\n\n")
+			f_details.write("\n*** Polygons connexions ***\n\n")
 			for i, polygon in enumerate(self.polygons):
-				f_debug.write(str(i+1) + ": " + str(polygon) + "\n")
+				f_details.write(str(i+1) + ": " + str(polygon) + "\n")
 
-			f_debug.write("\n*** Edges position and length ***\n\n")
+			f_details.write("\n*** Edges position and length ***\n\n")
 			for i, edge in enumerate(self.edges):
-				f_debug.write(str(i+1) + ": " + str(edge) + "\n")
-
-			f_debug.write("\n*** Angles ***\n\n")
-			for i, corner in enumerate(self.corners):
-				f_debug.write(str(i+1) + ": " + corner.print_angles() + "\n")
-
-	def build_corners_table(self, corners_table_path):
-		infos = str(self.get_nb_corners()) + " corners," + str(self.get_nb_polygons()) + \
-				" polygons," + str(self.get_nb_edges()) + " edges\n"
-
-		labels = "id,posX,posY,posZ,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H,\
-				rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
-
-		with open(corners_table_path, 'w') as table:
-			table.write(infos)
-			table.write(labels)
-			for corner in self.corners:
-				table.write(corner.get_data())
-
-	def build_edges_table(self, edges_table_path):
-		infos = str(self.get_nb_corners()) + " corners," + \
-				str(self.get_nb_polygons()) + " polygons," + str(self.get_nb_edges()) + " edges\n"
-		labels = "id,posX,posY,posZ,rotX,rotY,rotZ,length\n"
-
-		with open(edges_table_path, 'w') as table:
-			table.write(infos)
-			table.write(labels)
-			for edge in self.edges:
-				table.write(edge.get_data())
+				f_details.write(str(i+1) + ": " + str(edge) + "\n")
 
 	def _clean_file(self, cleaned_path):
 		words = 'vertex', 'endloop'

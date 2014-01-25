@@ -10,7 +10,7 @@
 class Polygon:
 	def __init__(self, polygon_id):
 		self.id = polygon_id
-		self.corners_id = []
+		self.corners_id = list()
 		self.normal = (0,0,0)
 	
 	def get_corners(self): return self.corners_id

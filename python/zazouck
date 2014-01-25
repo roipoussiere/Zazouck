@@ -9,10 +9,9 @@
 
 # TODO : alléger avec from .. import ..
 from os import path as op
-import os, sys, shutil, tempfile
+import os, sys, shutil
 import parser, export, roddy
 
-tmp_dir = tempfile.gettempdir()
 openscad_path = "openscad"
 zazouck_python_dir = op.abspath(op.dirname(sys.argv[0]))
 scad_dir = op.join(op.dirname(zazouck_python_dir), "scad")
@@ -31,45 +30,34 @@ def main():
 	input_stl = True if (op.splitext(opt.input_path)[1] == ".stl") else False
 	projet_name = op.splitext(op.basename(opt.input_path))[0]
 	input_stl_path = op.join(os.getcwd(), opt.input_path) if input_stl else None
-	output_dir = opt.input_path if not input_stl else op.join(os.getcwd(), projet_name) if (opt.output_dir == None) else opt.output_dir
+	output_dir = opt.input_path if not input_stl else \
+			op.join(os.getcwd(), projet_name) if (opt.output_dir == None) else opt.output_dir
 	param_path = None if opt.param_path == None else opt.param_path.name
 	doc_dir = op.join(output_dir, "doc") if (opt.doc_dir == False) else opt.doc_dir.name
 	infos_path = op.join(output_dir, "infos.txt")
+	bulding_dir = op.join(output_dir, "cmd")
 	#assembly_path = op.join(output_dir, "assembly.stl") if opt.assembly else None
 
 	module = m.roddy # à remplacer par un paramètre
 
 	if input_stl:
 		_create_dir(output_dir)
-
-	if module == m.roddy:
-		model = roddy.Roddy(input_stl_path, output_dir)
-
+		_create_dir(bulding_dir)
+		shutil.copy(opt.input_path, op.join(output_dir, "original.stl"))
+	
 	if input_stl:
-		model.make_tables()
+		if module == m.roddy:
+			model = roddy.Roddy(input_stl_path, output_dir, bulding_dir) # crée les fichiers de cmd
+		#elif...
 
-	#exp = export.Export(openscad_path, output_dir, scad_dir, opt.jobs, opt.verbose, opt.test)
+	exp = export.Export(openscad_path, output_dir, scad_dir, opt.jobs, opt.verbose, opt.test)
+	exp.make_documentation(doc_dir)
 
-	# if input_stl:
-	# 	exp.make_tables(input_stl_path)
-
-	# _create_dir(doc_dir)
-	# exp.make_documentation(doc_dir)
-
-	# #roddy = roddy.Roddy(s, input_stl_path, output_dir)
-
-	# if opt.infos:
-	# 	pass
-	# 	# TODO
-	# else: # si on crée le stl
-	# 	corners_dir = op.join(output_dir, "corners")
-	# 	edges_dir = op.join(output_dir, "edges")
-
-	# 	_create_dir(corners_dir)
-	# 	_create_dir(edges_dir)
-
-	# 	exp.make_corners(corners_dir)
-	# 	exp.make_edges(edges_dir)
+	if opt.infos:
+		pass
+		# TODO
+	else: # si on crée le stl
+		exp.make_stl()
 
 	# Problème d'import du fichier scad :/
 	#if full_model_path != None:
