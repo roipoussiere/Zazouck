@@ -41,7 +41,7 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		help = "3d model (stl file) or model directory if you want to continue a compilation.")
 
 	parser.add_argument('-o', '--output-dir', action = 'store', default = None,
-		type = argparse.FileType('w'),
+		type = argparse.FileType('w'), metavar = 'PROJECT_DIR',
 		help = "Directory where all the files will be exported (current dir. by default)")
 	
 	# TODO + ajouter valeur par defaut

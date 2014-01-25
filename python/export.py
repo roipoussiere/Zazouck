@@ -13,6 +13,7 @@ from os import path as op
 import subprocess
 import shlex
 import signal
+import xml.etree.ElementTree as ET
 
 class Export: # TODO : singleton
 
@@ -24,23 +25,15 @@ class Export: # TODO : singleton
 		self.verbose_lvl = verbose_lvl
 		self.test = test
 
-		# TODO : modifier les 3 lignes
-		corners_table_dir = op.join(project_dir, "cmd")
-		self.corners_table_path = op.join(corners_table_dir, "corners.csv")
-		self.edges_table_path = op.join(corners_table_dir, "edges.csv")
-
 		self.process = list() # liste de tuples (retour process, nom du fichier)
 		self.nb_created = 0 # pour afficher le nombre de fichiers crées lors d'un ctr-c
 		signal.signal(signal.SIGINT, self.signal_handler)
 
+		xml_path = op.join(project_dir, "build.xml")
+		self.root = ET.parse(xml_path).getroot()
+
 		if test:
 			print "Running in testing mode - don't print these files."
-
-	def _get_nb_lines(self, input_path):
-		with open(input_path, 'r') as f_input:
-			for nb_lines, line in enumerate(f_input):
-				pass
-		return nb_lines + 1
 
 	def _print_status(self, i, nb_corners, t_init, picture=False):
 		f_type = "picture" if picture else "stl file"
@@ -60,13 +53,19 @@ class Export: # TODO : singleton
 		self.make_pictures(img_dir, 200)
 
 	def make_pictures(self, img_dir, pict_width):
-		scad_name = "corner_light.scad" if self.test else "corner.scad"
-		corner_scad_path = op.join(self.scad_dir, scad_name)
 		extra_options = "--imgsize=" + str(pict_width*2) + "," + str(pict_width*2) + \
 				" --camera=0,0,0,45,0,45,140"
 		print "\n*** Creating pictures ***\n"
 
-		self._start_processes(corner_scad_path, self.corners_table_path, img_dir, "png", extra_options)
+		corner = self.root.find('set')
+		while corner.get('img') != "true":
+			corner = self.root.find('set')
+
+		part_scad_name = corner.get('file') if not self.test else corner.get('light_file')
+		part_scad_path = op.join(self.scad_dir, part_scad_name)
+
+		#TODO: ne pas transmettre l'arbre puisque on l'a dans self
+		self._start_processes(part_scad_path, corner, img_dir, "png")
 
 		dimentions = str(pict_width) + 'x' + str(pict_width)
 		process_image = 'mogrify -trim +repage -resize ' + dimentions + \
@@ -75,63 +74,50 @@ class Export: # TODO : singleton
 		subprocess.Popen(shlex.split(process_image))
 
 	def make_stl(self):
+		for set in self.root.findall('set'):
+			print "\n*** Creating " + set.get('name') + "s ***\n"
 
-		# TODO: pas bien
-		corners_dir = op.join(self.project_dir, "corners")
-		os.makedirs(corners_dir)
+			part_scad_name = set.get('light_file') if self.test and \
+					'light_file' in set.attrib else set.get('file')
+			part_scad_path = op.join(self.scad_dir, part_scad_name)
 
-		scad_name = "corner_light.scad" if self.test else "corner.scad"
-		corner_scad_path = op.join(self.scad_dir, scad_name)		
+			export_path = op.join(self.project_dir, set.get('name'))
+			os.makedirs(export_path)
 
-		print "\n*** Creating corners ***\n"
-		self._start_processes(corner_scad_path, self.corners_table_path, corners_dir, "stl")
+			self._start_processes(part_scad_path, set, export_path, set.get('type'))
 
-		# TODO: pas bien
-		edges_dir = op.join(self.project_dir, "edges")
-		os.makedirs(edges_dir)
-	
-		edge_scad_path = op.join(self.scad_dir, "edge.scad")
+	def _start_processes(self, part_scad_path, set_tree, export_dir, type, extra_options = ""):
+		nb_files = len(set_tree)
 
-		print "\n*** Creating edges ***\n"
-		#self._start_processes(edge_scad_path, self.corners_table_path, edges_dir, "dxf")
+		#print "Model details: " + table.readline().rstrip('\n').replace(",", ", ") + "."
+		print nb_files, type, "files will be created in " + export_dir + "."
 
-	def _start_processes(self, scad_path, table_path, output_dir, extension, extra_options = ""):
-		nb_files = self._get_nb_lines(table_path) - 2
+		t_init = time.time()
+		self.nb_created = 0
 
-		with open(table_path, 'r') as table:
-			print "Model details: " + table.readline().rstrip('\n').replace(",", ", ") + "."
-			print nb_files, extension, "files will be created in " + output_dir + "."
+		if self.nb_job_slots == 1:
+			print "Compiling the first " + type + " file, please wait...\n"
+		else:
+			nb_creating = self.nb_job_slots if self.nb_job_slots < nb_files else nb_files
+			print "Compiling", nb_creating, type, "files simultaneously, please wait...\n"
 
-			table.readline()
-			t_init = time.time()
-			self.nb_created = 0
+		for part in set_tree:
+			options = "-D 'id=" + part.get('id') + "; " + part.get('data').replace('\'', '"') + "'"
 
-			if self.nb_job_slots == 1:
-				print "Compiling the first " + extension + " file, please wait...\n"
-			else:
-				nb_creating = self.nb_job_slots if self.nb_job_slots < nb_files else nb_files
-				print "Compiling", nb_creating, extension, "files simultaneously, please wait...\n"
+			output_path = op.join(export_dir, part.get('id') + "." + type)
+			self._openscad(part_scad_path, options, output_path)
+			self._end_of_process(nb_files, t_init)
 
-			for line in table:
-				corner_id = line[0:line.index(",")]
-				start = [m.start() for m in re.finditer(r",",line)][3] + 1 # position des données
-				data = line.rstrip('\n')[start:]
+		while self.process:
+			self._end_of_process(nb_files, t_init)
 
-				######### et pour edge ??
-				options = "-D 'id=" + corner_id + "; angles=\"" + data + "\"' " + extra_options
-
-				output_path = op.join(output_dir, corner_id + "." + extension)
-				self._openscad(scad_path, options, output_path)
-				self._end_of_process(nb_files, t_init)
-
-			while self.process:
-				self._end_of_process(nb_files, t_init)
-
-		print "\nFinished!", self.nb_created, extension, "files successfully created in " + output_dir + "."
+		print "\nFinished!", self.nb_created, type, "files successfully created in " + export_dir + "."
 
 	def _end_of_process(self, nb_files, t_init):
 		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - t_init))
+
 		for i, p in enumerate(self.process):
+			
 			if p[0].poll() == 0:
 				del self.process[i]
 				self.nb_created += 1
@@ -172,7 +158,8 @@ class Export: # TODO : singleton
 		out = None if self.verbose_lvl == 3 else open(os.devnull, 'w')
 
 		p = subprocess.Popen(shlex.split(cmd), stdout = out, stderr = err)
-		self.process.append((p,op.basename(output_file)))
+
+		self.process.append((p, op.basename(output_file)))
 
 		if len(self.process) >= self.nb_job_slots:
 			p.wait()

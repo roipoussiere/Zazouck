@@ -8,100 +8,77 @@
 # You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
 
 from os import path as op
+import xml.etree.ElementTree as ET
 import math
+
 import solid
 
 class Roddy:
 
-	def __init__(self, input_stl_path, output_dir, cmd_dir):
+	def __init__(self, input_stl_path, project_dir):
 		self.input_stl_path = input_stl_path
-		self.output_dir = output_dir
-		self.cmd_dir = cmd_dir
+		self.project_dir = project_dir
 
 		self.solid = solid.Solid(input_stl_path)
-		self.solid.display(op.join(self.output_dir, "details.txt"))
+		self.solid.display(op.join(self.project_dir, "details.txt"))
 
-		self._corners()
-	# 	self._edges()
+		self.xml_root = ET.Element("model")
 
-	def _corners(self):
+		self._build_corners_tree()
+		self._build_edges_tree()
 
-		self._build_corners_table(op.join(self.cmd_dir, "corners.csv"))
-		self._build_edges_table(op.join(self.cmd_dir, "edges.csv"))
+		tree = ET.ElementTree(self.xml_root)
+		_indent(self.xml_root)
+		tree.write(op.join(project_dir, "build.xml"), encoding = "UTF-8", xml_declaration = True)
 
-		print "Successfully created building files in " + self.output_dir + "."
+		print "Successfully created building files in " + self.project_dir + "."
 
+#	infos = str(self.solid.get_nb_corners()) + " corners," + str(self.solid.get_nb_polygons()) \
+#			+ " polygons," + str(self.solid.get_nb_edges()) + " edges\n"
 
-	# def _edges(self):
-	# 	export = export.Export(output_dir)
+	def _build_corners_tree(self):
+		xml_corner = ET.SubElement(self.xml_root, "set")
 
-	# TODO: à déplacer
-	# def set_corners_data(self):
-	# 	for corner in solid.corners:
-	# 		for target in corner.get_connected_corners():
-	# 			corner.set_angles(self._get_corner_by_id(target).get_position())
+		xml_corner.set('name', 'corner')
+		xml_corner.set('file', "corner.scad")
+		xml_corner.set('light_file', "corner_light.scad")
+		xml_corner.set('type', 'stl')
+		xml_corner.set('const', 'rot=0,0,0')
+		xml_corner.set('img', 'true')
 
-	# 	for corner in self.corners:
-	# 		corner.set_data()
+		# TODO: .corner = ugly!!!
+		for corner in self.solid.corners:
+			part = ET.SubElement(xml_corner, "part")
+			part.set('id', str(corner.get_id()))
+			part.set('pos', ','.join(str(p) for p in corner.get_position()))
+			part.set('data', self._corner_data(corner))
 
-	# def set_edges_data(self):
-	# 	for edge in self.edges:
-	# 		edge.set_data()
+	def _build_edges_tree(self):
+		xml_edge = ET.SubElement(self.xml_root, "set")
+		xml_edge.set('name', 'edge')
+		xml_edge.set('file', "edge.scad")
+		xml_edge.set('type', 'dxf')
+		xml_edge.set('const', '')
+		xml_edge.set('img', 'false')
 
-	def _build_corners_table(self, corners_table_path):
-		infos = str(self.solid.get_nb_corners()) + " corners," + str(self.solid.get_nb_polygons()) \
-				+ " polygons," + str(self.solid.get_nb_edges()) + " edges\n"
+		for edge in self.solid.edges:	# ugly!!!
+			part = ET.SubElement(xml_edge, "part")
+			part.set('id', str(edge.get_id()))
 
-		labels = "id,posX,posY,posZ,rod 1-V,rod 1-H,rod 2-V,rod 2-H,rod 3-V,rod 3-H," + \
-				"rod 4-V,rod 4-H,rod 5-V,rod 5-H,rod 6-V,rod 6-H,rod 7-V,rod 7-H,rod 8-V,rod 8-H\n"
-
-		with open(corners_table_path, 'w') as table:
-			table.write(infos)
-			table.write(labels)
-
-			for corner in self.solid.corners:   # ugly!!!
-				table.write(self._corner_data(corner))
-
-	def _build_edges_table(self, edges_table_path):
-		infos = str(self.solid.get_nb_corners()) + " corners," + str(self.solid.get_nb_polygons()) \
-				+ " polygons," + str(self.solid.get_nb_edges()) + " edges\n"
-		labels = "id,posX,posY,posZ,rotX,rotY,rotZ,length\n"
-
-		with open(edges_table_path, 'w') as table:
-			table.write(infos)
-			table.write(labels)
-			for edge in self.solid.edges:	# ugly!!!
-				table.write(self._edge_data(edge))
+			part.set('pos', ','.join(str(p) for p in edge.get_position()))
+			part.set('rot', ','.join(str(r) for r in edge.get_rotation()))
+			part.set('data', self._edge_data(edge))
 
 	def _corner_data(self, corner):
-		data = self._number_to_txt(corner.get_id(), 5)
 		angles = list()
-
-		for p in corner.get_position():
-			data += "," + str(p)
-
 		for target in corner.get_connected_corners():
 			angles += self.positions_to_angles(corner.get_position(), \
 					self.solid._get_corner_by_id(target).get_position())
 
-		for angle in angles:
-			data += "," + self._number_to_txt(angle, 3)
-		data += "\n"
-
-		return data
+		return "angles='" + ','.join(self._number_to_txt(angle, 3) for angle in angles) + "'"
 
 	def _edge_data(self, edge):
-		data = str(edge.get_id()) + ","
-
-		for p in edge.get_position():
-			data += str(p) + ","
-
-		for r in edge.get_rotation():
-			data += str(r) + ","
-
-		data += str(edge.get_length()) + "\n"
-
-		return data
+		return 'length=' + str(edge.get_length())
 
 	def positions_to_angles(self, init_position, target_position):
 		#for i in range(3):
@@ -137,3 +114,18 @@ class Roddy:
 		while len(nb) < size:
 			nb = "0" + nb
 		return nb
+
+def _indent(elem, level=0):
+	i = "\n" + level*"\t"
+	if len(elem):
+		if not elem.text or not elem.text.strip():
+			elem.text = i + "\t"
+		if not elem.tail or not elem.tail.strip():
+			elem.tail = i
+		for elem in elem:
+			_indent(elem, level+1)
+		if not elem.tail or not elem.tail.strip():
+			elem.tail = i
+	else:
+		if level and (not elem.tail or not elem.tail.strip()):
+			elem.tail = i

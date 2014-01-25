@@ -36,9 +36,9 @@ class Edge:
 		self.position = (tx, ty, tz)
 
 	def set_rotation(self):
-		rx = 1
-		ry = 1
-		rz = 1
+		rx = 0
+		ry = 0
+		rz = 0
 		self.rotation = (rx, ry, rz)
 	
 	def __str__(self):
