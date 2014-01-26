@@ -88,8 +88,7 @@ $ zazoucko cube.stl -d
 Use zazoucko -h to see all available options :
 
 ```
-usage: zazouck [-h] [-o OUTPUT_DIR] [-p PARAM_PATH] [-t] [-s FIRST_LINE]
-               [-f LAST_LINE] [-d DIR] [-ns] [-nd] [-ni] [-na] [-nf]
+usage: zazouck [-h] [-o PROJECT_DIR] [-p PARAM_PATH] [-t] [-i] [-d DIR]
                [-V [{1,2,3}]] [-j [NB_JOBS_SLOTS]] [-v]
                input_path
 
@@ -100,12 +99,12 @@ describing the parts (very fast), then it compile this one into a lot
 of .stl files (can be long). See README.md for getting started.
 
 positional arguments:
-  input_path            3d model (stl file) or model directory if it's already
-                        created.
+  input_path            3d model (stl file) or model directory if you want to
+                        continue a compilation.
 
 optional arguments:
   -h, --help            show this help message and exit
-  -o OUTPUT_DIR, --output-dir OUTPUT_DIR
+  -o PROJECT_DIR, --output-dir PROJECT_DIR
                         Directory where all the files will be exported
                         (current dir. by default)
   -p PARAM_PATH, --param-path PARAM_PATH
@@ -113,21 +112,10 @@ optional arguments:
                         parts parameters.
   -t, --test            The files are quickly compiled for testing, not able
                         to be printed.
-  -s FIRST_LINE, --start-from FIRST_LINE
-                        Start compilation from line FIRST_LINE in the .csv
-                        file.
-  -f LAST_LINE, --finish-at LAST_LINE
-                        Finish compilation at line LAST_LINE in the .csv file.
+  -i, --infos           Get some informations about the model.
   -d DIR, --doc-dir DIR
                         Assembly instructions directory (OUTPUT_DIR/doc by
                         default).
-  -ns, --no-stl         Doesn't compile stl files, only build csv tables.
-  -nd, --no-doc         Doesn't build assembly instructions.
-  -ni, --no-infos       Doesn't make a text file containing informations about
-                        the model.
-  -na, --no-assembly    Doesn't create the 3d model of the assembly.
-  -nf, --no-shuffle     Doesn't shuffle the lists of corners, polygons and
-                        edges.
   -V [{1,2,3}], --verbose [{1,2,3}]
                         Verbose level: 1 = OpenScad calls (default value), 2 =
                         OpenScad warnings, 3 = all OpenScad messages.

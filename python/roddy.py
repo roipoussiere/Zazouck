@@ -24,12 +24,16 @@ class Roddy:
 
 		self.xml_root = ET.Element("model")
 
+		project_name = op.splitext(op.basename(input_stl_path))[0]
+		self.xml_root.set('name', project_name)
+
 		self._build_corners_tree()
 		self._build_edges_tree()
 
 		tree = ET.ElementTree(self.xml_root)
 		_indent(self.xml_root)
-		tree.write(op.join(project_dir, "build.xml"), encoding = "UTF-8", xml_declaration = True)
+		xml_path = op.join(project_dir, "build.zaz")
+		tree.write(xml_path, encoding = "UTF-8", xml_declaration = True)
 
 		print "Successfully created building files in " + self.project_dir + "."
 

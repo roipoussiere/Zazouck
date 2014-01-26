@@ -27,10 +27,10 @@ def _create_dir(directory):
 def main():
 	opt = parser.parser()
 
-	input_stl = True if (op.splitext(opt.input_path)[1] == ".stl") else False
+	is_input_stl = True if (op.splitext(opt.input_path)[1] == ".stl") else False
 	projet_name = op.splitext(op.basename(opt.input_path))[0]
-	input_stl_path = op.join(os.getcwd(), opt.input_path) if input_stl else None
-	project_dir = opt.input_path if not input_stl else \
+	input_stl_path = op.join(os.getcwd(), opt.input_path) if is_input_stl else None
+	project_dir = opt.input_path if not is_input_stl else \
 			op.join(os.getcwd(), projet_name) if (opt.output_dir == None) else opt.output_dir
 	param_path = None if opt.param_path == None else opt.param_path.name
 	doc_dir = op.join(project_dir, "doc") if (opt.doc_dir == False) else opt.doc_dir.name
@@ -39,24 +39,23 @@ def main():
 
 	module = m.roddy # à remplacer par un paramètre
 
-	if input_stl:
+	if is_input_stl:
 		_create_dir(project_dir)
 		shutil.copy(opt.input_path, op.join(project_dir, "original.stl"))
-	
-	if input_stl:
+		
 		if module == m.roddy:
-			model = roddy.Roddy(input_stl_path, project_dir) # crée les fichiers de cmd
-		#elif...
+			roddy.Roddy(input_stl_path, project_dir) # crée le fichier zaz
+		#elif module == ...
 
 	if opt.infos:
 
 		# TODO: afficher quelques infos de base
-		pass
 
-	else: # si on crée le stl
-		exp = export.Export(openscad_path, project_dir, scad_dir, opt.jobs, opt.verbose, opt.test)
-		exp.make_documentation(doc_dir)
-		exp.make_stl()
+		sys.exit(0)
+
+	exp = export.Export(project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
+	exp.make_documentation(doc_dir)
+	exp.make_stl()
 
 	# TODO: Problème d'import du fichier scad :/
 	#if full_model_path != None:
