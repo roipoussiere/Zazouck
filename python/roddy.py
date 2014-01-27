@@ -32,7 +32,7 @@ class Roddy:
 
 		tree = ET.ElementTree(self.xml_root)
 		_indent(self.xml_root)
-		xml_path = op.join(project_dir, "build.zaz")
+		xml_path = op.join(project_dir, "build.xml")
 		tree.write(xml_path, encoding = "UTF-8", xml_declaration = True)
 
 		print "Successfully created building files in " + self.project_dir + "."

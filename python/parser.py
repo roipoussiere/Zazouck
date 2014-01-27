@@ -60,6 +60,9 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 		type = argparse.FileType('w'),
 		help = "Assembly instructions directory (OUTPUT_DIR/doc by default).")
 
+	parser.add_argument('-na', '--no-assembled', action = 'store_false', default = True,
+		dest = 'assembled', help = "Do not build the assembled model (save time).")
+
 	parser.add_argument('-V', '--verbose', action = 'store', nargs = '?',
 		type = int, choices = xrange(1, 4), default = 0, const = 1,
 		help = "Verbose level: 1 = OpenScad calls (default value), 2 = OpenScad warnings, \

@@ -18,7 +18,7 @@ class Solid: # TODO : singleton
 		self.polygons = list()
 		self.corners = list()
 		self.edges = list()
-
+		self.id_list = list()
 		self._create_solid()
 	
 	def get_nb_corners(self): return len(self.corners)	
@@ -47,18 +47,18 @@ class Solid: # TODO : singleton
 				corner = c
 		return corner
 
-	def _get_random_id(self, id_list):
+	def _get_random_id(self):
 		MAX_ID = 32766 # values 0 and 32767 are not visible on a MQRcode
+		
 		while True:
 			id = randint(1, MAX_ID)
-			if id not in id_list:
-				id_list.append(id)
+			if id not in self.id_list:
+				self.id_list.append(id)
 				return id
 		return False
 
 	def _fill_corners(self, _model):
 		positions = list()
-		id_list = list()
 
 		for polygon_model in _model:
 			for point in polygon_model:
@@ -66,14 +66,12 @@ class Solid: # TODO : singleton
 					positions.append(point)
 		
 		for position in positions:
-			self.corners.append(corner.Corner(self._get_random_id(id_list), position))
+			self.corners.append(corner.Corner(self._get_random_id(), position))
 	
 	def _fill_polygons(self, _model):
-		id_list = list()
-
 		for polygon_model in _model:
 
-			poly = polygon.Polygon(self._get_random_id(id_list))
+			poly = polygon.Polygon(self._get_random_id())
 			corners_pos = []
 			for position in polygon_model:
 				for corner in self.corners:
@@ -90,7 +88,6 @@ class Solid: # TODO : singleton
 			corner.set_connected_corners(self.polygons)
 
 	def _fill_edges(self):
-		id_list = list()
 		extremities = list()
 
 		for c1 in self.corners:
@@ -98,7 +95,7 @@ class Solid: # TODO : singleton
 				if (c1.get_id(),c2) not in extremities and (c2,c1.get_id()) not in extremities:
 					extremities.append((c1.get_id(), c2))
 					self.edges.append(edge.Edge(
-							self._get_random_id(id_list), c1, self._get_corner_by_id(c2)))
+							self._get_random_id(), c1, self._get_corner_by_id(c2)))
 
 		for e in self.edges:
 			e.set_length()

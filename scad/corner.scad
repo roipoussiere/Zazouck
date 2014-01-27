@@ -47,8 +47,8 @@ notch_size = 1.5;
 code = false;
 
 /* Here is the serious stuff */
-
-print_parts(shape);
+pos=[0,0,0];
+translate(pos) print_parts(shape);
 
 module print_parts(part)
 {

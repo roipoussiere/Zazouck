@@ -88,7 +88,7 @@ $ zazoucko cube.stl -d
 Use zazoucko -h to see all available options :
 
 ```
-usage: zazouck [-h] [-o PROJECT_DIR] [-p PARAM_PATH] [-t] [-i] [-d DIR]
+usage: zazouck [-h] [-o PROJECT_DIR] [-p PARAM_PATH] [-t] [-i] [-d DIR] [-na]
                [-V [{1,2,3}]] [-j [NB_JOBS_SLOTS]] [-v]
                input_path
 
@@ -116,6 +116,7 @@ optional arguments:
   -d DIR, --doc-dir DIR
                         Assembly instructions directory (OUTPUT_DIR/doc by
                         default).
+  -na, --no-assembled   Do not build the assembled model (save time).
   -V [{1,2,3}], --verbose [{1,2,3}]
                         Verbose level: 1 = OpenScad calls (default value), 2 =
                         OpenScad warnings, 3 = all OpenScad messages.

@@ -29,7 +29,7 @@ class Export: # TODO : singleton
 		self.nb_created = 0 # pour afficher le nombre de fichiers crées lors d'un ctrl-c
 		signal.signal(signal.SIGINT, self.signal_handler)
 
-		self.xml_path = op.join(project_dir, "build.zaz")
+		self.xml_path = op.join(project_dir, "build.xml")
 		self.root = ET.parse(self.xml_path).getroot()
 
 		if test:
@@ -67,7 +67,7 @@ class Export: # TODO : singleton
 		part_scad_path = op.join(self.scad_dir, part_scad_name)
 
 		#TODO: ne pas transmettre l'arbre puisque on l'a dans self
-		self._start_processes(part_scad_path, corner, img_dir, "png")
+		self._start_processes(part_scad_path, corner, img_dir, 'png')
 
 		dimentions = str(pict_width) + 'x' + str(pict_width)
 		process_image = 'mogrify -trim +repage -resize ' + dimentions + \
@@ -76,7 +76,7 @@ class Export: # TODO : singleton
 		subprocess.Popen(shlex.split(process_image))
 
 	def make_stl(self):
-		for set in self.root.findall('set'):
+		for set in self.root:
 			print "\n*** Creating " + set.get('name') + "s ***\n"
 
 			part_scad_name = set.get('light_file') if self.test and \
@@ -88,20 +88,22 @@ class Export: # TODO : singleton
 			if not os.path.exists(export_path):
 				os.makedirs(export_path)
 
-			self._start_processes(part_scad_path, set, export_path, set.get('type'))
+			self._start_processes(part_scad_path, set, export_path)
 
 		self._save_xml()
 
 	def _save_xml(self):
 		ET.ElementTree(self.root).write(self.xml_path, encoding = "UTF-8", xml_declaration = True)
 
-	def _start_processes(self, part_scad_path, set_tree, export_dir, type):
+		####### option pour passer si done existe ?
+	def _start_processes(self, part_scad_path, set_tree, export_dir, \
+				is_img = False, is_assembly = False):
 		nb_files = len(set_tree)
-
-		print nb_files, type, "files will be created in " + export_dir + "."
-
 		t_init = time.time()
 		self.nb_created = 0
+		type = 'png' if is_img else set_tree.get('type')
+
+		print nb_files, type, "files will be created in " + export_dir + '.'
 
 		if self.nb_job_slots == 1:
 			print "Compiling the first " + type + " file, please wait...\n"
@@ -110,19 +112,25 @@ class Export: # TODO : singleton
 			print "Compiling", nb_creating, type, "files simultaneously, please wait...\n"
 
 		for part in set_tree:
-			if 'done' not in part.attrib:
-				options = "-D 'id=" + part.get('id') + "; " + part.get('data').replace('\'', '"') + "'"
+			if 'done' not in part.attrib or is_assembly:
+				id = 'id=' + part.get('id') + '; '
+				pos = 'pos=[' + part.get('pos') + ']; ' if 'pos' in part.attrib and is_assembly else ''
+				rot = 'rot=[' + part.get('rot') + ']; ' if 'rot' in part.attrib and is_assembly else ''
+				var = part.get('data').replace('\'', '"')
+
+				options = "-D '" + id + pos + rot + var + "'"
 
 				output_path = op.join(export_dir, part.get('id') + "." + type)
 				self._openscad(part_scad_path, options, output_path, part)
 				self._end_of_process(nb_files, t_init, type, part)
 			else:
 				print part.get('id') + '.' + type + ' already exists, pass.'
+				self.nb_created += 1
 
 		while self.process:
 			self._end_of_process(nb_files, t_init, type, part)
 
-		print "\nFinished!", self.nb_created, type, "files successfully created in " + export_dir + "."
+		print "\nFinished!", self.nb_created, type, "files successfully created in " + export_dir + '.'
 
 	def _end_of_process(self, nb_files, t_init, type, part):
 		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - t_init))
@@ -132,39 +140,31 @@ class Export: # TODO : singleton
 			if p[0].poll() == 0:
 				del self.process[i]
 				self.nb_created += 1
-				progress = str(self.nb_created) + "/" + str(nb_files)
+				progress = str(self.nb_created) + '/' + str(nb_files)
 
-				# trouver la partie qui vient de se terminer
 				if type != 'png':
 					p[1].set('done', 'true')
 					self._save_xml()
 
-				print spent + ": Created file " + progress + ": " + p[1].get('id') + "." + type + '.'
+				print spent + ": Created file " + progress + ': ' + p[1].get('id') + '.' + type + '.'
 
-	# def make_model(self, stls_dir, full_model_path):
-	# 	import shutil
+	def make_assembly(self):
+		import shutil
+		assembly_path = op.join(self.project_dir, 'assembled')
+		os.makedirs(assembly_path)
 
-	# 	print "\n*** Creating full model ***\n"
-	# 	print "This file will be created in " + full_model_path
+		print "\n*** Creating assembled model ***\n"
+		print "This file will be created in " + assembly_path
 
-	# 	temp_path = op.join(tempfile.gettempdir(), "full_model")
-	# 	if os.path.exists(temp_path):
-	# 		shutil.rmtree(temp_path)
-	# 	os.makedirs(temp_path)
+		for set in self.root:
+			part_scad_name = set.get('light_file') if self.test and \
+					'light_file' in set.attrib else set.get('file')
 
-	# 	corner_move_scad_path = op.join(self.scad_dir, "move_part.scad")
+			print "test:", self.test
 
-	# 	with open(self.corners_table_path, 'r') as table:
-	# 		table.readline()
-	# 		table.readline()
-			
-	# 		for i, line in enumerate(table): # utiliser start_processes ?
-	# 			data = line.split(",")[0:4]
-	# 			file_name = data[0] + ".stl"
-	# 			options = "-D 'file=\"" + op.join(stls_dir, file_name) + "\"; " + \
-	# 					"tx=" + data[1] + "; ty=" + data[2] + "; tz=" + data[3] + "'"
-	# 			output_file = op.join(temp_path, "moved_" + file_name)
-	# 			self._openscad(corner_move_scad_path, options, output_file)
+			part_scad_path = op.join(self.scad_dir, part_scad_name)
+
+			self._start_processes(part_scad_path, set, assembly_path, is_assembly = True)
 
 	def _openscad(self, scad_file_path, options, output_file, part):
 		cmd = self.openscad_path + ' ' + scad_file_path + ' -o ' + output_file + ' ' + options
@@ -185,6 +185,6 @@ class Export: # TODO : singleton
 		import sys
 		print "\n\nCompilation interrupted by the user."
 		print self.nb_created, "file" + ('s' if self.nb_created > 1 else '') + " were created."
-		print "You can continue this work later with this command:"
-		print "zazouck " + self.project_dir + "'."
+		print "You can continue this job later with this command:"
+		print "zazouck " + self.project_dir
 		sys.exit(0)

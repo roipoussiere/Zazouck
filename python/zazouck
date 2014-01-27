@@ -44,8 +44,11 @@ def main():
 		shutil.copy(opt.input_path, op.join(project_dir, "original.stl"))
 		
 		if module == m.roddy:
-			roddy.Roddy(input_stl_path, project_dir) # crée le fichier zaz
+			roddy.Roddy(input_stl_path, project_dir) # crée le fichier xml
 		#elif module == ...
+
+	else:
+		print "Resuming the compilation..."
 
 	if opt.infos:
 
@@ -57,8 +60,7 @@ def main():
 	exp.make_documentation(doc_dir)
 	exp.make_stl()
 
-	# TODO: Problème d'import du fichier scad :/
-	#if full_model_path != None:
-		#exp.make_model(project_dir, full_model_path)
+	if opt.assembled:
+		exp.make_assembly()
 
 main()
