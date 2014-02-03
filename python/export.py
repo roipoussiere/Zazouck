@@ -7,73 +7,27 @@
 # Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
 
-import time, os, re, tempfile
-import solid, stl
+import os, re, tempfile, signal
+import solid, stl, doc, process
 from os import path as op
-import subprocess
-import shlex
-import signal
 import xml.etree.ElementTree as ET
 
 class Export: # TODO : singleton
 
-	def __init__(self, project_dir, openscad_path, scad_dir, nb_job_slots, verbose_lvl, test):
+	def __init__(self, xml_path, project_dir, openscad_path, scad_dir, nb_job_slots, verbose_lvl, test):
+		self.xml_path = xml_path
 		self.openscad_path = openscad_path
 		self.project_dir = project_dir
 		self.scad_dir = scad_dir
 		self.nb_job_slots = nb_job_slots
 		self.verbose_lvl = verbose_lvl
 		self.test = test
-
-		self.process = list() # liste de tuples (retour process, nom du fichier)
-		self.nb_created = 0 # pour afficher le nombre de fichiers crées lors d'un ctrl-c
 		signal.signal(signal.SIGINT, self.signal_handler)
 
-		self.xml_path = op.join(project_dir, "build.xml")
-		self.root = ET.parse(self.xml_path).getroot()
+		self.root = ET.parse(xml_path).getroot()
 
 		if test:
 			print "Running in testing mode - don't print these files."
-
-	def _print_status(self, i, nb_corners, t_init, picture=False):
-		f_type = "picture" if picture else "stl file"
-		print "Compiling " + f_type + " " + str(i+1) + "/" + str(nb_corners),
-		print "(" + str(int(round(i/float(nb_corners)*100))) + "%)",
-		if i==0:
-			print "- please wait... "
-		else:
-			spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time()-t_init))
-			remaining = time.strftime("%Hh%Mm%Ss", time.gmtime((time.time()-t_init)/i*(nb_corners-i)))
-			print "- started for " + spent + ", please wait", remaining + "."
-
-	def make_documentation(self, doc_dir):
-		IMG_SIZE = 200
-
-		img_dir = op.join(doc_dir, "img")
-		if not os.path.exists(img_dir):
-			os.makedirs(img_dir)
-		self.make_pictures(img_dir, IMG_SIZE)
-
-	def make_pictures(self, img_dir, pict_width):
-		extra_options = "--imgsize=" + str(pict_width*2) + "," + str(pict_width*2) + \
-				" --camera=0,0,0,45,0,45,140"
-		print "\n*** Creating pictures ***\n"
-
-		corner = self.root.find('set')
-		while corner.get('img') != "true":
-			corner = self.root.find('set')
-
-		part_scad_name = corner.get('file') if not self.test else corner.get('light_file')
-		part_scad_path = op.join(self.scad_dir, part_scad_name)
-
-		#TODO: ne pas transmettre l'arbre puisque on l'a dans self
-		self._start_processes(part_scad_path, corner, img_dir, 'png')
-
-		dimentions = str(pict_width) + 'x' + str(pict_width)
-		process_image = 'mogrify -trim +repage -resize ' + dimentions + \
-				' -background "#FFFFE5" ' + '-gravity center -extent ' + dimentions + \
-				' -fuzz 5% -transparent "#FFFFE5" ' + op.join(img_dir, "*.png")
-		subprocess.Popen(shlex.split(process_image))
 
 	def make_stl(self):
 		for set in self.root:
@@ -88,65 +42,9 @@ class Export: # TODO : singleton
 			if not os.path.exists(export_path):
 				os.makedirs(export_path)
 
-			self._start_processes(part_scad_path, set, export_path)
+			process.Process(part_scad_path, set, export_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl)
 
 		self._save_xml()
-
-	def _save_xml(self):
-		ET.ElementTree(self.root).write(self.xml_path, encoding = "UTF-8", xml_declaration = True)
-
-		####### option pour passer si done existe ?
-	def _start_processes(self, part_scad_path, set_tree, export_dir, \
-				is_img = False, is_assembly = False):
-		nb_files = len(set_tree)
-		t_init = time.time()
-		self.nb_created = 0
-		type = 'png' if is_img else set_tree.get('type')
-
-		print nb_files, type, "files will be created in " + export_dir + '.'
-
-		if self.nb_job_slots == 1:
-			print "Compiling the first " + type + " file, please wait...\n"
-		else:
-			nb_creating = self.nb_job_slots if self.nb_job_slots < nb_files else nb_files
-			print "Compiling", nb_creating, type, "files simultaneously, please wait...\n"
-
-		for part in set_tree:
-			if 'done' not in part.attrib or is_assembly:
-				id = 'id=' + part.get('id') + '; '
-				pos = 'pos=[' + part.get('pos') + ']; ' if 'pos' in part.attrib and is_assembly else ''
-				rot = 'rot=[' + part.get('rot') + ']; ' if 'rot' in part.attrib and is_assembly else ''
-				var = part.get('data').replace('\'', '"')
-
-				options = "-D '" + id + pos + rot + var + "'"
-
-				output_path = op.join(export_dir, part.get('id') + "." + type)
-				self._openscad(part_scad_path, options, output_path, part)
-				self._end_of_process(nb_files, t_init, type, part)
-			else:
-				print part.get('id') + '.' + type + ' already exists, pass.'
-				self.nb_created += 1
-
-		while self.process:
-			self._end_of_process(nb_files, t_init, type, part)
-
-		print "\nFinished!", self.nb_created, type, "files successfully created in " + export_dir + '.'
-
-	def _end_of_process(self, nb_files, t_init, type, part):
-		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - t_init))
-
-		for i, p in enumerate(self.process):
-			
-			if p[0].poll() == 0:
-				del self.process[i]
-				self.nb_created += 1
-				progress = str(self.nb_created) + '/' + str(nb_files)
-
-				if type != 'png':
-					p[1].set('done', 'true')
-					self._save_xml()
-
-				print spent + ": Created file " + progress + ': ' + p[1].get('id') + '.' + type + '.'
 
 	def make_assembly(self):
 		import shutil
@@ -160,31 +58,23 @@ class Export: # TODO : singleton
 			part_scad_name = set.get('light_file') if self.test and \
 					'light_file' in set.attrib else set.get('file')
 
-			print "test:", self.test
-
 			part_scad_path = op.join(self.scad_dir, part_scad_name)
 
-			self._start_processes(part_scad_path, set, assembly_path, is_assembly = True)
+			process.Process(part_scad_path, set, assembly_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl, is_assembly = True)
 
-	def _openscad(self, scad_file_path, options, output_file, part):
-		cmd = self.openscad_path + ' ' + scad_file_path + ' -o ' + output_file + ' ' + options
+		self._save_xml()
 
-		if self.verbose_lvl >= 1:
-			print '>>>' + cmd
-		err = None if self.verbose_lvl >= 2 else open(os.devnull, 'w')
-		out = None if self.verbose_lvl == 3 else open(os.devnull, 'w')
-
-		p = subprocess.Popen(shlex.split(cmd), stdout = out, stderr = err)
-
-		self.process.append((p, part))
-
-		if len(self.process) >= self.nb_job_slots:
-			p.wait()
+	def _save_xml(self):
+		ET.ElementTree(self.root).write(self.xml_path, encoding = "UTF-8", xml_declaration = True)
 
 	def signal_handler(self, signal, frame):
 		import sys
 		print "\n\nCompilation interrupted by the user."
-		print self.nb_created, "file" + ('s' if self.nb_created > 1 else '') + " were created."
+
+		# TODO : compter le nombre de fichiers crées
+
+		# print self.nb_created, "file" + ('s' if self.nb_created > 1 else '') + " were created."
 		print "You can continue this job later with this command:"
 		print "zazouck " + self.project_dir
+		self._save_xml()
 		sys.exit(0)
