@@ -52,7 +52,6 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html""")
 	parser.add_argument('-t', '--test', action = 'store_true', default = False,
 		help = "The files are quickly compiled for testing, not able to be printed.")
 
-	# TODO
 	parser.add_argument('-i', '--infos', action = 'store_true', default = False,
 		help = "Get some informations about the model.")
 

@@ -10,7 +10,7 @@
 # TODO : alléger avec from .. import ..
 from os import path as op
 import os, sys, shutil
-import parser, export, roddy
+import parser, export, roddy, doc
 
 openscad_path = "openscad"
 zazouck_python_dir = op.abspath(op.dirname(sys.argv[0]))
@@ -35,7 +35,7 @@ def main():
 	param_path = None if opt.param_path == None else opt.param_path.name
 	doc_dir = op.join(project_dir, "doc") if (opt.doc_dir == False) else opt.doc_dir.name
 	infos_path = op.join(project_dir, "infos.txt")
-	#assembly_path = op.join(project_dir, "assembly.stl") if opt.assembly else None
+	xml_path = op.join(project_dir, "build.xml")
 
 	module = m.roddy # à remplacer par un paramètre
 
@@ -44,20 +44,19 @@ def main():
 		shutil.copy(opt.input_path, op.join(project_dir, "original.stl"))
 		
 		if module == m.roddy:
-			roddy.Roddy(input_stl_path, project_dir) # crée le fichier xml
+			model = roddy.Roddy(xml_path, input_stl_path, infos_path) # crée le fichier xml
 		#elif module == ...
 
 	else:
 		print "Resuming the compilation..."
 
 	if opt.infos:
-
-		# TODO: afficher quelques infos de base
-
+		print "\n** Model informations ***\n"
+		print str(model)
 		sys.exit(0)
 
-	exp = export.Export(project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
-	exp.make_documentation(doc_dir)
+	doc.Doc(xml_path, doc_dir, scad_dir)
+	exp = export.Export(xml_path, project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
 	exp.make_stl()
 
 	if opt.assembled:

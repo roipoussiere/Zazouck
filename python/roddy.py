@@ -15,12 +15,9 @@ import solid
 
 class Roddy:
 
-	def __init__(self, input_stl_path, project_dir):
-		self.input_stl_path = input_stl_path
-		self.project_dir = project_dir
-
+	def __init__(self, xml_path, input_stl_path, infos_path):
 		self.solid = solid.Solid(input_stl_path)
-		self.solid.display(op.join(self.project_dir, "details.txt"))
+		self.solid.display(infos_path)
 
 		self.xml_root = ET.Element("model")
 
@@ -32,10 +29,9 @@ class Roddy:
 
 		tree = ET.ElementTree(self.xml_root)
 		_indent(self.xml_root)
-		xml_path = op.join(project_dir, "build.xml")
 		tree.write(xml_path, encoding = "UTF-8", xml_declaration = True)
 
-		print "Successfully created building files in " + self.project_dir + "."
+		print "Successfully created building file in " + xml_path + "."
 
 #	infos = str(self.solid.get_nb_corners()) + " corners," + str(self.solid.get_nb_polygons()) \
 #			+ " polygons," + str(self.solid.get_nb_edges()) + " edges\n"
@@ -118,6 +114,12 @@ class Roddy:
 		while len(nb) < size:
 			nb = "0" + nb
 		return nb
+
+	def __str__(self):
+		string = str(self.solid.get_nb_corners()) + " corners, "
+		string += str(self.solid.get_nb_polygons()) + " polygons, "
+		string += str(self.solid.get_nb_edges()) + " edges."
+		return string
 
 def _indent(elem, level=0):
 	i = "\n" + level*"\t"
