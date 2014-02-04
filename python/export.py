@@ -26,12 +26,9 @@ class Export: # TODO : singleton
 
 		self.root = ET.parse(xml_path).getroot()
 
-		if test:
-			print "Running in testing mode - don't print these files."
-
 	def make_stl(self):
 		for set in self.root:
-			print "\n*** Creating " + set.get('name') + "s ***\n"
+			print "\n*** Creating", len(set), set.get('name') + "s ***"
 
 			part_scad_name = set.get('light_file') if self.test and \
 					'light_file' in set.attrib else set.get('file')

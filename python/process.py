@@ -35,14 +35,7 @@ class Process():
 
 	# TODO : option pour passer si done existe ?
 	def _start_processes(self, is_img, is_assembly):
-		print self.nb_files, self.type, "files will be created in " + self.export_dir + '.'
-
-		if self.nb_job_slots == 1:
-			print "Compiling the first " + self.type + " file, please wait...\n"
-		else:
-			nb_creating = self.nb_job_slots if self.nb_job_slots < self.nb_files else self.nb_files
-			print "Compiling", nb_creating, self.type, "files simultaneously, please wait..."
-
+		if self.verbose_lvl == 0:
 			print '_' * self.console_width if self.verbose_lvl == 0 else ''
 
 		for part in self.set_tree:
@@ -58,18 +51,20 @@ class Process():
 				self.openscad(self.part_scad_path, options, output_path, part)
 				self._end_of_process(part)
 			else:
-				print part.get('id') + '.' + self.type + ' already exists, pass.'
+				if self.verbose_lvl > 0:
+					print part.get('id') + '.' + self.type + ' already exists, pass.'
 				self.nb_created += 1
 
 		while self.process:
 			self._end_of_process(part)
 
-		print '\n' if self.verbose_lvl == 0 else ''
-		print "Finished!", self.nb_created, self.type, "files successfully created in " + self.export_dir + '.'
+		if self.verbose_lvl == 0:
+			print ''
 
 	def _print_status(self, tree):
 		spent = time.strftime("%Hh%Mm%Ss", time.gmtime(time.time() - self.t_init))
-		str_progress = str(self.nb_created) + '/' + str(self.nb_files)
+		percents = ' (' + str(int(100*float(self.nb_created)/self.nb_files)) + '%)'
+		str_progress = str(self.nb_created) + '/' + str(self.nb_files) + percents
 
 		if self.verbose_lvl == 0:
 			progress = int(round(self.console_width * float(self.nb_created) / self.nb_files))

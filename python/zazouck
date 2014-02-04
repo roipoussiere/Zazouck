@@ -13,15 +13,16 @@ import os, sys, shutil
 import parser, export, roddy, doc
 
 openscad_path = "openscad"
-zazouck_python_dir = op.abspath(op.dirname(sys.argv[0]))
-scad_dir = op.join(op.dirname(zazouck_python_dir), "scad")
+zazouck_dir = op.abspath(op.dirname(op.dirname(sys.argv[0])))
+scad_dir = op.join(zazouck_dir, "scad")
 
 class m(): roddy = range(1); # liste des modules disponibles
 
-def _create_dir(directory):
+def _create_dir(directory, verbose):
 	if os.path.exists(directory):
 		shutil.rmtree(directory)
-		print "The existing folder '" + op.basename(directory) + "' has been overwriten."
+		if verbose > 0:
+			print "The existing folder '" + op.basename(directory) + "' has been overwriten."
 	os.makedirs(directory)
 
 def main():
@@ -40,11 +41,14 @@ def main():
 	module = m.roddy # à remplacer par un paramètre
 
 	if is_input_stl:
-		_create_dir(project_dir)
+		_create_dir(project_dir, opt.verbose)
 		shutil.copy(opt.input_path, op.join(project_dir, "original.stl"))
 		
 		if module == m.roddy:
 			model = roddy.Roddy(xml_path, input_stl_path, infos_path) # crée le fichier xml
+			if opt.verbose > 0:
+				print "Successfully created building file in " + xml_path + "."
+
 		#elif module == ...
 
 	else:
@@ -55,7 +59,7 @@ def main():
 		print str(model)
 		sys.exit(0)
 
-	doc.Doc(xml_path, doc_dir, scad_dir, opt.jobs, openscad_path, opt.verbose)
+	doc.Doc(xml_path, zazouck_dir, doc_dir, scad_dir, opt.jobs, openscad_path, opt.verbose)
 	exp = export.Export(xml_path, project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
 	exp.make_stl()
 

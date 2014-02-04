@@ -31,8 +31,6 @@ class Roddy:
 		_indent(self.xml_root)
 		tree.write(xml_path, encoding = "UTF-8", xml_declaration = True)
 
-		print "Successfully created building file in " + xml_path + "."
-
 #	infos = str(self.solid.get_nb_corners()) + " corners," + str(self.solid.get_nb_polygons()) \
 #			+ " polygons," + str(self.solid.get_nb_edges()) + " edges\n"
 
