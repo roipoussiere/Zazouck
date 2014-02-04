@@ -9,11 +9,11 @@
 
 from os import path as op
 import xml.etree.ElementTree as ET
-import os, subprocess, shlex
+import os, subprocess, shlex, shutil
 import process, utils
 
 class Doc:
-	def __init__(self, xml_path, doc_dir, scad_dir, jobs, openscad_path, verbose):
+	def __init__(self, xml_path, zazouck_dir, doc_dir, scad_dir, jobs, openscad_path, verbose):
 		self.doc_dir = doc_dir
 		os.makedirs(doc_dir)
 		self.jobs = jobs
@@ -23,6 +23,7 @@ class Doc:
 		self.root = ET.parse(xml_path).getroot()
 
 		self.make_pictures()
+		shutil.copy(op.join(zazouck_dir, op.join("doc_generation", "doc.css")), doc_dir)
 		self.create_main_file()
 
 	def create_main_file(self):
@@ -34,21 +35,29 @@ class Doc:
 		head = ET.SubElement(html, "head")
 		ET.SubElement(head, "title").text = title
 
+		link = ET.SubElement(head, "link")
+		link.set('rel', 'stylesheet')
+		link.set('href', 'doc.css')
+		
 		body = ET.SubElement(html, "body")
 		ET.SubElement(body, "h1").text = title
 
 		for set in self.root:
 			set_div = ET.SubElement(body, 'div')
 			set_div.set('class', 'set')
-			ET.SubElement(set_div, 'h2').text = set.get('name')
+			ET.SubElement(set_div, 'h2').text = set.get('name').capitalize() + 's'
+
+			clear_div = ET.SubElement(body, 'div')
+			clear_div.set('class', 'separator')
 
 			for part in set:
-				part_div = ET.SubElement(body, 'div')
-				set_div.set('class', 'set')
+				part_div = ET.SubElement(set_div, 'div')
+				part_div.set('class', 'part')
 				ET.SubElement(part_div, 'h3').text = part.get('id')
 
 				if set.get('img') == 'true':
 					img = ET.SubElement(part_div, 'img')
+					img.set('class', 'part')
 					img.set('src', op.join('img', part.get('id') + '.png'))
 
 		utils.indent(html)
@@ -58,7 +67,7 @@ class Doc:
 	def make_pictures(self):
 		IMG_SIZE = 200
 
-		print "\n*** Creating pictures ***\n"
+		print "\n*** Creating pictures ***"
 
 		img_dir = op.join(self.doc_dir, "img")
 		if not os.path.exists(img_dir):
