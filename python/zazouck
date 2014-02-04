@@ -55,7 +55,7 @@ def main():
 		print str(model)
 		sys.exit(0)
 
-	doc.Doc(xml_path, doc_dir, scad_dir)
+	doc.Doc(xml_path, doc_dir, scad_dir, opt.jobs, openscad_path, opt.verbose)
 	exp = export.Export(xml_path, project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
 	exp.make_stl()
 

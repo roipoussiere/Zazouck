@@ -30,6 +30,7 @@ class Process():
 			self.console_width = int(os.popen('stty size', 'r').read().split()[1])
 		except:
 			self.console_width = 80
+
 		self._start_processes(is_img, is_assembly)
 
 	# TODO : option pour passer si done existe ?

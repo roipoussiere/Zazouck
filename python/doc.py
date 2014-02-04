@@ -9,38 +9,58 @@
 
 from os import path as op
 import xml.etree.ElementTree as ET
-import os
-import process
+import os, subprocess, shlex
+import process, utils
 
 class Doc:
-	# créer images dans cette classe ?
-	def __init__(self, xml_path, doc_dir, scad_dir):
+	def __init__(self, xml_path, doc_dir, scad_dir, jobs, openscad_path, verbose):
 		self.doc_dir = doc_dir
 		os.makedirs(doc_dir)
-		self.create_files()
+		self.jobs = jobs
+		self.openscad_path = openscad_path
+		self.verbose = verbose
 		self.scad_dir = scad_dir
+		self.root = ET.parse(xml_path).getroot()
 
-	def create_files(self):
+		self.make_pictures()
+		self.create_main_file()
+
+	def create_main_file(self):
 		index_path = op.join(self.doc_dir, "index.html")
+		title = (self.root.get('name') + " documentation").capitalize()
 
-		with open(index_path, 'w') as index:
-			str = "<!DOCTYPE html>\n"
-			str += "<html>\n"
-			str += "\t<head>\n"
-			str += "\t\t<title> Documentation </title>\n"
-			str += "\t</head>\n"
-			str += "\t<body>\n"
-			str += "\t\t<h1> " + "part" + " </h1>\n"
-			str += "\t</body>\n"
-			str += "</html>\n"
-			index.write(str)
+		html = ET.Element("html")
 
-	def make_pictures(self, img_dir):
+		head = ET.SubElement(html, "head")
+		ET.SubElement(head, "title").text = title
+
+		body = ET.SubElement(html, "body")
+		ET.SubElement(body, "h1").text = title
+
+		for set in self.root:
+			set_div = ET.SubElement(body, 'div')
+			set_div.set('class', 'set')
+			ET.SubElement(set_div, 'h2').text = set.get('name')
+
+			for part in set:
+				part_div = ET.SubElement(body, 'div')
+				set_div.set('class', 'set')
+				ET.SubElement(part_div, 'h3').text = part.get('id')
+
+				if set.get('img') == 'true':
+					img = ET.SubElement(part_div, 'img')
+					img.set('src', op.join('img', part.get('id') + '.png'))
+
+		utils.indent(html)
+		tree = ET.ElementTree(html)
+		tree.write(index_path, encoding = "UTF-8", xml_declaration = True)
+
+	def make_pictures(self):
 		IMG_SIZE = 200
 
 		print "\n*** Creating pictures ***\n"
 
-		img_dir = op.join(doc_dir, "img")
+		img_dir = op.join(self.doc_dir, "img")
 		if not os.path.exists(img_dir):
 			os.makedirs(img_dir)
 
@@ -55,9 +75,8 @@ class Doc:
 		part_scad_path = op.join(self.scad_dir, part_scad_name)
 
 		#TODO: ne pas transmettre l'arbre puisque on l'a dans self
-
-		self._start_processes(part_scad_path, corner, img_dir, 'png')
-
+		process.Process(part_scad_path, corner, img_dir, self.jobs, self.openscad_path, self.verbose, is_img = True)
+					#part_scad_path, set_tree, export_dir, nb_job_slots, openscad_path, verbose_lvl, is_img = False, is_assembly = False
 		dimentions = str(IMG_SIZE) + 'x' + str(IMG_SIZE)
 		process_image = 'mogrify -trim +repage -resize ' + dimentions + \
 				' -background "#FFFFE5" ' + '-gravity center -extent ' + dimentions + \

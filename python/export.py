@@ -41,8 +41,8 @@ class Export: # TODO : singleton
 
 			if not os.path.exists(export_path):
 				os.makedirs(export_path)
-
 			process.Process(part_scad_path, set, export_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl)
+						# part_scad_path, set_tree, export_dir, nb_job_slots, openscad_path, verbose_lvl, is_img = False, is_assembly = False
 
 		self._save_xml()
 
@@ -61,7 +61,6 @@ class Export: # TODO : singleton
 			part_scad_path = op.join(self.scad_dir, part_scad_name)
 
 			process.Process(part_scad_path, set, assembly_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl, is_assembly = True)
-
 		self._save_xml()
 
 	def _save_xml(self):
