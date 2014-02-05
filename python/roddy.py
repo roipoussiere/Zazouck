@@ -35,7 +35,7 @@ class Roddy:
 #			+ " polygons," + str(self.solid.get_nb_edges()) + " edges\n"
 
 	def _build_corners_tree(self):
-		xml_corner = ET.SubElement(self.xml_root, "set")
+		xml_corner = ET.SubElement(self.xml_root, "family")
 
 		xml_corner.set('name', 'corner')
 		xml_corner.set('file', "corner.scad")
@@ -52,7 +52,7 @@ class Roddy:
 			part.set('data', self._corner_data(corner))
 
 	def _build_edges_tree(self):
-		xml_edge = ET.SubElement(self.xml_root, "set")
+		xml_edge = ET.SubElement(self.xml_root, "family")
 		xml_edge.set('name', 'edge')
 		xml_edge.set('file', "edge.scad")
 		xml_edge.set('type', 'dxf')

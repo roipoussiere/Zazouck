@@ -27,19 +27,19 @@ class Export: # TODO : singleton
 		self.root = ET.parse(xml_path).getroot()
 
 	def make_stl(self):
-		for set in self.root:
-			print "\n*** Creating", len(set), set.get('name') + "s ***"
+		for family in self.root:
+			print "\n*** Creating", len(family), family.get('name') + "s ***"
 
-			part_scad_name = set.get('light_file') if self.test and \
-					'light_file' in set.attrib else set.get('file')
+			part_scad_name = family.get('light_file') if self.test and \
+					'light_file' in family.attrib else family.get('file')
 			part_scad_path = op.join(self.scad_dir, part_scad_name)
 
-			export_path = op.join(self.project_dir, set.get('name'))
+			export_path = op.join(self.project_dir, family.get('name'))
 
 			if not os.path.exists(export_path):
 				os.makedirs(export_path)
-			process.Process(part_scad_path, set, export_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl)
-						# part_scad_path, set_tree, export_dir, nb_job_slots, openscad_path, verbose_lvl, is_img = False, is_assembly = False
+			process.Process(part_scad_path, family, export_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl)
+						# part_scad_path, family_tree, export_dir, nb_job_slots, openscad_path, verbose_lvl, is_img = False, is_assembly = False
 
 		self._save_xml()
 
@@ -51,13 +51,13 @@ class Export: # TODO : singleton
 		print "\n*** Creating assembled model ***\n"
 		print "This file will be created in " + assembly_path
 
-		for set in self.root:
-			part_scad_name = set.get('light_file') if self.test and \
-					'light_file' in set.attrib else set.get('file')
+		for family in self.root:
+			part_scad_name = family.get('light_file') if self.test and \
+					'light_file' in family.attrib else family.get('file')
 
 			part_scad_path = op.join(self.scad_dir, part_scad_name)
 
-			process.Process(part_scad_path, set, assembly_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl, is_assembly = True)
+			process.Process(part_scad_path, family, assembly_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl, is_assembly = True)
 		self._save_xml()
 
 	def _save_xml(self):

@@ -9,41 +9,75 @@
 
 from os import path as op
 import xml.etree.ElementTree as ET
-import os, subprocess, shlex, shutil
+import os, subprocess, shlex, distutils.core
 import process, utils
 
 class Doc:
 	def __init__(self, xml_path, zazouck_dir, doc_dir, scad_dir, jobs, openscad_path, verbose):
 		self.doc_dir = doc_dir
-		os.makedirs(doc_dir)
 		self.jobs = jobs
 		self.openscad_path = openscad_path
 		self.verbose = verbose
 		self.scad_dir = scad_dir
 		self.root = ET.parse(xml_path).getroot()
 
-		self.make_pictures()
-		self.make_part_files()
-		shutil.copy(op.join(zazouck_dir, op.join("doc_generation", "doc.css")), doc_dir)
-		self.create_main_file()
+		doc_files_dir = op.join(zazouck_dir, 'doc_generation')
+		distutils.dir_util.copy_tree(doc_files_dir, doc_dir)
 
-	def create_main_file(self):
-		content = ET.Element('div')
-		content.set('id', 'content')
+		self.make_pictures()
+		self.make_html_parts()
+		self.make_html_families()
+		self.make_html_menu()
+		self.make_html_model()
+
+	def make_html_model(self):
+		import time
+
+		content = ET.Element('article')
+		ET.SubElement(content, 'p').text = 'Please select a part on the summary.'
+		ET.SubElement(content, 'p').text = 'documentation created at ' + time.strftime('%l:%M%p on %b %d, %Y')
+		file_path = op.join(self.doc_dir, 'model.html')
+		self.make_html(file_path, content)
+
+	def make_html_menu(self):
+		parts_dir = op.join(self.doc_dir, 'parts')
+		content = ET.Element('summary')
+		ul_family = ET.SubElement(content, 'ul')
+
+		for family in self.root:
+			li_family = ET.SubElement(ul_family, 'li')
+
+			link = ET.SubElement(li_family, 'a')
+			link.text = family.get('name').capitalize() + 's'
+			link.set('href', op.join(self.doc_dir, family.get('name') + '.html'))
+			link.set('target', 'detail')
+
+			ul_part = ET.SubElement(li_family, 'ul')
+			for part in family:
+				li_part = ET.SubElement(ul_part, 'li')
+
+				link = ET.SubElement(li_part, 'a')
+				link.text = part.get('id')
+				link.set('href', op.join(parts_dir, part.get('id') + '.html'))
+				link.set('target', 'detail')
+
+		file_path = op.join(self.doc_dir, 'menu.html')
+		self.make_html(file_path, content)
+
+	def make_html_families(self):
 		img_dir = op.join(self.doc_dir, 'img')
 
-		for set in self.root:
-			set_div = ET.SubElement(content, 'div')
-			set_div.set('class', 'set')
-			ET.SubElement(set_div, 'h2').text = set.get('name').capitalize() + 's'
+		for family in self.root:
+			content = ET.Element('article')
+			ET.SubElement(content, 'h2').text = family.get('name').capitalize() + 's'
 
-			clear_div = ET.SubElement(content, 'div')
-			clear_div.set('class', 'separator')
+			parts_div = ET.SubElement(content, 'div')
+			parts_div.set('class', 'icons')
 
-			for part in set:
+			for part in family:
 				file_path = op.join(op.join(self.doc_dir, 'parts'), part.get('id') + '.html')
 
-				part_link = ET.SubElement(set_div, 'a')
+				part_link = ET.SubElement(parts_div, 'a')
 				part_link.set('href', file_path)
 				part_link.set('class', 'part')
 
@@ -51,62 +85,63 @@ class Doc:
 				part_div.set('class', 'icon')
 				ET.SubElement(part_div, 'h3').text = part.get('id')
 
-				if set.get('img') == 'true':
+				if family.get('img') == 'true':
 					img = ET.SubElement(part_div, 'img')
 					img.set('class', 'thumbnail')
 					img.set('src', op.join(img_dir, part.get('id') + '.png'))
 
-		file_path = op.join(self.doc_dir, 'index.html')
-		self.make_html(file_path, self.root.get('name') + " documentation", content)
+			clear_div = ET.SubElement(content, 'div')
+			clear_div.set('class', 'separator')
 
-	def make_part_files(self):
-		parts_dir = op.join(self.doc_dir, 'parts')
+			file_path = op.join(self.doc_dir, family.get('name') + '.html')
+			# (self.root.get('name') + " documentation").capitalize()
+			self.make_html(file_path, content)
+
+	def make_html_parts(self):
 		img_dir = op.join(self.doc_dir, 'img')
-
+		parts_dir = op.join(self.doc_dir, 'parts')
 		os.makedirs(parts_dir)
 
-		for set in self.root:
-			type = set.get('type')
+		for family in self.root:
+			type = family.get('type')
 			
-			for part in set:
-				content = ET.Element("div")
-				content.set('id', 'content')
+			for part in family:
+				content = ET.Element("article")
 
-				if set.get('img') == 'true':
+				if family.get('img') == 'true':
 					img = ET.SubElement(content, 'img')
 					img.set('class', 'large')
 					img.set('src', op.join(img_dir, part.get('id') + '.png'))
 
+				infos_div = ET.SubElement(content, 'div')
+				ET.SubElement(infos_div, 'p').text = 'Id: ' + part.get('id')
+				ET.SubElement(infos_div, 'p').text = \
+						'Position: ' + ('unknown' if part.get('pos') == None else part.get('pos'))
+				ET.SubElement(infos_div, 'p').text = \
+						'Rotation: ' + ('unknown' if part.get('rot') == None else part.get('rot'))
+
+				ET.SubElement(infos_div, 'p').text = 'Datas:'
+				ul_data = ET.SubElement(infos_div, 'ul')
+
+				for data in part.get('data').split(';'):
+					ET.SubElement(ul_data, 'li').text = data
+
 				file_path = op.join(parts_dir, part.get('id') + '.html')
-				self.make_html(file_path, type + ' ' + part.get('id'), content)
+				# type + ' ' + part.get('id').capitalize()
+				self.make_html(file_path, content)
 
-	def make_html(self, file_path, title, content):
-		CSS_FILE = op.join(self.doc_dir, 'doc.css')
-		LINK = "https://github.com/roipoussiere/Zazouck"
-
+	def make_html(self, file_path, content):
 		html = ET.Element('html')
 		head = ET.SubElement(html, 'head')
-		ET.SubElement(head, 'title').text = title.capitalize()
 
 		link = ET.SubElement(head, 'link')
 		link.set('rel', 'stylesheet')
-		link.set('href', CSS_FILE)
-		
+		link.set('href', 'index.css')
+
 		body = ET.SubElement(html, 'body')
-		header = ET.SubElement(body, 'div')
-		header.set('id', 'header')
-		ET.SubElement(header, 'h1').text = title.capitalize()
-
 		body.append(content)
-		footer = ET.SubElement(body, 'div')
-		footer.set('id', 'footer')
-		
-		# ET.SubElement(footer, 'p').text = 'Generated by <a href="' + LINK + '">Zazouck</a>'
-		ET.SubElement(footer, 'p').text = 'Generated by Zazouck - www.zazouck.org'
-
 		utils.indent(html)
-		tree = ET.ElementTree(html)
-		tree.write(file_path, encoding = 'UTF-8', xml_declaration = True)
+		ET.ElementTree(html).write(file_path)
 
 	def make_pictures(self):
 		IMG_SIZE = 200
@@ -120,16 +155,16 @@ class Doc:
 		extra_options = "--imgsize=" + str(IMG_SIZE * 2) + "," + str(IMG_SIZE * 2) + \
 				" --camera=0,0,0,45,0,45,140"
 
-		corner = self.root.find('set')
+		corner = self.root.find('family')
 		while corner.get('img') != "true":
-			corner = self.root.find('set')
+			corner = self.root.find('family')
 
 		part_scad_name = corner.get('file')
 		part_scad_path = op.join(self.scad_dir, part_scad_name)
 
 		#TODO: ne pas transmettre l'arbre puisque on l'a dans self
 		process.Process(part_scad_path, corner, img_dir, self.jobs, self.openscad_path, self.verbose, is_img = True)
-					#part_scad_path, set_tree, export_dir, nb_job_slots, openscad_path, verbose_lvl, is_img = False, is_assembly = False
+
 		dimentions = str(IMG_SIZE) + 'x' + str(IMG_SIZE)
 		process_image = 'mogrify -trim +repage -resize ' + dimentions + \
 				' -background "#FFFFE5" ' + '-gravity center -extent ' + dimentions + \
@@ -137,4 +172,4 @@ class Doc:
 		try:
 			subprocess.Popen(shlex.split(process_image))
 		except:
-			print "Please install ImageMagic to build nice pictures for the documentation."
+			print "Warning: please install ImageMagic to build nice pictures for the documentation."

@@ -6,6 +6,11 @@
  * You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
  */
 
+* {
+	margin: 0px;
+	padding: 0px;
+}
+
 body {
 	background-color : #CCC;
 	font-family: "Sawasdee", Arial;
@@ -25,6 +30,30 @@ h3 {
 	margin: 0px;
 }
 
+li {
+	padding-left: 20px;
+	list-style: none;
+}
+
+iframe.menu {
+	float:left;
+	position: absolute;
+	top: 40px;
+	width:20%;
+	height:90%;
+	border-width:0px 1px 0px 0px;
+}
+
+iframe.detail {
+	float:right;
+	position: absolute;
+	top: 40px;
+	left:20%;
+	height:90%;
+	width:80%;
+	border-width:0px;
+}
+
 img.thumbnail {
 	width: 100px;
 }
@@ -33,13 +62,19 @@ img.large {
 	width: 200px;
 }
 
+div.icons {
+	text-align:center;
+	width:100%;
+	height: 200px;
+}
+    
 div.icon {
 	text-align: center;
-	float: left;
-	width: 100px;
 	padding: 3px;
 	border: 1px solid;
 	margin: 2px;
+	width: 100px;
+    display:inline-block;
 }
 
 div.icon:hover {
@@ -55,10 +90,19 @@ div.separator {
 	clear: both;
 }
 
-div#footer{
+header {
 	position: fixed;
 	text-align: center;
-	padding: 0px;
+	top: 0;
+	left: 0;
+	height: 40px;
+	width: 100%;
+	background: #AAA;
+}
+
+footer {
+	position: fixed;
+	text-align: center;
 	bottom: 0;
 	left: 0;
 	height: 30px;
