@@ -51,13 +51,21 @@ class Doc:
 		content = ET.Element('article')
 		ET.SubElement(content, 'p').text = 'Please select a part on the summary.'
 		file_path = op.join(self.doc_dir, 'model.html')
-		self.make_html(file_path, content)
+		self.make_html(file_path, content, 'stylesheet.css')
 
 	def make_html_menu(self):
 		parts_dir = op.join(self.doc_dir, 'parts')
 		content = ET.Element('summary')
-		ul_family = ET.SubElement(content, 'ul')
 
+		menu = ET.SubElement(content, 'div')
+		menu.set('id', 'menu')
+
+		link = ET.SubElement(menu, 'a')
+		link.text = self.root.get('name').capitalize()
+		link.set('href', op.join(self.doc_dir, 'model.html'))
+		link.set('target', 'detail')
+
+		ul_family = ET.SubElement(menu, 'ul')
 		for family in self.root:
 			li_family = ET.SubElement(ul_family, 'li')
 
@@ -76,22 +84,48 @@ class Doc:
 				link.set('target', 'detail')
 
 		file_path = op.join(self.doc_dir, 'menu.html')
-		self.make_html(file_path, content)
+		self.make_html(file_path, content, 'stylesheet.css')
+
+	#def make_details(self):
 
 	def make_html_families(self):
 		img_dir = op.join(self.doc_dir, 'img')
 
 		for family in self.root:
 			content = ET.Element('article')
-			ET.SubElement(content, 'h2').text = family.get('name').capitalize() + 's'
 
-			parts_div = ET.SubElement(content, 'div')
-			parts_div.set('class', 'icons')
+			family_infos = ET.SubElement(content, 'div')
+			family_infos.set('id', 'infos')
+
+			img = ET.SubElement(family_infos, 'img')
+			img.set('class', 'large')
+			img.set('src', op.join(self.doc_dir, 'group.png'))
+
+			family_text = ET.SubElement(family_infos, 'div')
+			family_text.set('id', 'text')
+
+			ET.SubElement(family_text, 'h2').text = family.get('name').capitalize() + 's'
+			ET.SubElement(family_text, 'p').text = 'Number of parts: ' + str(len(family))
+			ET.SubElement(family_text, 'p').text = 'Type: ' + family.get('type')
+
+			if family.get('const') in (None, ""):
+				ET.SubElement(family_text, 'p').text = 'No constant datas'
+			else:
+				ET.SubElement(family_text, 'p').text = 'Constant datas:'
+				ul_data = ET.SubElement(family_text, 'ul')
+
+				for data in family.get('const').split(';'):
+					ET.SubElement(ul_data, 'li').text = data
+
+			family_parts = ET.SubElement(content, 'div')
+			family_parts.set('id', 'icons')
+
+			ET.SubElement(family_parts, 'h3').text = 'Parts'
 
 			for part in family:
 				file_path = op.join(op.join(self.doc_dir, 'parts'), part.get('id') + '.html')
 
-				part_link = ET.SubElement(parts_div, 'a')
+				part_link = ET.SubElement(family_parts, 'a')
 				part_link.set('href', file_path)
 				part_link.set('class', 'part')
 
@@ -99,17 +133,18 @@ class Doc:
 				part_div.set('class', 'icon')
 				ET.SubElement(part_div, 'h3').text = part.get('id')
 
-				if family.get('img') == 'true':
-					img = ET.SubElement(part_div, 'img')
-					img.set('class', 'thumbnail')
-					img.set('src', op.join(img_dir, part.get('id') + '.png'))
+				img = ET.SubElement(part_div, 'img')
+				img.set('class', 'thumbnail')
+				img_path = op.join(img_dir, part.get('id') + '.png') if family.get('img') == 'true' \
+						else op.join(self.doc_dir, family.get('type') + '.png')
+				img.set('src', img_path)
 
 			clear_div = ET.SubElement(content, 'div')
 			clear_div.set('class', 'separator')
 
 			file_path = op.join(self.doc_dir, family.get('name') + '.html')
 			# (self.root.get('name') + " documentation").capitalize()
-			self.make_html(file_path, content)
+			self.make_html(file_path, content, 'stylesheet.css')
 
 	def make_html_parts(self):
 		img_dir = op.join(self.doc_dir, 'img')
@@ -117,41 +152,54 @@ class Doc:
 		os.makedirs(parts_dir)
 
 		for family in self.root:
-			type = family.get('type')
 			
 			for part in family:
 				content = ET.Element("article")
 
-				ET.SubElement(content, 'h2').text = part.get('id')
+				part_infos = ET.SubElement(content, 'div')
+				part_infos.set('id', 'infos')
 
-				if family.get('img') == 'true':
-					img = ET.SubElement(content, 'img')
-					img.set('class', 'large')
-					img.set('src', op.join(img_dir, part.get('id') + '.png'))
+				img = ET.SubElement(part_infos, 'img')
+				img.set('class', 'large')
+				img_path = op.join(img_dir, part.get('id') + '.png') if family.get('img') == 'true' \
+						else op.join(self.doc_dir, family.get('type') + '.png')
+				img.set('src', img_path)
 
-				infos_div = ET.SubElement(content, 'div')
-				ET.SubElement(infos_div, 'p').text = \
+				part_text = ET.SubElement(part_infos, 'div')
+				part_text.set('id', 'text')
+
+				ET.SubElement(part_text, 'h2').text = family.get('name').capitalize() + ' ' + part.get('id')
+
+				link = ET.SubElement(part_text, 'a')
+				link.text = 'Child of ' + family.get('name').capitalize()
+				link.set('href', op.join(self.doc_dir, family.get('name') + '.html'))
+				link.set('target', 'detail')
+
+				ET.SubElement(part_text, 'p').text = \
 						'Position: ' + ('unknown' if part.get('pos') == None else part.get('pos'))
-				ET.SubElement(infos_div, 'p').text = \
+				ET.SubElement(part_text, 'p').text = \
 						'Rotation: ' + ('unknown' if part.get('rot') == None else part.get('rot'))
 
-				ET.SubElement(infos_div, 'p').text = 'Datas:'
-				ul_data = ET.SubElement(infos_div, 'ul')
+				if part.get('data') in (None, ""):
+					ET.SubElement(part_text, 'p').text = 'No datas'
+				else:
+					ET.SubElement(part_text, 'p').text = 'Datas:'
+					ul_data = ET.SubElement(part_text, 'ul')
 
-				for data in part.get('data').split(';'):
-					ET.SubElement(ul_data, 'li').text = data
+					for data in part.get('data').split(';'):
+						ET.SubElement(ul_data, 'li').text = data
 
 				file_path = op.join(parts_dir, part.get('id') + '.html')
 				# type + ' ' + part.get('id').capitalize()
-				self.make_html(file_path, content)
+				self.make_html(file_path, content, '../stylesheet.css')
 
-	def make_html(self, file_path, content):
+	def make_html(self, file_path, content, css_path):
 		html = ET.Element('html')
 		head = ET.SubElement(html, 'head')
 
 		link = ET.SubElement(head, 'link')
 		link.set('rel', 'stylesheet')
-		link.set('href', 'index.css')
+		link.set('href', css_path)
 
 		body = ET.SubElement(html, 'body')
 		body.append(content)
