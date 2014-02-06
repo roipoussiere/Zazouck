@@ -35,22 +35,21 @@ li {
 	list-style: none;
 }
 
-iframe.menu {
+iframe#menu {
 	float:left;
 	position: absolute;
 	top: 40px;
-	width:20%;
-	height:90%;
+	width:150px;
+	height:88%;
 	border-width:0px 1px 0px 0px;
 }
 
-iframe.detail {
+iframe#detail {
 	float:right;
 	position: absolute;
 	top: 40px;
-	left:20%;
-	height:90%;
-	width:80%;
+	left:150px;
+	height:88%;
 	border-width:0px;
 }
 

@@ -29,13 +29,27 @@ class Doc:
 		self.make_html_families()
 		self.make_html_menu()
 		self.make_html_model()
+		self.replace_html_index()
+
+	def replace_html_index(self):
+		import time
+		index = op.join(self.doc_dir, 'index.html')
+		os.rename(index, index + '~')
+
+		#with open(index, 'w') as f:
+		with open(index, 'w') as fout, open(index + '~', 'r') as fin:
+			for line in fin:
+				line = line.replace('__TITLE__', (self.root.get('name') + ' documentation').capitalize())
+				line = line.replace('__TIME__', time.strftime('%l:%M%p on %b %d, %Y'))
+				fout.write(line)
+
+		os.remove(index + '~')
 
 	def make_html_model(self):
 		import time
 
 		content = ET.Element('article')
 		ET.SubElement(content, 'p').text = 'Please select a part on the summary.'
-		ET.SubElement(content, 'p').text = 'documentation created at ' + time.strftime('%l:%M%p on %b %d, %Y')
 		file_path = op.join(self.doc_dir, 'model.html')
 		self.make_html(file_path, content)
 
@@ -108,13 +122,14 @@ class Doc:
 			for part in family:
 				content = ET.Element("article")
 
+				ET.SubElement(content, 'h2').text = part.get('id')
+
 				if family.get('img') == 'true':
 					img = ET.SubElement(content, 'img')
 					img.set('class', 'large')
 					img.set('src', op.join(img_dir, part.get('id') + '.png'))
 
 				infos_div = ET.SubElement(content, 'div')
-				ET.SubElement(infos_div, 'p').text = 'Id: ' + part.get('id')
 				ET.SubElement(infos_div, 'p').text = \
 						'Position: ' + ('unknown' if part.get('pos') == None else part.get('pos'))
 				ET.SubElement(infos_div, 'p').text = \
@@ -141,7 +156,10 @@ class Doc:
 		body = ET.SubElement(html, 'body')
 		body.append(content)
 		utils.indent(html)
-		ET.ElementTree(html).write(file_path)
+
+		with open(file_path, 'w') as f:
+			f.write('<!DOCTYPE html>\n')
+			ET.ElementTree(html).write(f, 'utf-8')
 
 	def make_pictures(self):
 		IMG_SIZE = 200
