@@ -106,6 +106,8 @@ class Doc:
 		element_text = ET.SubElement(family_infos, 'div')
 		element_text.set('id', 'text')
 
+		# TODO: afficher nom de famille avant l'id
+
 		ET.SubElement(element_text, 'h2').text = tree.get('id').capitalize()
 		if len(tree) != 0:
 			ET.SubElement(element_text, 'p').text = 'Number of childrens: ' + str(len(tree))
@@ -120,7 +122,7 @@ class Doc:
 			ET.SubElement(element_text, 'p').text = 'Light version: ' + tree.get('light_file')
 
 		if 'data' in tree.attrib: #*
-			ET.SubElement(element_text, 'p').text = 'Constant datas:'
+			ET.SubElement(element_text, 'p').text = 'Datas:'
 			ul_data = ET.SubElement(element_text, 'ul')
 			for data in tree.get('data').split(';'):
 				ET.SubElement(ul_data, 'li').text = data
@@ -128,27 +130,12 @@ class Doc:
 		if len(tree) != 0:
 			ET.SubElement(content, 'hr')
 			childrens = ET.SubElement(content, 'div')
-			childrens.set('id', 'childrens')
+			childrens.set('class', 'elements')
 
 			ET.SubElement(childrens, 'h3').text = 'Childrens'
 
 			for element in tree:
-				file_path = element.get('id') + '.html'
-
-				part_link = ET.SubElement(childrens, 'a')
-				#link.set('onclick', 'menu.getElementsById(' + element.get('id') + ') = "focus";')
-				part_link.set('href', file_path)
-				part_link.set('class', 'element')
-
-				part_div = ET.SubElement(part_link, 'div')
-				part_div.set('class', 'icon')
-				ET.SubElement(part_div, 'h3').text = element.get('id').capitalize()
-
-				if tree.get('img') != 'no': #*
-					img_path = '../parts_img/' + element.get('id') + '.png'
-					img = ET.SubElement(part_div, 'img')
-					img.set('class', 'thumbnail')
-					img.set('src', img_path)
+				childrens.append(self.html_elements(element.get('id')))
 
 			clear_div = ET.SubElement(content, 'div')
 			clear_div.set('class', 'separator')
@@ -156,35 +143,37 @@ class Doc:
 		if 'connections' in tree.attrib:
 			ET.SubElement(content, 'hr')
 			connections = ET.SubElement(content, 'div')
-			connections.set('id', 'connections')
+			connections.set('class', 'elements')
 
 			ET.SubElement(connections, 'h3').text = 'Connected to'
 
 			for connection_id in tree.get('connections').split(';'):
-				file_path = connection_id + '.html'
-
-				part_link = ET.SubElement(connections, 'a')
-				#link.set('onclick', 'menu.getElementsById(' + element.get('id') + ') = "focus";')
-				part_link.set('href', file_path)
-				part_link.set('class', 'element')
-
-				part_div = ET.SubElement(part_link, 'div')
-				part_div.set('class', 'icon')
-				ET.SubElement(part_div, 'h3').text = connection_id.capitalize()
-
-				if tree.get('img') != 'no': #*
-					img_path = '../parts_img/' + connection_id + '.png'
-					img = ET.SubElement(part_div, 'img')
-					img.set('class', 'thumbnail')
-					img.set('src', img_path)
+				connections.append(self.html_elements(connection_id))
 
 			clear_div = ET.SubElement(content, 'div')
 			clear_div.set('class', 'separator')
 
 		file_path = op.join(self.doc_dir, 'parts_html', tree.get('id') + '.html')
-		# (self.root.get('id') + " documentation").capitalize()
 		self.make_html(file_path, content, '../stylesheet.css')
 
+	def html_elements(self, elmt_id):
+		file_path = elmt_id + '.html'
+
+		elmt = ET.Element('a')
+		#link.set('onclick', 'menu.getElementsById(' + element.get('id') + ') = "focus";')
+		elmt.set('href', file_path)
+		elmt.set('class', 'element')
+
+		part_div = ET.SubElement(elmt, 'div')
+		part_div.set('class', 'icon')
+		ET.SubElement(part_div, 'h3').text = elmt_id.capitalize()
+
+		img_path = '../parts_img/' + elmt_id + '.png'
+		img = ET.SubElement(part_div, 'img')
+		img.set('class', 'thumbnail')
+		img.set('src', img_path)
+
+		return elmt
 #*
 #TODO: fonction qui récupère la valeur de l'attribut un element en fonction de son id (recherche dans l'element et dans la famille)
 
