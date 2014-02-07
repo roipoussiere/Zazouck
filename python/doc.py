@@ -49,38 +49,38 @@ class Doc:
 		os.remove(index + '~')
 
 	def make_html_menu(self, tree = False):
-		if tree == False:
-			parts_dir = op.join(self.doc_dir, 'parts')
-			content = ET.Element('summary')
+		parts_dir = op.join(self.doc_dir, 'parts')
+		content = ET.Element('summary')
 
-			menu = ET.SubElement(content, 'div')
-			menu.set('id', 'menu')
+		menu = ET.SubElement(content, 'div')
+		menu.set('id', 'menu')
 
-			link = ET.SubElement(menu, 'a')
-			link.text = self.root.get('id').capitalize()
-			link.set('class', 'focus')
-			link.set('id', self.root.get('id'))
-			link.set('href', './parts_html/' + self.root.get('id') + '.html')
-			link.set('target', 'detail')
+		link = ET.SubElement(menu, 'a')
+		link.text = self.root.get('id').capitalize()
+		link.set('class', 'focus')
+		link.set('id', self.root.get('id'))
+		link.set('href', './parts_html/' + self.root.get('id') + '.html')
+		link.set('target', 'detail')
 
-			tree = self.root
-
-		for elmt in tree:
-			self.make_html_menu(elmt)
-
-		ul_family = ET.SubElement(menu, 'ul')
-		for family in self.root:
-			li_family = ET.SubElement(ul_family, 'li')
-
-			link = ET.SubElement(li_family, 'a')
-			link.text = family.get('id').capitalize()
-			link.set('href', './parts_html/' + family.get('id') + '.html')
-			link.set('id', family.get('id'))
-			link.set('onclick', 'document.getElementsByClassName("focus")[0].className = ""; this.className = "focus";')
-			link.set('target', 'detail')
+		self.feed_menu(self.root, menu)
 
 		file_path = op.join(self.doc_dir, 'menu.html')
 		self.make_html(file_path, content, 'stylesheet.css')
+
+	def feed_menu(self, tree, menu):
+		ul = ET.SubElement(menu, 'ul')
+		for elmt in tree:
+			li = ET.SubElement(ul, 'li')
+
+			link = ET.SubElement(li, 'a')
+			link.text = elmt.get('id').capitalize()
+			link.set('href', './parts_html/' + elmt.get('id') + '.html')
+			link.set('id', elmt.get('id'))
+			link.set('onclick', 'document.getElementsByClassName("focus")[0].className = ""; this.className = "focus";')
+			link.set('target', 'detail')
+			
+			if len(elmt) > 0:
+				self.feed_menu(elmt, li)
 
 	def make_html_details(self, tree):
 		for elmt in tree:
