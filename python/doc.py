@@ -28,7 +28,7 @@ class Doc:
 		self.make_pictures()
 		#self.make_html_parts()
 		#self.make_html_families()
-		self.make_html_menu()
+		self.make_html_menu(self.root)
 		#self.make_html_model()
 		self.make_html_details(self.root)
 		self.replace_html_index()
@@ -48,20 +48,25 @@ class Doc:
 
 		os.remove(index + '~')
 
-	# TODO: récursivité
-	def make_html_menu(self):
-		parts_dir = op.join(self.doc_dir, 'parts')
-		content = ET.Element('summary')
+	def make_html_menu(self, tree = False):
+		if tree == False:
+			parts_dir = op.join(self.doc_dir, 'parts')
+			content = ET.Element('summary')
 
-		menu = ET.SubElement(content, 'div')
-		menu.set('id', 'menu')
+			menu = ET.SubElement(content, 'div')
+			menu.set('id', 'menu')
 
-		link = ET.SubElement(menu, 'a')
-		link.text = self.root.get('id').capitalize()
-		link.set('class', 'focus')
-		link.set('id', self.root.get('id'))
-		link.set('href', './parts_html/' + self.root.get('id') + '.html')
-		link.set('target', 'detail')
+			link = ET.SubElement(menu, 'a')
+			link.text = self.root.get('id').capitalize()
+			link.set('class', 'focus')
+			link.set('id', self.root.get('id'))
+			link.set('href', './parts_html/' + self.root.get('id') + '.html')
+			link.set('target', 'detail')
+
+			tree = self.root
+
+		for elmt in tree:
+			self.make_html_menu(elmt)
 
 		ul_family = ET.SubElement(menu, 'ul')
 		for family in self.root:
@@ -73,17 +78,6 @@ class Doc:
 			link.set('id', family.get('id'))
 			link.set('onclick', 'document.getElementsByClassName("focus")[0].className = ""; this.className = "focus";')
 			link.set('target', 'detail')
-
-			ul_part = ET.SubElement(li_family, 'ul')
-			for part in family:
-				li_part = ET.SubElement(ul_part, 'li')
-
-				link = ET.SubElement(li_part, 'a')
-				link.text = part.get('id')
-				link.set('id', part.get('id'))
-				link.set('href', './parts_html/' + part.get('id') + '.html')
-				link.set('onclick', 'document.getElementsByClassName("focus")[0].className = ""; this.className = "focus";')
-				link.set('target', 'detail')
 
 		file_path = op.join(self.doc_dir, 'menu.html')
 		self.make_html(file_path, content, 'stylesheet.css')
@@ -106,7 +100,7 @@ class Doc:
 		element_text = ET.SubElement(family_infos, 'div')
 		element_text.set('id', 'text')
 
-		# TODO: afficher nom de famille avant l'id
+		# TODO: afficher nom de famille avant l'id #*
 
 		ET.SubElement(element_text, 'h2').text = tree.get('id').capitalize()
 		if len(tree) != 0:
