@@ -22,7 +22,8 @@ class Roddy:
 		self.xml_root = ET.Element("model")
 
 		project_name = op.splitext(op.basename(input_stl_path))[0]
-		self.xml_root.set('name', project_name)
+		self.xml_root.set('id', project_name)
+		self.xml_root.set('unit', 'mm')
 
 		self._build_corners_tree()
 		self._build_edges_tree()
@@ -37,12 +38,11 @@ class Roddy:
 	def _build_corners_tree(self):
 		xml_corner = ET.SubElement(self.xml_root, "family")
 
-		xml_corner.set('name', 'corner')
+		xml_corner.set('id', 'corners')
 		xml_corner.set('file', "corner.scad")
 		xml_corner.set('light_file', "corner_light.scad")
 		xml_corner.set('type', 'stl')
-		xml_corner.set('const', 'rot=0,0,0')
-		xml_corner.set('img', 'true')
+		xml_corner.set('img', 'yes')
 
 		# TODO: .corner = ugly!!!
 		for corner in self.solid.corners:
@@ -50,14 +50,14 @@ class Roddy:
 			part.set('id', str(corner.get_id()))
 			part.set('pos', ','.join(str(p) for p in corner.get_position()))
 			part.set('data', self._corner_data(corner))
+			part.set('connections', ';'.join(str(x) for x in corner.get_connected_corners()))
 
 	def _build_edges_tree(self):
 		xml_edge = ET.SubElement(self.xml_root, "family")
-		xml_edge.set('name', 'edge')
+		xml_edge.set('id', 'edges')
 		xml_edge.set('file', "edge.scad")
 		xml_edge.set('type', 'dxf')
-		xml_edge.set('const', '')
-		xml_edge.set('img', 'false')
+		xml_edge.set('img', 'no')
 
 		for edge in self.solid.edges:	# ugly!!!
 			part = ET.SubElement(xml_edge, "part")
@@ -66,6 +66,7 @@ class Roddy:
 			part.set('pos', ','.join(str(p) for p in edge.get_position()))
 			part.set('rot', ','.join(str(r) for r in edge.get_rotation()))
 			part.set('data', self._edge_data(edge))
+			part.set('connections', str(edge.get_corner_start().get_id()) + ';' + str(edge.get_corner_end().get_id()))
 
 	def _corner_data(self, corner):
 		angles = list()

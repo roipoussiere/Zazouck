@@ -28,13 +28,13 @@ class Export: # TODO : singleton
 
 	def make_stl(self):
 		for family in self.root:
-			print "\n*** Creating", len(family), family.get('name') + "s ***"
+			print "\n*** Creating", len(family), family.get('id') + "***"
 
 			part_scad_name = family.get('light_file') if self.test and \
 					'light_file' in family.attrib else family.get('file')
 			part_scad_path = op.join(self.scad_dir, part_scad_name)
 
-			export_path = op.join(self.project_dir, family.get('name'))
+			export_path = op.join(self.project_dir, family.get('id'))
 
 			if not os.path.exists(export_path):
 				os.makedirs(export_path)
