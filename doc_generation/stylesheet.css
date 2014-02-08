@@ -66,6 +66,7 @@ div#infos {
 
 div#text {
 	float: left;
+	width: 600px;
 }
 
 div#infos li {

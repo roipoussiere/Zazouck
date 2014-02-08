@@ -25,6 +25,7 @@ class Roddy:
 		self.xml_root.set('id', project_name)
 		self.xml_root.set('unit', 'mm')
 		self.xml_root.set('img', 'yes')
+		self.xml_root.set('desc', 'Build a construction with rods and 3d printed corners.')
 
 		self._build_corners_tree()
 		self._build_edges_tree()
@@ -44,6 +45,7 @@ class Roddy:
 		xml_corner.set('light_file', "corner_light.scad")
 		xml_corner.set('type', 'stl')
 		xml_corner.set('img', '0,0,0,45,0,45,140')
+		xml_corner.set('desc', '3D printed parts representing the vertices of the model. They connect rods together.')
 
 		# TODO: .corner = ugly!!!
 		for corner in self.solid.corners:
@@ -58,6 +60,7 @@ class Roddy:
 		xml_edge.set('id', 'edge')
 		xml_edge.set('file', "edge.scad")
 		xml_edge.set('type', 'dxf')
+		xml_edge.set('desc', 'Rods representing the edges of the model. You can get it from with a laser cutting or simply by cutting rods by hands.')
 
 		for edge in self.solid.edges: # ugly!!!
 			part = ET.SubElement(xml_edge, "part")
