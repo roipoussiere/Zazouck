@@ -218,9 +218,9 @@ class Doc:
 		img_dir = op.join(self.doc_dir, 'parts_img')
 		os.makedirs(img_dir)
 
-		img_opt = "--imgsize=" + str(IMG_SIZE * 2) + "," + str(IMG_SIZE * 2) + " --camera=0,0,0,45,0,45,140"
 
-		for family in (family for family in self.root if family.get('img') != 'no'):
+		for family in (family for family in self.root if 'img' in family.attrib):
+			img_opt = "--imgsize=" + str(IMG_SIZE * 2) + "," + str(IMG_SIZE * 2) + " --camera=" + family.get('img')
 			part_scad_path = op.join(self.scad_dir, family.get('file'))
 
 			process.Process(part_scad_path, family, img_dir, self.jobs, self.openscad_path, self.verbose, img_opt)

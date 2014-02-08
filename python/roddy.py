@@ -42,7 +42,7 @@ class Roddy:
 		xml_corner.set('file', "corner.scad")
 		xml_corner.set('light_file', "corner_light.scad")
 		xml_corner.set('type', 'stl')
-		xml_corner.set('img', 'yes')
+		xml_corner.set('img', '0,0,0,45,0,45,140')
 
 		# TODO: .corner = ugly!!!
 		for corner in self.solid.corners:
@@ -57,7 +57,6 @@ class Roddy:
 		xml_edge.set('id', 'edge')
 		xml_edge.set('file', "edge.scad")
 		xml_edge.set('type', 'dxf')
-		xml_edge.set('img', 'no')
 
 		for edge in self.solid.edges:	# ugly!!!
 			part = ET.SubElement(xml_edge, "part")
