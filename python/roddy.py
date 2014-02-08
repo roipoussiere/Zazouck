@@ -43,8 +43,6 @@ class Roddy:
 		xml_corner.set('light_file', "corner_light.scad")
 		xml_corner.set('type', 'stl')
 		xml_corner.set('img', 'yes')
-		xml_corner.set('data', 'lala=yay') # test
-		xml_corner.set('rot', '0,0,0') # test
 
 		# TODO: .corner = ugly!!!
 		for corner in self.solid.corners:
