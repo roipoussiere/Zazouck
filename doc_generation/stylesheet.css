@@ -103,6 +103,14 @@ div.icon:hover {
 	background-color: #AAA;
 }
 
+a.link_info {
+	color: black;
+}
+
+a.link_info:hover {
+	background-color: #AAA;
+}
+
 a.element {
 	color: black;
 	text-decoration: none;

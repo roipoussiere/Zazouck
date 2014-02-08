@@ -38,11 +38,13 @@ class Roddy:
 	def _build_corners_tree(self):
 		xml_corner = ET.SubElement(self.xml_root, "family")
 
-		xml_corner.set('id', 'corners')
+		xml_corner.set('id', 'corner')
 		xml_corner.set('file', "corner.scad")
 		xml_corner.set('light_file', "corner_light.scad")
 		xml_corner.set('type', 'stl')
 		xml_corner.set('img', 'yes')
+		xml_corner.set('data', 'lala=yay') # test
+		xml_corner.set('rot', '0,0,0') # test
 
 		# TODO: .corner = ugly!!!
 		for corner in self.solid.corners:
@@ -54,7 +56,7 @@ class Roddy:
 
 	def _build_edges_tree(self):
 		xml_edge = ET.SubElement(self.xml_root, "family")
-		xml_edge.set('id', 'edges')
+		xml_edge.set('id', 'edge')
 		xml_edge.set('file', "edge.scad")
 		xml_edge.set('type', 'dxf')
 		xml_edge.set('img', 'no')

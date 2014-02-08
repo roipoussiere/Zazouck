@@ -28,7 +28,7 @@ class Export: # TODO : singleton
 
 	def make_stl(self):
 		for family in self.root:
-			print "\n*** Creating", len(family), family.get('id') + "***"
+			print "\n*** Creating", len(family), family.get('id') + "s ***"
 
 			part_scad_name = family.get('light_file') if self.test and \
 					'light_file' in family.attrib else family.get('file')
