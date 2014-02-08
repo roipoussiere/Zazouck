@@ -88,8 +88,8 @@ class Doc:
 		family_infos = ET.SubElement(content, 'div')
 		family_infos.set('id', 'infos')
 		
-		img_path = '../parts_img/' + tree.get('id') + '.png' if tree.tag == 'part' else \
-				'../img/group.png' if tree.tag == 'family' else ''
+		img_path = '../parts_img/' + tree.get('id') + '.png' if tree.tag == 'part' or \
+				tree.tag == 'model' else '../img/group.png' if tree.tag == 'family' else ''
 
 		if img_path != '':
 			img = ET.SubElement(family_infos, 'img')
@@ -125,7 +125,7 @@ class Doc:
 			if data != '' and (tree.tag != 'part' or tree.tag == 'part' and info[2]):
 				text_data = ET.SubElement(element_text, 'p')
 				text_data.text = info[0] + ': '
-				ET.SubElement(text_data, 'b').text = data
+				ET.SubElement(text_data, 'b').text = data.replace(',', ', ')
 
 		parent_data = self.get_family_attribute(tree, 'data')
 		curent_data = tree.get('data') if 'data' in tree.attrib else ''
@@ -215,26 +215,33 @@ class Doc:
 
 		print "\n*** Creating pictures ***"
 
+		img_opt = "--imgsize=" + str(IMG_SIZE * 2) + "," + str(IMG_SIZE * 2)
+
 		img_dir = op.join(self.doc_dir, 'parts_img')
 		os.makedirs(img_dir)
 
+		cube_path = op.join(self.doc_dir, self.root.get('id') + '.scad')
+		with open(cube_path, 'w') as f:
+			f.write('import("' + op.join(op.dirname(self.doc_dir), 'original.stl') + '");')
+		os.system('openscad ' + cube_path + ' -o ' + op.join(img_dir, self.root.get('id') + '.png'))
+		os.remove(cube_path)
 
+		# ajouter recursivité + s'il pas d'img dans le noeud courant on regarde dans family
 		for family in (family for family in self.root if 'img' in family.attrib):
-			img_opt = "--imgsize=" + str(IMG_SIZE * 2) + "," + str(IMG_SIZE * 2) + " --camera=" + family.get('img')
 			part_scad_path = op.join(self.scad_dir, family.get('file'))
-
+			img_opt = img_opt + (" --camera=" + family.get('img') if family.get('img') != 'yes' else '')
 			process.Process(part_scad_path, family, img_dir, self.jobs, self.openscad_path, self.verbose, img_opt)
 
-			dimentions = str(IMG_SIZE) + 'x' + str(IMG_SIZE)
-			cmd = 'mogrify -trim +repage -resize ' + dimentions + \
-					' -background "#FFFFE5" ' + '-gravity center -extent ' + dimentions + \
-					' -fuzz 15% -transparent "#FFFFE5" ' + op.join(img_dir, '*.png')
-			# - colorspace xxx
-			#shadow_cmd = 'for f in ' + op.join(img_dir, '*.png') + '; do convert $f -trim ' + \
-			#		'\( +clone -background black -shadow 80x5+5+5 \) +swap -background none -layers merge $f; done'
+		dimentions = str(IMG_SIZE) + 'x' + str(IMG_SIZE)
+		cmd = 'mogrify -trim +repage -resize ' + dimentions + \
+				' -background "#FFFFE5" ' + '-gravity center -extent ' + dimentions + \
+				' -fuzz 15% -transparent "#FFFFE5" ' + op.join(img_dir, '*.png')
+		# - colorspace xxx
+		#shadow_cmd = 'for f in ' + op.join(img_dir, '*.png') + '; do convert $f -trim ' + \
+		#		'\( +clone -background black -shadow 80x5+5+5 \) +swap -background none -layers merge $f; done'
 
-			try:
-				subprocess.Popen(shlex.split(cmd))
-				#os.system(shadow_cmd)
-			except:
-				print "Error when processing images. Do you have ImageMagick installed?"
+		try:
+			subprocess.Popen(shlex.split(cmd))
+			#os.system(shadow_cmd)
+		except:
+			print "Error when processing images. Do you have ImageMagick installed on you computer?"

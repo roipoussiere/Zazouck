@@ -24,6 +24,7 @@ class Roddy:
 		project_name = op.splitext(op.basename(input_stl_path))[0]
 		self.xml_root.set('id', project_name)
 		self.xml_root.set('unit', 'mm')
+		self.xml_root.set('img', 'yes')
 
 		self._build_corners_tree()
 		self._build_edges_tree()
@@ -58,7 +59,7 @@ class Roddy:
 		xml_edge.set('file', "edge.scad")
 		xml_edge.set('type', 'dxf')
 
-		for edge in self.solid.edges:	# ugly!!!
+		for edge in self.solid.edges: # ugly!!!
 			part = ET.SubElement(xml_edge, "part")
 			part.set('id', str(edge.get_id()))
 
