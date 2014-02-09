@@ -60,6 +60,7 @@ class Roddy:
 		xml_edge.set('id', 'edge')
 		xml_edge.set('file', "edge.scad")
 		xml_edge.set('type', 'dxf')
+		xml_edge.set('img', 'yes')
 		xml_edge.set('desc', 'Rods representing the edges of the model. You can get it from with a laser cutting or simply by cutting rods by hands.')
 
 		for edge in self.solid.edges: # ugly!!!
