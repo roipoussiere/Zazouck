@@ -13,9 +13,10 @@ from os import path as op
 
 class Process():
 
-	def __init__(self, part_scad_path, family_tree, export_dir, nb_job_slots, openscad_path, verbose_lvl, img_opt = False, is_assembly = False):
+	def __init__(self, part_scad_path, family_tree, param, export_dir, nb_job_slots, openscad_path, verbose_lvl, img_opt = False, is_assembly = False):
 		self.part_scad_path = part_scad_path
 		self.family_tree = family_tree
+		self.param = param
 		self.export_dir = export_dir
 		self.nb_job_slots = nb_job_slots
 		self.openscad_path = openscad_path
@@ -49,8 +50,8 @@ class Process():
 				pos = 'pos=[' + part.get('pos') + ']; ' if 'pos' in part.attrib and self.is_assembly else ''
 				rot = 'rot=[' + part.get('rot') + ']; ' if 'rot' in part.attrib and self.is_assembly else ''
 				img = ' ' + self.img_opt if self.img_opt != False else ''
-				data = part.get('data').replace('\'', '"')
-
+				data = (part.get('data') + '; ' + self.param).replace('\'', '"')
+				
 				options = "-D '" + id + pos + rot + data + "'" + img
 
 				output_path = op.join(self.export_dir, part.get('id') + '.' + self.type)

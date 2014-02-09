@@ -37,10 +37,11 @@ class Export: # TODO : singleton
 			part_scad_path = op.join(self.scad_dir, part_scad_name)
 
 			export_path = op.join(self.project_dir, family.get('id'))
+			param = self.root.get('data')
 
 			if not os.path.exists(export_path):
 				os.makedirs(export_path)
-			process.Process(part_scad_path, family, export_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl)
+			process.Process(part_scad_path, family, param, export_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl)
 						# part_scad_path, family_tree, export_dir, nb_job_slots, openscad_path, verbose_lvl, is_img = False, is_assembly = False
 
 		self._save_xml()
@@ -58,8 +59,9 @@ class Export: # TODO : singleton
 					'light_file' in family.attrib else family.get('file')
 
 			part_scad_path = op.join(self.scad_dir, part_scad_name)
+			param = self.root.get('data')
 
-			process.Process(part_scad_path, family, assembly_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl, is_assembly = True)
+			process.Process(part_scad_path, family, param, assembly_path, self.nb_job_slots, self.openscad_path, self.verbose_lvl, is_assembly = True)
 		self._save_xml()
 
 	def _save_xml(self):

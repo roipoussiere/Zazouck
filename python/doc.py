@@ -233,7 +233,8 @@ class Doc:
 		for family in (family for family in self.root if 'img' in family.attrib):
 			part_scad_path = op.join(self.scad_dir, family.get('file'))
 			img_opt = img_opt + (" --camera=" + family.get('img') if family.get('img') != 'yes' else '')
-			process.Process(part_scad_path, family, img_dir, self.jobs, self.openscad_path, self.verbose, img_opt)
+			param = self.root.get('data')
+			process.Process(part_scad_path, family, param, img_dir, self.jobs, self.openscad_path, self.verbose, img_opt)
 
 		dimentions = str(IMG_SIZE) + 'x' + str(IMG_SIZE)
 		cmd = 'mogrify -trim +repage -resize ' + dimentions + \
