@@ -10,7 +10,7 @@
 # TODO : alléger avec from .. import ..
 from os import path as op
 import os, sys, shutil
-import parser, export, roddy, doc
+import parser, export, roddy, doc, utils
 
 openscad_path = "openscad"
 zazouck_dir = op.abspath(op.dirname(op.dirname(sys.argv[0])))
@@ -46,10 +46,12 @@ def main():
 		
 		if module == m.roddy:
 			model = roddy.Roddy(xml_path, input_stl_path, infos_path) # crée le fichier xml
-			if opt.verbose > 0:
-				print "Successfully created building file in " + xml_path + "."
-
 		#elif module == ...
+
+		utils.get_params(param_path, xml_path)
+
+		if opt.verbose > 0:
+			print "Successfully created building file in " + xml_path + "."
 
 	else:
 		print "Resuming the compilation..."
@@ -60,7 +62,7 @@ def main():
 		sys.exit(0)
 
 	doc.Doc(xml_path, zazouck_dir, doc_dir, scad_dir, opt.jobs, openscad_path, opt.verbose)
-	exp = export.Export(xml_path, project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
+	exp = export.Export(xml_path, param_path, project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
 	exp.make_stl()
 
 	if opt.assembled:

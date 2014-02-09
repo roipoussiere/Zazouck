@@ -14,14 +14,16 @@ import xml.etree.ElementTree as ET
 
 class Export: # TODO : singleton
 
-	def __init__(self, xml_path, project_dir, openscad_path, scad_dir, nb_job_slots, verbose_lvl, test):
+	def __init__(self, xml_path, param_path, project_dir, openscad_path, scad_dir, nb_job_slots, verbose_lvl, test):
 		self.xml_path = xml_path
+		self.param_path = param_path
 		self.openscad_path = openscad_path
 		self.project_dir = project_dir
 		self.scad_dir = scad_dir
 		self.nb_job_slots = nb_job_slots
 		self.verbose_lvl = verbose_lvl
 		self.test = test
+		self.params = list()
 		signal.signal(signal.SIGINT, self.signal_handler)
 
 		self.root = ET.parse(xml_path).getroot()

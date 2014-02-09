@@ -11,7 +11,7 @@ from os import path as op
 import xml.etree.ElementTree as ET
 import math
 
-import solid
+import solid, utils
 
 class Roddy:
 
@@ -31,7 +31,7 @@ class Roddy:
 		self._build_edges_tree()
 
 		tree = ET.ElementTree(self.xml_root)
-		_indent(self.xml_root)
+		utils.indent(self.xml_root)
 		tree.write(xml_path, encoding = "UTF-8", xml_declaration = True)
 
 #	infos = str(self.solid.get_nb_corners()) + " corners," + str(self.solid.get_nb_polygons()) \
@@ -68,7 +68,7 @@ class Roddy:
 
 			part.set('pos', ','.join(str(p) for p in edge.get_position()))
 			part.set('rot', ','.join(str(r) for r in edge.get_rotation()))
-			part.set('data', self._edge_data(edge))
+			part.set('data', 'length=' + str(edge.get_length()))
 			part.set('connections', str(edge.get_corner_start().get_id()) + ';' + str(edge.get_corner_end().get_id()))
 
 	def _corner_data(self, corner):
@@ -77,10 +77,7 @@ class Roddy:
 			angles += self.positions_to_angles(corner.get_position(), \
 					self.solid._get_corner_by_id(target).get_position())
 
-		return "angles='" + ','.join(self._number_to_txt(angle, 3) for angle in angles) + "'"
-
-	def _edge_data(self, edge):
-		return 'length=' + str(edge.get_length())
+		return "angles='" + ','.join(str(angle) for angle in angles) + "'"
 
 	def positions_to_angles(self, init_position, target_position):
 		#for i in range(3):
@@ -109,31 +106,8 @@ class Roddy:
 		
 		return int(round(angle_v)), int(round(angle_h))
 
-	# corner
-	def _number_to_txt(self, nb, size):
-		nb = "err" if nb > pow(10, size)-1 else str(nb)
-
-		while len(nb) < size:
-			nb = "0" + nb
-		return nb
-
 	def __str__(self):
 		string = str(self.solid.get_nb_corners()) + " corners, "
 		string += str(self.solid.get_nb_polygons()) + " polygons, "
 		string += str(self.solid.get_nb_edges()) + " edges."
 		return string
-
-def _indent(elem, level=0):
-	i = "\n" + level*"\t"
-	if len(elem):
-		if not elem.text or not elem.text.strip():
-			elem.text = i + "\t"
-		if not elem.tail or not elem.tail.strip():
-			elem.tail = i
-		for elem in elem:
-			_indent(elem, level+1)
-		if not elem.tail or not elem.tail.strip():
-			elem.tail = i
-	else:
-		if level and (not elem.tail or not elem.tail.strip()):
-			elem.tail = i

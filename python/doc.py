@@ -56,7 +56,6 @@ class Doc:
 		link.set('class', 'focus')
 		link.set('href', './parts_html/' + self.root.get('id') + '.html')
 		link.set('id', self.root.get('id'))
-		link.set('onclick', 'document.getElementsByClassName("focus")[0].className = ""; this.className = "focus";')
 		link.set('target', 'detail')
 
 		self.feed_menu(self.root, menu)
@@ -73,7 +72,6 @@ class Doc:
 			link.text = elmt.get('id').capitalize()
 			link.set('href', './parts_html/' + elmt.get('id') + '.html')
 			link.set('id', elmt.get('id'))
-			link.set('onclick', 'document.getElementsByClassName("focus")[0].className = ""; this.className = "focus";')
 			link.set('target', 'detail')
 			
 			if len(elmt) > 0:
@@ -127,19 +125,21 @@ class Doc:
 				text_data.text = info[0] + ': '
 				ET.SubElement(text_data, 'b').text = data.replace(',', ', ')
 
-		parent_data = self.get_family_attribute(tree, 'data')
+		parent_data = self.get_family_attribute(tree, 'data') if tree.tag != 'family' else ''
 		curent_data = tree.get('data') if 'data' in tree.attrib else ''
 		datas = parent_data + curent_data
 		if datas != '':
+			ul = ET.SubElement(element_text, 'p').text = 'Datas:'
+			ul = ET.SubElement(element_text, 'ul')
 			for data in datas.split(';'):
 				tab_data = data.replace("'", '').replace(',', ', ').split('=')
-				text_data = ET.SubElement(element_text, 'p')
+				text_data = ET.SubElement(ul, 'li')
 				text_data.text = tab_data[0].capitalize() + ': '
 				ET.SubElement(text_data, 'b').text = tab_data[1].capitalize()
 
 		if len(tree) != 0:
-			ET.SubElement(content, 'hr')
 			childrens = ET.SubElement(content, 'div')
+			ET.SubElement(childrens, 'hr')
 			childrens.set('class', 'elements')
 
 			ET.SubElement(childrens, 'h3').text = 'Elements'
@@ -151,8 +151,8 @@ class Doc:
 			clear_div.set('class', 'separator')
 
 		if 'connections' in tree.attrib:
-			ET.SubElement(content, 'hr')
 			connections = ET.SubElement(content, 'div')
+			ET.SubElement(connections, 'hr')
 			connections.set('class', 'elements')
 
 			ET.SubElement(connections, 'h3').text = 'Connected to'
@@ -170,7 +170,6 @@ class Doc:
 		file_path = elmt_id + '.html'
 
 		elmt = ET.Element('a')
-		#link.set('onclick', 'menu.getElementsById(' + element.get('id') + ') = "focus";')
 		elmt.set('href', file_path)
 		elmt.set('class', 'element')
 
@@ -202,6 +201,7 @@ class Doc:
 		link.set('href', css_path)
 
 		body = ET.SubElement(html, 'body')
+		body.set('id', os.path.splitext(os.path.basename(file_path))[0])
 		#body.set('onload', 'menu.getElementsById(' + element.get('id') + ') = "focus";')
 		body.append(content)
 		utils.indent(html)

@@ -3,12 +3,20 @@
 <html>
 	<head>
 		<title>__TITLE__</title>
-		<link rel="stylesheet", href="stylesheet.css">
+		<link rel="stylesheet" href="stylesheet.css"/>
+		<script>
+			function load_details(elmt) {
+				elmt.style.width = (window.innerWidth - 150) + 'px'
+				id = elmt.contentDocument.body.id;
+				menu = document.getElementById("menu").contentDocument;
+				menu.getElementsByClassName('focus')[0].className = '';
+				menu.getElementById(id).className = 'focus'
+			}
+		</script>
 	</head>
 	<body>
 		<iframe id="menu" src="menu.html"></iframe>
-		<iframe id="detail" name="detail" src="__MODEL_PATH__.html"></iframe>
-		<script> document.getElementById("detail").style.width = (window.innerWidth - 150) + 'px'; </script>
+		<iframe id="detail" name="detail" src="__MODEL_PATH__.html" onload="load_details(this)"></iframe>
 
 		<header>
 			<h1>__TITLE__</h1>

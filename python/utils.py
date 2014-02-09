@@ -21,3 +21,22 @@ def indent(elem, level=0):
 	else:
 		if level and (not elem.tail or not elem.tail.strip()):
 			elem.tail = i
+
+def get_params(param_path, xml_path):
+	import xml.etree.ElementTree as ET
+	import re
+	root = ET.parse(xml_path).getroot()
+	params = list()
+
+	with open(param_path, 'r') as param:
+		for line in param:
+			data = re.sub(r'\s+', '=', line.strip())
+			if data:
+				data = data.split('=')
+				isnumber = data[1].replace(".", "", 1).isdigit()
+				data = data[0] + "=" + (data[1] if isnumber else "'" + data[1] + "'")
+				params.append(data)
+	datas = '; '.join(params)
+	root.set('data', datas)
+
+	ET.ElementTree(root).write(xml_path, encoding = "UTF-8", xml_declaration = True)
