@@ -7,13 +7,14 @@
 # Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
 
-import os, sys, time, subprocess, shlex, platform
+import os, sys, time
 from os import path as op
-
+import utils
 
 class Process():
 
-	def __init__(self, part_scad_path, family_tree, param, export_dir, nb_job_slots, openscad_path, verbose_lvl, img_opt = False, is_assembly = False):
+	def __init__(self, part_scad_path, family_tree, param, export_dir, nb_job_slots, \
+				openscad_path, verbose_lvl, img_opt = False, is_assembly = False):
 		self.part_scad_path = part_scad_path
 		self.family_tree = family_tree
 		self.param = param
@@ -23,7 +24,10 @@ class Process():
 		self.verbose_lvl = verbose_lvl
 		self.img_opt = img_opt
 		self.is_assembly = is_assembly
-		self.type = 'png' if img_opt != False else family_tree.get('type')
+
+		# TODO: supprimer self.type qui sert à rien?
+
+		self.type = 'png' if img_opt != False and family_tree.get('type') != 'dxf' else family_tree.get('type')
 		self.process = list() # liste de tuples (retour process, nom du fichier)
 		self.nb_created = 0 # pour afficher le nombre de fichiers crées lors d'un ctrl-c
 		self.progress = 0 # nb entre 0 et 78
@@ -40,12 +44,15 @@ class Process():
 	# TODO : récursivité pour imprimer les images de tous les éléments d'un groupe
 
 	def _start_processes(self):
+		import tempfile
+		tmp_dxf = op.join(tempfile.gettempdir(), 'tmp_dxf')
+
 		if self.verbose_lvl == 0:
 			print '_' * self.console_width if self.verbose_lvl == 0 else ''
 
 		for part in self.family_tree:
 
-			if 'done' != 'yes' or self.is_assembly:
+			if part.get('done') != 'yes' or self.is_assembly:
 				id = 'id=' + part.get('id') + '; '
 				pos = 'pos=[' + part.get('pos') + ']; ' if 'pos' in part.attrib and self.is_assembly else ''
 				rot = 'rot=[' + part.get('rot') + ']; ' if 'rot' in part.attrib and self.is_assembly else ''
@@ -53,8 +60,8 @@ class Process():
 				data = (part.get('data') + '; ' + self.param).replace('\'', '"')
 				
 				options = "-D '" + id + pos + rot + data + "'" + img
-
-				output_path = op.join(self.export_dir, part.get('id') + '.' + self.type)
+				output_path = op.join(self.export_dir, part.get('id') + '.' + self.type) \
+						if self.type != 'dxf' else op.join(tmp_dxf, part.get('id') + '.dxf')
 				self.openscad(self.part_scad_path, options, output_path, part)
 				self._end_of_process(part)
 			else:
@@ -103,18 +110,9 @@ class Process():
 				self._print_status(p[1])
 
 	def openscad(self, scad_file_path, options, output_file, part):
-		cmd = self.openscad_path + ' ' + scad_file_path + ' -o ' + output_file + ' ' + options
+		command = self.openscad_path + ' ' + scad_file_path + ' -o ' + output_file + ' ' + options
 
-		if self.verbose_lvl >= 2:
-			print '>>>' + cmd
-		err = None if self.verbose_lvl >= 3 else open(os.devnull, 'w')
-		out = None if self.verbose_lvl == 4 else open(os.devnull, 'w')
-
-		try:
-			p = subprocess.Popen(shlex.split(cmd), stdout = out, stderr = err)
-		except:
-			print "Err: Can't build the file with OpenScad."
-
+		p = utils.cmd(command, self.verbose_lvl)
 		self.process.append((p, part))
 
 		if len(self.process) >= self.nb_job_slots:

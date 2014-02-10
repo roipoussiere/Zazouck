@@ -18,13 +18,6 @@ scad_dir = op.join(zazouck_dir, "scad")
 
 class m(): roddy = range(1); # liste des modules disponibles
 
-def _create_dir(directory, verbose):
-	if os.path.exists(directory):
-		shutil.rmtree(directory)
-		if verbose > 0:
-			print "The existing folder '" + op.basename(directory) + "' has been overwriten."
-	os.makedirs(directory)
-
 def main():
 	opt = parser.parser()
 
@@ -41,7 +34,7 @@ def main():
 	module = m.roddy # à remplacer par un paramètre
 
 	if is_input_stl:
-		_create_dir(project_dir, opt.verbose)
+		utils.create_dir(project_dir, opt.verbose)
 		shutil.copy(opt.input_path, op.join(project_dir, "original.stl"))
 		
 		if module == m.roddy:
