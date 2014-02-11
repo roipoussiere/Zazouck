@@ -3,62 +3,72 @@
 
 # Copyright 2013-2014 Nathanaël Jourdane
 # This file is part of Zazouck.
-# Zazouck is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-# Zazouck is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License along with Zazouck. If not, see <http://www.gnu.org/licenses/>.
+# Zazouck is free software: you can redistribute it and/or modify it under the terms of the GNU
+# General Public License as published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version. Zazouck is distributed in the hope that it will be
+# useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with Zazouck. If not, see
+# <http://www.gnu.org/licenses/>.
 
-# TODO : alléger avec from .. import ..
+'Main function of the program.'
+
 from os import path as op
 import os, sys, shutil
 import parser, export, roddy, doc, utils
 
-openscad_path = "openscad"
-zazouck_dir = op.abspath(op.dirname(op.dirname(sys.argv[0])))
-scad_dir = op.join(zazouck_dir, "scad")
+OPENSCAD_PATH = "openscad"
+ZAZOUCK_DIR = op.abspath(op.dirname(op.dirname(sys.argv[0])))
+SCAD_DIR = op.join(ZAZOUCK_DIR, "scad")
 
-class m(): roddy = range(1); # liste des modules disponibles
+class Module():
+    
+    roddy = range(1) # liste des modules disponibles
 
 def main():
-	opt = parser.parser()
+    'Main function of the program.'
+    opt = parser.parser()
 
-	is_input_stl = True if (op.splitext(opt.input_path)[1] == ".stl") else False
-	projet_name = op.splitext(op.basename(opt.input_path))[0]
-	input_stl_path = op.join(os.getcwd(), opt.input_path) if is_input_stl else None
-	project_dir = opt.input_path if not is_input_stl else \
-			op.join(os.getcwd(), projet_name) if (opt.output_dir == None) else opt.output_dir
-	param_path = None if opt.param_path == None else opt.param_path.name
-	doc_dir = op.join(project_dir, "doc") if (opt.doc_dir == False) else opt.doc_dir.name
-	infos_path = op.join(project_dir, "infos.txt")
-	xml_path = op.join(project_dir, "build.xml")
+    is_input_stl = True if (op.splitext(opt.input_path)[1] == ".stl") else False
+    projet_name = op.splitext(op.basename(opt.input_path))[0]
+    input_stl_path = op.join(os.getcwd(), opt.input_path) if is_input_stl else None
+    project_dir = opt.input_path if not is_input_stl else \
+            op.join(os.getcwd(), projet_name) if (opt.output_dir == None) else opt.output_dir
+    param_path = opt.param_path.name if opt.param_path != None else None
+    doc_dir = op.join(project_dir, "doc") if (opt.doc_dir == False) else opt.doc_dir.name
+    infos_path = op.join(project_dir, "infos.txt")
+    xml_path = op.join(project_dir, "build.xml")
 
-	module = m.roddy # à remplacer par un paramètre
+    module = Module.roddy # à remplacer par un paramètre
 
-	if is_input_stl:
-		utils.create_dir(project_dir, opt.verbose)
-		shutil.copy(opt.input_path, op.join(project_dir, "original.stl"))
-		
-		if module == m.roddy:
-			model = roddy.Roddy(xml_path, input_stl_path, infos_path) # crée le fichier xml
-		#elif module == ...
+    if is_input_stl:
+        utils.create_dir(project_dir, opt.verbose)
+        shutil.copy(opt.input_path, op.join(project_dir, "original.stl"))
+        
+        if module == Module.roddy:
+            model = roddy.Roddy(xml_path, input_stl_path, infos_path) # crée le fichier xml
+        #elif module == ...
 
-		utils.get_params(param_path, xml_path)
+        if param_path != None:
+            utils.get_params(param_path, xml_path)
 
-		if opt.verbose > 0:
-			print "Successfully created building file in " + xml_path + "."
+        if opt.verbose > 0:
+            print "Successfully created building file in " + xml_path + "."
 
-	else:
-		print "Resuming the compilation..."
+    else:
+        print "Resuming the compilation..."
 
-	if opt.infos:
-		print "\n** Model informations ***\n"
-		print str(model)
-		sys.exit(0)
+    if opt.infos:
+        print "\n** Model informations ***\n"
+        print str(model)
+        sys.exit(0)
 
-	doc.Doc(xml_path, zazouck_dir, doc_dir, scad_dir, opt.jobs, openscad_path, opt.verbose)
-	exp = export.Export(xml_path, param_path, project_dir, openscad_path, scad_dir, opt.jobs, opt.verbose, opt.test)
-	exp.make_stl()
+    doc.Doc(xml_path, ZAZOUCK_DIR, doc_dir, SCAD_DIR, opt.jobs, OPENSCAD_PATH, opt.verbose)
+    exp = export.Export(xml_path, param_path, project_dir, OPENSCAD_PATH,
+            SCAD_DIR, opt.jobs, opt.verbose, opt.test)
+    exp.make_stl()
 
-	if opt.assembled:
-		exp.make_assembly()
+    if opt.assembled:
+        exp.make_assembly()
 
 main()

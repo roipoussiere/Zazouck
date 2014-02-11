@@ -131,6 +131,8 @@ Zazouck is licensed under GNU GPLv3: www.gnu.org/licenses/gpl-3.0.html
 
 ##Contact
 
-If you discover a bug or if you have any suggestion, please report it by [opening an issue](https://github.com/roipoussiere/Zazouck/issues). If you have other comments to make about Zazouck, you can contact me directly:
+If you discover a bug or if you have any suggestion, please report it by [opening an issue](https://github.com/roipoussiere/Zazouck/issues). If you have other comments or questions to make about Zazouck, you can also contact me directly:
 
-Nathanaël Jourdane : nathanael at jourdane dot net
+_Nathanaël Jourdane : nathanael at jourdane dot net_
+
+For all other questions the answer in 42.
